@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:with_run_app/core/google_sign_in_helper.dart';
+import 'package:with_run_app/ui/pages/my_info/my_info_page.dart';
 
 class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final mq = MediaQuery.of(context);
-    final deviceHeight = mq.size.height;
-    final devicePaddingTop = mq.padding.top;
-    final devicePaddingBottom = mq.padding.bottom;
-
     return Scaffold(
       backgroundColor: Theme.of(context).highlightColor,
       body: SafeArea(
@@ -28,8 +25,19 @@ class LoginPage extends StatelessWidget {
               ),
               SizedBox(height: 10),
               GestureDetector(
-                onTap: () {
-                  print('구글 로그인');
+                onTap: () async {
+                  final credential = await signInWithGoogle();
+
+                  if (credential.user?.emailVerified ?? false) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return MyInfoPage();
+                        },
+                      ),
+                    );
+                  }
                 },
                 child: SvgPicture.asset('assets/login_light.svg', height: 50),
               ),
