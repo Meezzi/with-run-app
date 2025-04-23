@@ -1,3 +1,6 @@
+# 임시파일 .tmp 무시
+*.tmp
+
 # Miscellaneous
 *.class
 *.log
