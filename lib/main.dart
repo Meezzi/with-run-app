@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:with_run_app/firebase_options.dart';
@@ -15,6 +16,9 @@ void main() async {
 
   // firebase 초기화
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // dotenv 호출
+  await dotenv.load(fileName: ".env");
 
   runApp(ProviderScope(child: MyApp()));
 }
