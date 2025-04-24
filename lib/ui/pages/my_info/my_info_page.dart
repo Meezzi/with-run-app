@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-class MyInfoPage extends StatelessWidget {
+class MyInfoPage extends StatefulWidget {
+  @override
+  State<MyInfoPage> createState() => _MyInfoPageState();
+}
+
+class _MyInfoPageState extends State<MyInfoPage> {
+  bool isSelected = false;
+  final formKey = GlobalKey<FormState>();
+  late final contentController = TextEditingController();
+
+  @override
+  void dispose() {
+    contentController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool isSelected = false;
-
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -21,11 +34,11 @@ class MyInfoPage extends StatelessWidget {
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
                   print('완료');
+                  final result = formKey.currentState!.validate();
                 },
                 child: Container(
                   alignment: Alignment.center,
                   width: 50,
-                  // height: 44,
                   child: Text(
                     '완료',
                     style: TextStyle(fontSize: 18, color: Colors.blue),
@@ -35,7 +48,8 @@ class MyInfoPage extends StatelessWidget {
             ),
           ],
         ),
-        body: SafeArea(
+        body: Form(
+          key: formKey,
           child: SizedBox.expand(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 44),
@@ -46,12 +60,8 @@ class MyInfoPage extends StatelessWidget {
                   GestureDetector(
                     onTap: () async {
                       print('프로필 추가');
-                      // 1. 이미지 피커 객체 생성
+                      // 이미지 피커 객체 생성
                       ImagePicker imagePicker = ImagePicker();
-
-                      // 2. 이미지 피커 객체의 pickImage 메서드 사용
-                      // 3. pickImage의 반환 타입이 Future이므로
-                      //    async - await 사용하는게 편하다
                       XFile? xFile = await imagePicker.pickImage(
                         source: ImageSource.gallery,
                       );
@@ -84,16 +94,6 @@ class MyInfoPage extends StatelessWidget {
                   SizedBox(height: 30),
                   TextFormField(
                     decoration: InputDecoration(
-                      hintText: '이메일을 입력해 주세요',
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey), // 비활성 상태일 때
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 12),
-                  TextFormField(
-                    decoration: InputDecoration(
                       hintText: '닉네임을 입력해 주세요',
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey), // 비활성 상태일 때
@@ -105,7 +105,22 @@ class MyInfoPage extends StatelessWidget {
                         ),
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
+                    validator: (value) {
+                      if (value?.trim().isEmpty ?? true) {
+                        return '닉네임을 입력해 주세요';
+                      }
+
+                      return null;
+                    },
                   ),
                 ],
               ),
