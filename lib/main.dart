@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:with_run_app/firebase_options.dart';
 import 'package:with_run_app/ui/pages/login/login_page.dart';
+import 'package:with_run_app/ui/pages/chat/chatting_page.dart';
 
 void main() async {
   // main함수에 async awati을 사용해 비동기 함수를
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(highlightColor: Color(0xff2196F3)),
-      home: LoginPage(),
+      home: ChatRoomScreen(roomName: '수원화성달리기모임',location: '경기도 수원시',adminNickname: 'asdfsa',),
     );
   }
 }

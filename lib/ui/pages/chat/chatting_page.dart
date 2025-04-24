@@ -1,86 +1,96 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-class ChattingPage extends StatefulWidget {
+class ChatRoomScreen extends StatefulWidget {
+  final String roomName;
+  final String location;
+  final String adminNickname;
+
+  const ChatRoomScreen({
+    super.key,
+    required this.roomName,
+    required this.location,
+    required this.adminNickname,
+  });
+
   @override
-  _ChattingPageState createState() => _ChattingPageState();
+  State<ChatRoomScreen> createState() => _ChatRoomScreenState();
 }
 
-class _ChattingPageState extends State<ChattingPage> {
-  final List<Map<String, dynamic>> dummyMessages = [ // 예시
+class _ChatRoomScreenState extends State<ChatRoomScreen> {
+  final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  // 예시 메시지 데이터
+  List<Map<String, dynamic>> messages = [
     {
-      'messageId': '1',
-      'chatRoomId': 'room1',
-      'senderId': '지온',
-      'text': 'ㄱㄱ?',
-      'timestamp': DateTime.now().subtract(Duration(minutes: 10)),
+      'text': '뜁시다',
+      'time': '오후 3:40',
+      'nickname': '청국장',
+      'profileUrl': 'https://ibb.co/t0w29M9',
       'isMe': false,
     },
     {
-      'messageId': '2',
-      'chatRoomId': 'room1',
-      'senderId': '나',
       'text': 'ㄱㄱ',
-      'timestamp': DateTime.now().subtract(Duration(minutes: 9)),
-      'isMe': true,
-    },
-    {
-      'messageId': '3',
-      'chatRoomId': 'room1',
-      'senderId': '민수',
-      'text': '먼저감',
-      'timestamp': DateTime.now().subtract(Duration(minutes: 7)),
+      'time': '오후 3:42',
+      'nickname': '된찌',
+      'profileUrl': 'https://example.com/profile2.jpg',
       'isMe': false,
     },
     {
-      'messageId': '4',
-      'chatRoomId': 'room1',
-      'senderId': '정대',
-      'text': '꼴찌 아이스크림사기',
-      'timestamp': DateTime.now().subtract(Duration(minutes: 6)),
+      'text': '기기',
+      'time': '오후 3:45',
+      'nickname': '제육',
+      'profileUrl': 'https://example.com/profile3.jpg',
       'isMe': false,
     },
   ];
 
-  final TextEditingController _controller = TextEditingController();
-
   void _sendMessage() {
-    final newMessage = {
-      'messageId': DateTime.now().toString(),
-      'chatRoomId': 'room1',
-      'senderId': '나',
-      'text': _controller.text,
-      'timestamp': DateTime.now(),
-      'isMe': true,
-    };
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
 
     setState(() {
-      dummyMessages.add(newMessage);
-      _controller.clear(); // 입력창 비우기
+      messages.insert(0, {
+        'text': text,
+        'time': '오후 3:50',
+        'nickname': '나',
+        'profileUrl': 'https://example.com/myprofile.jpg',
+        'isMe': true,
+      });
     });
+
+    _controller.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("런닝클럽"),
-        backgroundColor: Color(0xFF036FF4),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.roomName, style: TextStyle(fontWeight: FontWeight.bold)),
+            Text("${widget.location}",
+                style: TextStyle(fontSize: 12)),
+          ],
+        ),
       ),
-      backgroundColor: Colors.white,
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              itemCount: dummyMessages.length,
+              controller: _scrollController,
+              reverse: true,
+              padding: EdgeInsets.all(8),
+              itemCount: messages.length,
               itemBuilder: (context, index) {
-                final msg = dummyMessages[index];
-                return GroupChatBubble(
-                  text: msg['text'],
-                  sender: msg['senderId'],
-                  time: DateFormat('HH:mm').format(msg['timestamp']),
+                final msg = messages[index];
+                return ChatBubble(
                   isMe: msg['isMe'],
+                  text: msg['text'],
+                  time: msg['time'],
+                  profileUrl: msg['profileUrl'],
+                  nickname: msg['nickname'],
                 );
               },
             ),
@@ -95,124 +105,102 @@ class _ChattingPageState extends State<ChattingPage> {
   }
 }
 
-class GroupChatBubble extends StatelessWidget {
-  final String text;
-  final String sender;
-  final String time;
+class ChatBubble extends StatelessWidget {
   final bool isMe;
+  final String text;
+  final String time;
+  final String profileUrl;
+  final String nickname;
 
-  const GroupChatBubble({
-    required this.text,
-    required this.sender,
-    required this.time,
+  const ChatBubble({
+    super.key,
     required this.isMe,
+    required this.text,
+    required this.time,
+    required this.profileUrl,
+    required this.nickname,
   });
 
   @override
   Widget build(BuildContext context) {
-    final avatar = CircleAvatar(
-      backgroundColor: Colors.deepPurpleAccent,
-      child: Text(sender[0]),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: [
-          if (!isMe) avatar, // 내가 보낸 메시지가 아니면 아바타 표시
-          if (!isMe) SizedBox(width: 8),
-          Flexible(
-            child: Column(
-              crossAxisAlignment:
-                  isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-              children: [
-                if (!isMe)
-                  Text(
-                    sender,
-                    style: TextStyle(fontSize: 12, color: Colors.black),
-                  ),
-                Container(
-                  margin: EdgeInsets.only(top: 2),
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isMe ? Colors.blue[200] : Colors.grey,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                      bottomLeft: Radius.circular(isMe ? 16 : 0),
-                      bottomRight: Radius.circular(isMe ? 0 : 16),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(text),
-                    ],
-                  ),
-                ),
-                // 시간 부분
-                SizedBox(height: 4),
-                Text(
-                  time,
-                  style: TextStyle(fontSize: 10, color: Colors.black54),
-                ),
-              ],
-            ),
-          ),
-          if (isMe) SizedBox(width: 8),
-          if (isMe)
-            CircleAvatar(
-              backgroundColor: Colors.indigo,
-              child: Text("나"[0]),
-            ),
+    return Row(
+      mainAxisAlignment:
+          isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (!isMe) ...[
+          CircleAvatar(radius: 16, backgroundImage: NetworkImage(profileUrl)),
+          SizedBox(width: 8),
         ],
-      ),
+        Flexible(
+          child: Column(
+            crossAxisAlignment:
+                isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+              if (!isMe)
+                Text(nickname,
+                    style: TextStyle(fontSize: 12, color: Colors.grey)),
+              Container(
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.symmetric(vertical: 4),
+                decoration: BoxDecoration(
+                  color: isMe ? Colors.blue[100] : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(text),
+              ),
+              Text(
+                time,
+                style: TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+        if (isMe) SizedBox(width: 8),
+      ],
     );
   }
 }
 
 class ChatInputField extends StatelessWidget {
   final TextEditingController controller;
-  final Function onSend;
+  final VoidCallback onSend;
 
   const ChatInputField({
+    super.key,
     required this.controller,
     required this.onSend,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  hintText: "메시지를 입력하세요...",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    return Container(
+      padding: EdgeInsets.all(8),
+      color: Colors.grey[100],
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controller,
+              onSubmitted: (_) => onSend(),
+              decoration: InputDecoration(
+                hintText: "메시지를 입력해주세요...",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
                 ),
+                fillColor: Colors.white,
+                filled: true,
+                contentPadding: EdgeInsets.symmetric(horizontal: 16),
               ),
             ),
-            SizedBox(width: 8),
-            IconButton(
-              icon: Icon(Icons.send),
-              onPressed: () {
-                if (controller.text.isNotEmpty) {
-                  onSend();
-                }
-              },
-            ),
-          ],
-        ),
+          ),
+          SizedBox(width: 8),
+          IconButton(
+            icon: Icon(Icons.send),
+            onPressed: onSend,
+          ),
+        ],
       ),
     );
   }
