@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class MyInfoPage extends StatelessWidget {
   @override
@@ -43,8 +44,17 @@ class MyInfoPage extends StatelessWidget {
 
                 children: [
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
                       print('프로필 추가');
+                      // 1. 이미지 피커 객체 생성
+                      ImagePicker imagePicker = ImagePicker();
+
+                      // 2. 이미지 피커 객체의 pickImage 메서드 사용
+                      // 3. pickImage의 반환 타입이 Future이므로
+                      //    async - await 사용하는게 편하다
+                      XFile? xFile = await imagePicker.pickImage(
+                        source: ImageSource.gallery,
+                      );
                     },
                     child: Stack(
                       children: [

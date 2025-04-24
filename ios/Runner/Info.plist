@@ -2,6 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- image_picker -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>프로필 사진 업로드를 위한 라이브러리 권한을 허용해 주세요</string>
+	<!-- image_picker -->
+
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
