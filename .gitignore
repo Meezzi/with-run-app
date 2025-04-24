@@ -1,5 +1,8 @@
-# 임시파일 .tmp 무시
+# 무시 파일
 *.tmp
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
 
 # Miscellaneous
 *.class
