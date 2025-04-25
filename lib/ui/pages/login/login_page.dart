@@ -29,13 +29,16 @@ class LoginPage extends StatelessWidget {
                   final credential = await signInWithGoogle();
 
                   if (credential.user?.emailVerified ?? false) {
-                    Navigator.push(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
                         builder: (context) {
-                          return MyInfoPage();
+                          return MyInfoPage(uid: credential.user!.uid);
                         },
                       ),
+                      (route) {
+                        return route.isCurrent;
+                      },
                     );
                   }
                 },
