@@ -8,6 +8,7 @@ import 'package:with_run_app/ui/pages/map/providers/location_provider.dart';
 
 // 맵에 표시될 채팅방 마커를 클릭했을 때의 콜백 함수 타입
 typedef OnChatRoomMarkerTapCallback = void Function(ChatRoom chatRoom);
+typedef OnTemporaryMarkerTapCallback = void Function(LatLng position);
 
 class MapState {
   final Completer<GoogleMapController> mapController;
@@ -47,6 +48,7 @@ class MapNotifier extends StateNotifier<MapState> {
   final ChatService _chatService = ChatService();
   final Ref _ref;
   OnChatRoomMarkerTapCallback? _onChatRoomMarkerTap;
+  OnTemporaryMarkerTapCallback? _onTemporaryMarkerTap;
 
   MapNotifier(this._ref) : super(MapState()) {
     _listenToLocationChanges();
@@ -54,6 +56,10 @@ class MapNotifier extends StateNotifier<MapState> {
 
   void setOnChatRoomMarkerTapCallback(OnChatRoomMarkerTapCallback callback) {
     _onChatRoomMarkerTap = callback;
+  }
+
+  void setOnTemporaryMarkerTapCallback(OnTemporaryMarkerTapCallback callback) {
+    _onTemporaryMarkerTap = callback;
   }
 
   void _listenToLocationChanges() {
@@ -148,6 +154,14 @@ class MapNotifier extends StateNotifier<MapState> {
     }
   }
 
+  // 임시 마커 탭 처리
+  void onTemporaryMarkerTap(LatLng position) {
+    debugPrint('임시 마커 클릭됨: $position');
+    if (_onTemporaryMarkerTap != null) {
+      _onTemporaryMarkerTap!(position);
+    }
+  }
+
   // 맵 컨트롤러 설정
   void setMapController(GoogleMapController controller) {
     if (!state.mapController.isCompleted) {
@@ -188,13 +202,14 @@ class MapNotifier extends StateNotifier<MapState> {
     // 기존 임시 마커 제거
     currentMarkers.removeWhere((marker) => marker.markerId == markerId);
     
-    // 새 임시 마커 추가
+    // 새 임시 마커 추가 - 탭 이벤트 추가
     currentMarkers.add(
       Marker(
         markerId: markerId,
         position: position,
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         infoWindow: const InfoWindow(title: '새 채팅방 위치'),
+        onTap: () => onTemporaryMarkerTap(position),
       ),
     );
     
@@ -202,6 +217,13 @@ class MapNotifier extends StateNotifier<MapState> {
       markers: currentMarkers,
       selectedPosition: position,
     );
+    
+    // 마커를 추가한 후 카메라 이동
+    if (state.mapController.isCompleted) {
+      state.mapController.future.then((controller) {
+        controller.animateCamera(CameraUpdate.newLatLng(position));
+      });
+    }
   }
 
   // 임시 마커 제거
