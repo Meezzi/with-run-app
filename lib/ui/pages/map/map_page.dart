@@ -483,11 +483,11 @@ class _MapPageState extends State<MapPage> {
     if (!mounted) return;
 
     final screenSize = MediaQuery.of(context).size;
-    const infoWindowWidth = 250.0;
+    const infoWindowWidth = 350.0;
     const infoWindowHeight = 250.0;
 
     final left = (screenSize.width - infoWindowWidth) / 2;
-    final top = (screenSize.height - infoWindowHeight) / 2;
+    final top = (screenSize.height - infoWindowHeight) / 2 - 150;
 
     _infoWindowOverlay = OverlayEntry(
       builder:
@@ -741,7 +741,7 @@ class _MapPageState extends State<MapPage> {
         backgroundColor: isError ? Colors.redAccent : const Color(0xFF00E676),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+        margin: const EdgeInsets.fromLTRB(16, 16, 16, 130),
         elevation: 4,
       ),
     );
