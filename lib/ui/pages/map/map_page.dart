@@ -26,6 +26,7 @@ class _MapPageState extends State<MapPage> {
   OverlayEntry? _infoWindowOverlay;
   bool _isCreatingChatRoom = false;
   LatLng? _selectedPosition;
+  StreamSubscription<Position>? _positionStream;
 
   @override
   void initState() {
@@ -64,23 +65,57 @@ class _MapPageState extends State<MapPage> {
       });
       _moveToCurrentLocation();
       _addCurrentLocationMarker();
+
+      _positionStream = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 10,
+        ),
+      ).listen((Position position) {
+        if (!mounted) return;
+        setState(() {
+          _currentPosition = position;
+          _updateCurrentLocationMarker();
+        });
+        _moveToCurrentLocation();
+      });
     } catch (e) {
       debugPrint('위치 가져오기 오류: $e');
       if (mounted) _showSnackBar('위치 정보를 가져오는데 실패했습니다.');
     }
   }
 
+  void _updateCurrentLocationMarker() {
+    if (_currentPosition != null) {
+      setState(() {
+        _markers.removeWhere((marker) => marker.markerId == const MarkerId('myLocation'));
+        _markers.add(
+          Marker(
+            markerId: const MarkerId('myLocation'),
+            position: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+            infoWindow: const InfoWindow(title: '내 위치'),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          ),
+        );
+      });
+    }
+  }
+
   Future<void> _moveToCurrentLocation() async {
     if (_currentPosition != null && _mapController.isCompleted) {
       final controller = await _mapController.future;
-      controller.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-            zoom: 15.0,
+      try {
+        await controller.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+              zoom: 15.0,
+            ),
           ),
-        ),
-      );
+        );
+      } catch (e) {
+        debugPrint("Failed to animate camera: $e");
+      }
     }
   }
 
@@ -131,10 +166,72 @@ class _MapPageState extends State<MapPage> {
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
           infoWindow: const InfoWindow(title: '새 채팅방 위치'),
           onTap: () {
-            _showSnackBar('새 채팅방 만들기 버튼을 눌러 채팅방을 생성해주세요!');
+            _showMarkerConfirmationDialog(position);
           },
         ),
       );
+    });
+  }
+
+  void _showMarkerConfirmationDialog(LatLng position) {
+    showDialog(
+      context: context,
+      builder: (context) => Consumer<AppThemeProvider>(
+        builder: (context, themeProvider, child) => AlertDialog(
+          backgroundColor: themeProvider.isDarkMode ? Colors.grey[900] : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            '새 채팅방 위치',
+            style: TextStyle(
+              color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            '이 위치로 채팅방을 생성하시겠습니까?',
+            style: TextStyle(
+              color: themeProvider.isDarkMode ? Colors.grey[300] : Colors.grey[800],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _removeTemporaryMarker();
+              },
+              child: Text(
+                '아니요',
+                style: TextStyle(
+                  color: themeProvider.isDarkMode ? Colors.grey[400] : Colors.grey[700],
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showSnackBar('새 채팅방 만들기 버튼을 클릭해주세요!');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: themeProvider.isDarkMode ? Colors.green[400] : const Color(0xFF00E676),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('예'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _removeTemporaryMarker() {
+    setState(() {
+      _markers.removeWhere((marker) => marker.markerId == const MarkerId('temporaryMarker'));
+      _selectedPosition = null;
     });
   }
 
@@ -185,7 +282,11 @@ class _MapPageState extends State<MapPage> {
                   color: themeProvider.isDarkMode ? Colors.grey[900] : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: const [
-                    BoxShadow(color: Color(0x40000000), blurRadius: 8, spreadRadius: 1),
+                    BoxShadow(
+                      color: Color(0x40000000),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                    ),
                   ],
                 ),
                 child: Column(
@@ -270,9 +371,7 @@ class _MapPageState extends State<MapPage> {
         content: Text(message),
         backgroundColor: isError ? Colors.redAccent : const Color(0xFF00E676),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         elevation: 4,
       ),
@@ -531,8 +630,7 @@ class _MapPageState extends State<MapPage> {
                           ),
                           onPressed: () {
                             setState(() {
-                              _markers.removeWhere(
-                                  (marker) => marker.markerId == const MarkerId('temporaryMarker'));
+                              _markers.removeWhere((marker) => marker.markerId == const MarkerId('temporaryMarker'));
                             });
                             Navigator.of(context).pop();
                             _isCreatingChatRoom = false;
@@ -567,9 +665,7 @@ class _MapPageState extends State<MapPage> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: themeProvider.isDarkMode
-                                      ? Colors.grey[300]
-                                      : const Color(0xFF616161),
+                                  color: themeProvider.isDarkMode ? Colors.grey[300] : const Color(0xFF616161),
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -577,9 +673,7 @@ class _MapPageState extends State<MapPage> {
                                 '위도: ${position.latitude.toStringAsFixed(6)}\n경도: ${position.longitude.toStringAsFixed(6)}',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: themeProvider.isDarkMode
-                                      ? Colors.grey[400]
-                                      : const Color(0xFF757575),
+                                  color: themeProvider.isDarkMode ? Colors.grey[400] : const Color(0xFF757575),
                                 ),
                               ),
                             ],
@@ -601,7 +695,8 @@ class _MapPageState extends State<MapPage> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide(
-                            color: themeProvider.isDarkMode ? Colors.grey[700]! : const Color(0xFFE0E0E0)),
+                          color: themeProvider.isDarkMode ? Colors.grey[700]! : const Color(0xFFE0E0E0),
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -641,7 +736,8 @@ class _MapPageState extends State<MapPage> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide(
-                            color: themeProvider.isDarkMode ? Colors.grey[700]! : const Color(0xFFE0E0E0)),
+                          color: themeProvider.isDarkMode ? Colors.grey[700]! : const Color(0xFFE0E0E0),
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -668,23 +764,20 @@ class _MapPageState extends State<MapPage> {
                         child: TextButton(
                           onPressed: () {
                             setState(() {
-                              _markers.removeWhere(
-                                  (marker) => marker.markerId == const MarkerId('temporaryMarker'));
+                              _markers.removeWhere((marker) => marker.markerId == const MarkerId('temporaryMarker'));
                             });
                             Navigator.of(context).pop();
                             _isCreatingChatRoom = false;
                             _selectedPosition = null;
                           },
                           style: TextButton.styleFrom(
-                            foregroundColor:
-                                themeProvider.isDarkMode ? Colors.grey[400] : const Color(0xFF757575),
+                            foregroundColor: themeProvider.isDarkMode ? Colors.grey[400] : const Color(0xFF757575),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                               side: BorderSide(
-                                  color: themeProvider.isDarkMode
-                                      ? Colors.grey[700]!
-                                      : const Color(0xFFE0E0E0)),
+                                color: themeProvider.isDarkMode ? Colors.grey[700]! : const Color(0xFFE0E0E0),
+                              ),
                             ),
                           ),
                           child: const Text(
@@ -709,15 +802,12 @@ class _MapPageState extends State<MapPage> {
                               latitude: position.latitude,
                               longitude: position.longitude,
                               title: roomName,
-                              description: descriptionController.text.trim().isNotEmpty
-                                  ? descriptionController.text.trim()
-                                  : null,
+                              description: descriptionController.text.trim().isNotEmpty ? descriptionController.text.trim() : null,
                               removeTemporaryMarker: true,
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                themeProvider.isDarkMode ? Colors.green[400] : const Color(0xFF00E676),
+                            backgroundColor: themeProvider.isDarkMode ? Colors.green[400] : const Color(0xFF00E676),
                             foregroundColor: Colors.white,
                             elevation: 2,
                             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -780,6 +870,7 @@ class _MapPageState extends State<MapPage> {
 
   @override
   void dispose() {
+    _positionStream?.cancel();
     _chatListOverlay?.remove();
     _infoWindowOverlay?.remove();
     super.dispose();
@@ -838,6 +929,44 @@ class _MapPageState extends State<MapPage> {
             ),
             centerTitle: true,
             actions: [
+              // Add the location button to the left of the forum button
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: themeProvider.isDarkMode ? Colors.white : Colors.grey[300],
+                  shape: BoxShape.circle,
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x1A000000),
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.my_location,
+                    color: themeProvider.isDarkMode ? Colors.blue[600] : const Color(0xFF2196F3),
+                  ),
+                  tooltip: '내 위치로 이동',
+                  onPressed: () async {
+                    if (_currentPosition != null && _mapController.isCompleted) {
+                      final controller = await _mapController.future;
+                      controller.animateCamera(
+                        CameraUpdate.newCameraPosition(
+                          CameraPosition(
+                            target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+                            zoom: 15,
+                          ),
+                        ),
+                      );
+                    } else if (_currentPosition == null) {
+                      _showSnackBar("현재 위치를 찾을 수 없습니다.", isError: true);
+                    }
+                  },
+                ),
+              ),
+              // Chat list button
               Container(
                 margin: const EdgeInsets.only(right: 8),
                 decoration: BoxDecoration(
@@ -887,7 +1016,11 @@ class _MapPageState extends State<MapPage> {
                     myLocationButtonEnabled: false,
                     zoomControlsEnabled: true,
                     compassEnabled: false,
-                    onMapCreated: (controller) => _mapController.complete(controller),
+                    onMapCreated: (controller) {
+                      if (!_mapController.isCompleted) {
+                        _mapController.complete(controller);
+                      }
+                    },
                     onTap: (position) {
                       _infoWindowOverlay?.remove();
                       _infoWindowOverlay = null;
@@ -898,50 +1031,13 @@ class _MapPageState extends State<MapPage> {
                     style: themeProvider.isDarkMode
                         ? themeProvider.darkMapStyle
                         : themeProvider.lightMapStyle,
+                    liteModeEnabled: false,
                   );
                 },
               ),
+              // Create chat room button moved up by 20 units
               Positioned(
-                right: 16,
-                bottom: 100,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: themeProvider.isDarkMode ? Colors.white : Colors.grey[300],
-                    shape: BoxShape.circle,
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x1A000000),
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.my_location,
-                      color: themeProvider.isDarkMode ? Colors.blue[600] : const Color(0xFF2196F3),
-                    ),
-                    tooltip: '내 위치로 이동',
-                    onPressed: () async {
-                      if (_currentPosition != null && _mapController.isCompleted) {
-                        final controller = await _mapController.future;
-                        controller.animateCamera(
-                          CameraUpdate.newCameraPosition(
-                            CameraPosition(
-                              target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-                              zoom: 15,
-                            ),
-                          ),
-                        );
-                      } else if (_currentPosition == null) {
-                        _showSnackBar("현재 위치를 찾을 수 없습니다.", isError: true);
-                      }
-                    },
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 30,
+                bottom: 80, // Changed from 60 to 80 (moved up by 20)
                 left: 0,
                 right: 0,
                 child: Center(
@@ -983,14 +1079,13 @@ class _MapPageState extends State<MapPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             CircleAvatar(
-                              backgroundColor:
-                                  themeProvider.isDarkMode ? const Color.fromARGB(255, 255, 255, 255) : Colors.white,
+                              backgroundColor: themeProvider.isDarkMode
+                                  ? const Color.fromARGB(255, 255, 255, 255)
+                                  : Colors.white,
                               radius: 14,
                               child: Icon(
                                 Icons.add_comment_outlined,
-                                color: themeProvider.isDarkMode
-                                    ? Colors.blue[600]
-                                    : const Color(0xFF2196F3),
+                                color: themeProvider.isDarkMode ? Colors.blue[600] : const Color(0xFF2196F3),
                                 size: 16,
                               ),
                             ),
