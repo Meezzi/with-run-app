@@ -7,15 +7,13 @@
 	<string>프로필 사진 업로드를 위한 라이브러리 권한을 허용해 주세요</string>
 	<!-- image_picker -->
   <key>io.flutter.embedded_views_preview</key>
-		<true />
-		<key>GoogleMapsApiKey</key>
-		<string>$(GOOGLE_MAPS_API_KEY)</string>
-		<key>CADisableMinimumFrameDurationOnPhone</key>
-		<true />
-		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>위치 기반 채팅방 생성을 위해 위치 정보가 필요합니다.</string>
+	<true />
+	<key>GoogleMapsApiKey</key>
+	<string>$(GOOGLE_MAPS_API_KEY)</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
+	<true />
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>위치 기반 채팅방 생성을 위해 위치 정보가 필요합니다.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -70,4 +68,3 @@
 	</array>
 </dict>
 </plist>
-

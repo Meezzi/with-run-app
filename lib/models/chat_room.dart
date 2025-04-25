@@ -2,49 +2,63 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatRoom {
   final String id;
+  final String title;
+  final String? description;
   final double latitude;
   final double longitude;
   final String creatorId;
-  final String creatorName;
   final DateTime createdAt;
-  final String title;
-  final String? description;
+  final List<String>? participants;
+  final String? lastMessage;
+  final DateTime? lastMessageTimestamp;
 
   ChatRoom({
     required this.id,
+    required this.title,
+    this.description,
     required this.latitude,
     required this.longitude,
     required this.creatorId,
-    required this.creatorName,
     required this.createdAt,
-    required this.title,
-    this.description,
+    this.participants,
+    this.lastMessage,
+    this.lastMessageTimestamp,
   });
 
-  // Firebase에서 데이터를 가져와 ChatRoom 객체로 변환
-  factory ChatRoom.fromMap(Map<String, dynamic> map, String documentId) {
+  factory ChatRoom.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    
     return ChatRoom(
-      id: documentId,
-      latitude: map['latitude'] ?? 0.0,
-      longitude: map['longitude'] ?? 0.0,
-      creatorId: map['creatorId'] ?? '',
-      creatorName: map['creatorName'] ?? '',
-      createdAt: (map['createdAt'] as Timestamp).toDate(),
-      title: map['title'] ?? '',
-      description: map['description'],
+      id: doc.id,
+      title: data['title'] ?? '',
+      description: data['description'],
+      latitude: (data['latitude'] as num).toDouble(),
+      longitude: (data['longitude'] as num).toDouble(),
+      creatorId: data['creatorId'] ?? '',
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      participants: data['participants'] != null 
+          ? List<String>.from(data['participants']) 
+          : null,
+      lastMessage: data['lastMessage'],
+      lastMessageTimestamp: data['lastMessageTimestamp'] != null 
+          ? (data['lastMessageTimestamp'] as Timestamp).toDate() 
+          : null,
     );
   }
 
-  // ChatRoom 객체를 Firebase에 저장하기 위한 Map으로 변환
   Map<String, dynamic> toMap() {
     return {
+      'title': title,
+      'description': description,
       'latitude': latitude,
       'longitude': longitude,
       'creatorId': creatorId,
-      'creatorName': creatorName,
-      'createdAt': createdAt,
-      'title': title,
-      'description': description,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'participants': participants ?? [],
+      'lastMessage': lastMessage,
+      'lastMessageTimestamp': lastMessageTimestamp != null 
+          ? Timestamp.fromDate(lastMessageTimestamp!) 
+          : null,
     };
   }
 }
