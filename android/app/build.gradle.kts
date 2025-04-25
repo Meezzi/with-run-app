@@ -1,3 +1,13 @@
+import java.io.File
+import java.util.Properties
+
+// .env 파일 읽기
+val envFile = rootProject.file("../.env")
+val env = Properties()
+if (envFile.exists()) {
+    env.load(envFile.inputStream())
+}
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -31,6 +41,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // .env 파일에서 API 키 가져와서 리소스로 설정
+        resValue("string", "google_maps_api_key", env.getProperty("GOOGLE_MAPS_API_KEY", ""))
     }
 
     buildTypes {
