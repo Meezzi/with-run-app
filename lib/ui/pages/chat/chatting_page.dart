@@ -1,77 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:with_run_app/message_provider.dart';// 방금 만든 파일 import
 
-class ChatRoomScreen extends StatefulWidget {
+class ChatRoomPage extends ConsumerWidget {
   final String roomName;
   final String location;
   final String adminNickname;
 
-  const ChatRoomScreen({
+  ChatRoomPage({
     super.key,
     required this.roomName,
     required this.location,
     required this.adminNickname,
   });
 
-  @override
-  State<ChatRoomScreen> createState() => _ChatRoomScreenState();
-}
-
-class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  // 예시 메시지 데이터
-  List<Map<String, dynamic>> messages = [
-    {
-      'text': '뜁시다',
-      'time': '오후 3:40',
-      'nickname': '청국장',
-      'profileUrl': 'https://ibb.co/t0w29M9',
-      'isMe': false,
-    },
-    {
-      'text': 'ㄱㄱ',
-      'time': '오후 3:42',
-      'nickname': '된찌',
-      'profileUrl': 'https://example.com/profile2.jpg',
-      'isMe': false,
-    },
-    {
-      'text': '기기',
-      'time': '오후 3:45',
-      'nickname': '제육',
-      'profileUrl': 'https://example.com/profile3.jpg',
-      'isMe': false,
-    },
-  ];
-
-  void _sendMessage() {
-    final text = _controller.text.trim();
-    if (text.isEmpty) return;
-
-    setState(() {
-      messages.insert(0, {
-        'text': text,
-        'time': '오후 3:50',
-        'nickname': '나',
-        'profileUrl': 'https://example.com/myprofile.jpg',
-        'isMe': true,
-      });
-    });
-
-    _controller.clear();
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final messages = ref.watch(messageProvider);
+    final notifier = ref.read(messageProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.roomName, style: TextStyle(fontWeight: FontWeight.bold)),
-            Text("${widget.location}",
-                style: TextStyle(fontSize: 12)),
+            Text(roomName, style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(location, style: TextStyle(fontSize: 12)),
           ],
         ),
       ),
@@ -86,18 +43,24 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               itemBuilder: (context, index) {
                 final msg = messages[index];
                 return ChatBubble(
-                  isMe: msg['isMe'],
-                  text: msg['text'],
-                  time: msg['time'],
-                  profileUrl: msg['profileUrl'],
-                  nickname: msg['nickname'],
+                  isMe: msg.isMe,
+                  text: msg.text,
+                  time: msg.time,
+                  profileUrl: msg.profileUrl,
+                  nickname: msg.nickname,
                 );
               },
             ),
           ),
           ChatInputField(
             controller: _controller,
-            onSend: _sendMessage,
+            onSend: () {
+              final text = _controller.text.trim();
+              if (text.isNotEmpty) {
+                notifier.sendMessage(text);
+                _controller.clear();
+              }
+            },
           ),
         ],
       ),
