@@ -1,10 +1,10 @@
-import 'dart:io'; // Platform 클래스 사용을 위해 추가
+import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // MethodChannel 사용을 위해 추가
-import 'package:flutter_riverpod/flutter_riverpod.dart' hide ChangeNotifierProvider, Consumer;
-import 'package:flutter_dotenv/flutter_dotenv.dart'; 
-import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:with_run_app/firebase_options.dart';
 import 'package:with_run_app/ui/pages/login/login_page.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
@@ -36,20 +36,20 @@ void main() async {
 
   runApp(
     ProviderScope(
-      child: ChangeNotifierProvider(
+      child: provider.ChangeNotifierProvider(
         create: (context) => AppThemeProvider(),
-        child: MyApp(),
+        child: const MyApp(),
       ),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<AppThemeProvider>(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return provider.Consumer<AppThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
           theme: themeProvider.lightTheme.copyWith(
@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
             highlightColor: const Color(0xff2196F3),
           ),
           themeMode: themeProvider.themeMode,
-          home: LoginPage(),
+          home:  LoginPage(),
         );
       },
     );
