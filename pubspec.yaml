@@ -23,12 +23,17 @@ dependencies:
   flutter_svg: ^2.1.0
  
   google_sign_in: ^6.3.0
+
   google_maps_flutter: ^2.12.1
   geolocator: ^14.0.0  # 위치 권한 및 현재 위치 얻기
   geocoding: ^3.0.0
  
   provider: ^6.1.4
   http: ^1.2.2
+
+  cloud_firestore: ^5.6.6
+  firebase_core: ^3.13.0
+
   image_picker: ^1.1.2
 
 dev_dependencies:
@@ -44,4 +49,6 @@ flutter:
   assets:
     - assets/
     - .env
+    - assets/icons/
+
 
