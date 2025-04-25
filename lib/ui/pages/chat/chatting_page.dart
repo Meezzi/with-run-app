@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final String roomName;
@@ -46,18 +45,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     },
   ];
 
-  void _sendMessage() async {
+  void _sendMessage() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
-
-    // Firestore에 메시지 추가
-    await FirebaseFirestore.instance.collection('messages').add({
-      'text': text,
-      'time': DateTime.now().toString(),
-      'nickname': '나',
-      'profileUrl': 'https://example.com/myprofile.jpg',
-      'isMe': true,
-    });
 
     setState(() {
       messages.insert(0, {
@@ -71,23 +61,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
     _controller.clear();
   }
-
-  // void _sendMessage() {
-  //   final text = _controller.text.trim();
-  //   if (text.isEmpty) return;
-
-  //   setState(() {
-  //     messages.insert(0, {
-  //       'text': text,
-  //       'time': '오후 3:50',
-  //       'nickname': '나',
-  //       'profileUrl': 'https://example.com/myprofile.jpg',
-  //       'isMe': true,
-  //     });
-  //   });
-
-  //   _controller.clear();
-  // }
 
   @override
   Widget build(BuildContext context) {
