@@ -23,26 +23,29 @@ class CreateChatRoomDialog extends ConsumerStatefulWidget {
 
 class _CreateChatRoomDialogState extends ConsumerState<CreateChatRoomDialog> {
   @override
-  Widget build(BuildContext context) {
-    return CupertinoAlertDialog(
-      title: const Text('새 채팅방 위치'),
-      content: const Text('이 위치에 채팅방을 생성하시겠습니까?'),
-      actions: [
-        CupertinoDialogAction(
-          onPressed: () {
-            ref.read(mapProvider.notifier).removeTemporaryMarker();
-            widget.onDismiss();
-          },
-          child: const Text('아니요'),
-        ),
-        CupertinoDialogAction(
-          isDefaultAction: true,
-          onPressed: _navigateToChatCreatePage,
-          child: const Text('예'),
-        ),
-      ],
-    );
-  }
+Widget build(BuildContext context) {
+  return CupertinoAlertDialog(
+    title: const Text('새 채팅방 위치'),
+    content: const Padding(
+      padding: EdgeInsets.only(top: 4), // content를 위로 올리기 위해 상단 여백 축소
+      child: Text('이 위치에 채팅방을 생성하시겠습니까?'),
+    ),
+    actions: [
+      CupertinoDialogAction(
+        onPressed: () {
+          ref.read(mapProvider.notifier).removeTemporaryMarker();
+          widget.onDismiss();
+        },
+        child: const Text('아니요'),
+      ),
+      CupertinoDialogAction(
+        isDefaultAction: true,
+        onPressed: _navigateToChatCreatePage,
+        child: const Text('예'),
+      ),
+    ],
+  );
+}
 
   void _navigateToChatCreatePage() {
     widget.onDismiss();

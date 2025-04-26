@@ -11,7 +11,10 @@ import 'package:with_run_app/ui/pages/map/widgets/chat_list_overlay.dart';
 import 'package:with_run_app/ui/pages/map/widgets/chat_room_info_window.dart';
 import 'package:with_run_app/ui/pages/map/widgets/create_chat_room_dialog.dart';
 import 'package:with_run_app/ui/pages/chat_create/chat_create_page.dart';
+import 'package:with_run_app/ui/pages/setting/setting_page.dart';
 import 'package:provider/provider.dart' as provider;
+
+
 
 class MapPage extends ConsumerStatefulWidget {
   const MapPage({super.key});
@@ -32,8 +35,12 @@ class _MapPageState extends ConsumerState<MapPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && !_isInitialized) {
         _isInitialized = true;
-        ref.read(mapProvider.notifier).setOnChatRoomMarkerTapCallback(showChatRoomInfoWindow);
-        ref.read(mapProvider.notifier).setOnTemporaryMarkerTapCallback(_showCreateChatRoomConfirmDialog);
+        ref
+            .read(mapProvider.notifier)
+            .setOnChatRoomMarkerTapCallback(showChatRoomInfoWindow);
+        ref
+            .read(mapProvider.notifier)
+            .setOnTemporaryMarkerTapCallback(_showCreateChatRoomConfirmDialog);
       }
     });
   }
@@ -61,13 +68,14 @@ class _MapPageState extends ConsumerState<MapPage> {
   void _showChatListOverlay() {
     _closeOverlays();
     _chatListOverlay = OverlayEntry(
-      builder: (context) => ChatListOverlay(
-        onShowSnackBar: _showSnackBar,
-        onDismiss: () {
-          _chatListOverlay?.remove();
-          _chatListOverlay = null;
-        },
-      ),
+      builder:
+          (context) => ChatListOverlay(
+            onShowSnackBar: _showSnackBar,
+            onDismiss: () {
+              _chatListOverlay?.remove();
+              _chatListOverlay = null;
+            },
+          ),
     );
     if (mounted) Overlay.of(context).insert(_chatListOverlay!);
   }
@@ -83,14 +91,15 @@ class _MapPageState extends ConsumerState<MapPage> {
     if (!mounted) return;
     _closeOverlays();
     _infoWindowOverlay = OverlayEntry(
-      builder: (context) => ChatRoomInfoWindow(
-        chatRoom: chatRoom,
-        onDismiss: () {
-          _infoWindowOverlay?.remove();
-          _infoWindowOverlay = null;
-        },
-        onShowSnackBar: _showSnackBar,
-      ),
+      builder:
+          (context) => ChatRoomInfoWindow(
+            chatRoom: chatRoom,
+            onDismiss: () {
+              _infoWindowOverlay?.remove();
+              _infoWindowOverlay = null;
+            },
+            onShowSnackBar: _showSnackBar,
+          ),
     );
     Overlay.of(context).insert(_infoWindowOverlay!);
   }
@@ -99,11 +108,19 @@ class _MapPageState extends ConsumerState<MapPage> {
     if (!mounted) return;
     showDialog(
       context: context,
-      builder: (context) => CreateChatRoomDialog(
-        position: position,
-        onShowSnackBar: _showSnackBar,
-        onDismiss: () => Navigator.of(context).pop(),
-      ),
+      barrierDismissible: true,
+      builder:
+          (context) => Transform.translate(
+            offset: const Offset(0, -160),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: CreateChatRoomDialog(
+                position: position,
+                onShowSnackBar: _showSnackBar,
+                onDismiss: () => Navigator.of(context).pop(),
+              ),
+            ),
+          ),
     );
   }
 
@@ -130,7 +147,10 @@ class _MapPageState extends ConsumerState<MapPage> {
     } else {
       _checkUserHasCreatedRoom().then((hasCreatedRoom) {
         if (hasCreatedRoom) {
-          _showSnackBar('이미 개설한 채팅방이 있습니다. 한 사용자당 하나의 채팅방만 개설할 수 있습니다.', isError: true);
+          _showSnackBar(
+            '이미 개설한 채팅방이 있습니다. 한 사용자당 하나의 채팅방만 개설할 수 있습니다.',
+            isError: true,
+          );
         } else {
           ref.read(mapProvider.notifier).setCreatingChatRoom(true);
           _showLocationSelectionDialog();
@@ -143,9 +163,7 @@ class _MapPageState extends ConsumerState<MapPage> {
     if (!mounted) return;
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const ChatCreatePage(),
-      ),
+      MaterialPageRoute(builder: (context) => const ChatCreatePage()),
     );
   }
 
@@ -153,30 +171,31 @@ class _MapPageState extends ConsumerState<MapPage> {
     if (!mounted) return;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        contentPadding: EdgeInsets.zero,
-        content: Container(
-          width: 320,
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.touch_app, size: 40, color: Colors.blue),
-              const SizedBox(height: 8),
-              const Text(
-                '지도에서 채팅방을 개설할 위치를 선택해주세요',
-                style: TextStyle(fontWeight: FontWeight.w600),
-                textAlign: TextAlign.center,
+      builder:
+          (context) => AlertDialog(
+            contentPadding: EdgeInsets.zero,
+            content: Container(
+              width: 320,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.touch_app, size: 40, color: Colors.blue),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '지도에서 채팅방을 개설할 위치를 선택해주세요',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('확인'),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('확인'),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -197,24 +216,41 @@ class _MapPageState extends ConsumerState<MapPage> {
     return GestureDetector(
       onTap: () => themeProvider.toggleTheme(),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: themeProvider.isDarkMode ? Colors.white : Colors.grey[300],
           borderRadius: BorderRadius.circular(30),
-          boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 6, offset: Offset(0, 2))],
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x1A000000),
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.directions_run,
-                color: themeProvider.isDarkMode ? Colors.green[600] : const Color(0xFF00E676), size: 20),
+            Icon(
+              Icons.directions_run,
+              color:
+                  themeProvider.isDarkMode
+                      ? Colors.green[600]
+                      : const Color(0xFF00E676),
+              size: 20,
+            ),
             const SizedBox(width: 8),
-            Text("WithRun",
-                style: TextStyle(
-                  color: themeProvider.isDarkMode ? Colors.black : const Color(0xFF212121),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                )),
+            Text(
+              "WithRun",
+              style: TextStyle(
+                color:
+                    themeProvider.isDarkMode
+                        ? Colors.black
+                        : const Color(0xFF212121),
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
           ],
         ),
       ),
@@ -233,7 +269,13 @@ class _MapPageState extends ConsumerState<MapPage> {
       decoration: BoxDecoration(
         color: themeProvider.isDarkMode ? Colors.white : Colors.grey[300],
         shape: BoxShape.circle,
-        boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 6, offset: Offset(0, 2))],
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1A000000),
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: IconButton(
         icon: Icon(icon, color: iconColor),
@@ -243,58 +285,77 @@ class _MapPageState extends ConsumerState<MapPage> {
     );
   }
 
-  final String _customDarkMapStyle = '''
-  [
-    {"elementType": "geometry", "stylers": [{"color": "#242f3e"}]},
-    {"elementType": "labels.text.fill", "stylers": [{"color": "#ffffff"}]},
-    {"elementType": "labels.text.stroke", "stylers": [{"color": "#242f3e"}]},
-    {"featureType": "administrative.locality", "elementType": "labels.text.fill", "stylers": [{"color": "#d0d0ff"}]},
-    {"featureType": "poi", "elementType": "labels.text.fill", "stylers": [{"color": "#b4e0b4"}]},
-    {"featureType": "poi.park", "elementType": "geometry", "stylers": [{"color": "#263c3f"}]},
-    {"featureType": "poi.park", "elementType": "labels.text.fill", "stylers": [{"color": "#6cff6c"}]},
-    {"featureType": "road", "elementType": "geometry", "stylers": [{"color": "#38414e"}]},
-    {"featureType": "road", "elementType": "geometry.stroke", "stylers": [{"color": "#212a37"}]},
-    {"featureType": "road", "elementType": "labels.text.fill", "stylers": [{"color": "#c5c5ff"}]},
-    {"featureType": "road.highway", "elementType": "geometry", "stylers": [{"color": "#505ea1"}]},
-    {"featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [{"color": "#1f2835"}]},
-    {"featureType": "road.highway", "elementType": "labels.text.fill", "stylers": [{"color": "#f2f2ff"}]},
-    {"featureType": "transit", "elementType": "geometry", "stylers": [{"color": "#2f3948"}]},
-    {"featureType": "transit.station", "elementType": "labels.text.fill", "stylers": [{"color": "#e0e0ff"}]},
-    {"featureType": "water", "elementType": "geometry", "stylers": [{"color": "#17263c"}]},
-    {"featureType": "water", "elementType": "labels.text.fill", "stylers": [{"color": "#80dfff"}]}
-  ]
-  ''';
-
   @override
   Widget build(BuildContext context) {
     final themeProvider = provider.Provider.of<AppThemeProvider>(context);
     final locationState = ref.watch(locationProvider);
     final mapState = ref.watch(mapProvider);
 
-    final initialPosition = locationState.currentPosition != null
-        ? CameraPosition(
-            target: LatLng(locationState.currentPosition!.latitude, locationState.currentPosition!.longitude),
-            zoom: 15,
-          )
-        : const CameraPosition(target: LatLng(37.5665, 126.9780), zoom: 11);
+    final initialPosition =
+        locationState.currentPosition != null
+            ? CameraPosition(
+              target: LatLng(
+                locationState.currentPosition!.latitude,
+                locationState.currentPosition!.longitude,
+              ),
+              zoom: 15,
+            )
+            : const CameraPosition(target: LatLng(37.5665, 126.9780), zoom: 11);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: Container(
+          margin: const EdgeInsets.only(left: 8),
+          decoration: BoxDecoration(
+            color: themeProvider.isDarkMode ? Colors.white : Colors.grey[300],
+            shape: BoxShape.circle,
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x1A000000),
+                blurRadius: 6,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: IconButton(
+            icon: Icon(
+              Icons.menu,
+              color:
+                  themeProvider.isDarkMode
+                      ? Colors.blue[600]!
+                      : const Color(0xFF2196F3),
+            ),
+            tooltip: '설정',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingPage()),
+              );
+            },
+          ),
+        ),
         title: _buildAppTitle(themeProvider),
         centerTitle: true,
         actions: [
           _buildActionButton(
             icon: Icons.my_location,
-            iconColor: themeProvider.isDarkMode ? Colors.blue[600]! : const Color(0xFF2196F3),
+            iconColor:
+                themeProvider.isDarkMode
+                    ? Colors.blue[600]!
+                    : const Color(0xFF2196F3),
             onPressed: _moveToCurrentLocation,
             tooltip: '내 위치로 이동',
           ),
           _buildActionButton(
             icon: Icons.forum_outlined,
-            iconColor: themeProvider.isDarkMode ? Colors.blue[600]! : const Color(0xFF2196F3),
+            iconColor:
+                themeProvider.isDarkMode
+                    ? Colors.blue[600]!
+                    : const Color(0xFF2196F3),
             onPressed: _showChatListOverlay,
             tooltip: '채팅 목록',
           ),
@@ -309,13 +370,18 @@ class _MapPageState extends ConsumerState<MapPage> {
             myLocationButtonEnabled: false,
             zoomControlsEnabled: true,
             compassEnabled: false,
-            onMapCreated: (controller) => ref.read(mapProvider.notifier).setMapController(controller),
+            onMapCreated:
+                (controller) =>
+                    ref.read(mapProvider.notifier).setMapController(controller),
             onTap: (position) {
               _closeOverlays();
               if (mapState.isCreatingChatRoom) {
                 _checkUserHasCreatedRoom().then((hasCreatedRoom) {
                   if (hasCreatedRoom) {
-                    _showSnackBar('이미 개설한 채팅방이 있습니다. 한 사용자당 하나의 채팅방만 개설할 수 있습니다.', isError: true);
+                    _showSnackBar(
+                      '이미 개설한 채팅방이 있습니다. 한 사용자당 하나의 채팅방만 개설할 수 있습니다.',
+                      isError: true,
+                    );
                     ref.read(mapProvider.notifier).setCreatingChatRoom(false);
                   } else {
                     ref.read(mapProvider.notifier).onMapTap(position);
@@ -325,7 +391,7 @@ class _MapPageState extends ConsumerState<MapPage> {
             },
             mapType: MapType.normal,
             liteModeEnabled: false,
-            style: themeProvider.isDarkMode ? _customDarkMapStyle : null,
+            style: themeProvider.isDarkMode ? themeProvider.darkMapStyle : themeProvider.lightMapStyle,
           ),
           Positioned(
             bottom: 80,
@@ -339,13 +405,22 @@ class _MapPageState extends ConsumerState<MapPage> {
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: themeProvider.isDarkMode
-                        ? [Colors.blue[400]!, Colors.green[400]!]
-                        : [const Color(0xFF2196F3), const Color(0xFF00E676)],
+                    colors:
+                        themeProvider.isDarkMode
+                            ? [Colors.blue[400]!, Colors.green[400]!]
+                            : [
+                              const Color(0xFF2196F3),
+                              const Color(0xFF00E676),
+                            ],
                   ),
                   borderRadius: const BorderRadius.all(Radius.circular(30)),
                   boxShadow: const [
-                    BoxShadow(color: Color(0x40000000), blurRadius: 10, spreadRadius: 1, offset: Offset(0, 4)),
+                    BoxShadow(
+                      color: Color(0x40000000),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                      offset: Offset(0, 4),
+                    ),
                   ],
                 ),
                 child: Material(
@@ -363,14 +438,21 @@ class _MapPageState extends ConsumerState<MapPage> {
                           radius: 16,
                           child: Icon(
                             Icons.add_comment_outlined,
-                            color: themeProvider.isDarkMode ? Colors.green[600] : const Color(0xFF2196F3),
+                            color:
+                                themeProvider.isDarkMode
+                                    ? Colors.green[600]
+                                    : const Color(0xFF2196F3),
                             size: 18,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Text(
                           '새 채팅방 만들기',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ],
                     ),

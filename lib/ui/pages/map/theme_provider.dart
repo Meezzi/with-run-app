@@ -54,54 +54,201 @@ class AppThemeProvider with ChangeNotifier {
         ),
       );
 
-  String get lightMapStyle => '[]';
-
-  String get darkMapStyle => '''
+  // iOS 스타일 Light 모드 맵 스타일
+  String get lightMapStyle => '''
   [
     {
+      "featureType": "water",
       "elementType": "geometry",
-      "stylers": [
-        { "color": "#212121" }
-      ]
+      "stylers": [{"color": "#d4f1f9"}]
     },
     {
-      "elementType": "labels.icon",
-      "stylers": [
-        { "visibility": "off" }
-      ]
+      "featureType": "landscape",
+      "elementType": "geometry",
+      "stylers": [{"color": "#f5f5f5"}]
     },
     {
-      "elementType": "labels.text.fill",
-      "stylers": [
-        { "color": "#757575" }
-      ]
+      "featureType": "road.highway",
+      "elementType": "geometry",
+      "stylers": [{"color": "#fafafa"}]
     },
     {
-      "elementType": "labels.text.stroke",
-      "stylers": [
-        { "color": "#212121" }
-      ]
+      "featureType": "road.arterial",
+      "elementType": "geometry",
+      "stylers": [{"color": "#ffffff"}]
+    },
+    {
+      "featureType": "road.local",
+      "elementType": "geometry",
+      "stylers": [{"color": "#ffffff"}]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "geometry",
+      "stylers": [{"color": "#e8f5e9"}]
+    },
+    {
+      "featureType": "transit",
+      "stylers": [{"visibility": "simplified"}]
     },
     {
       "featureType": "administrative",
-      "elementType": "geometry",
-      "stylers": [
-        { "color": "#757575" }
-      ]
+      "elementType": "geometry.stroke",
+      "stylers": [{"color": "#dddddd"}]
     },
     {
       "featureType": "road",
-      "elementType": "geometry.fill",
-      "stylers": [
-        { "color": "#2c2c2c" }
-      ]
+      "elementType": "labels.text.fill",
+      "stylers": [{"color": "#999999"}]
+    },
+    {
+      "featureType": "road",
+      "elementType": "labels.text.stroke",
+      "stylers": [{"color": "#ffffff"}]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "labels.icon",
+      "stylers": [{"visibility": "on"}]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "labels.icon",
+      "stylers": [{"visibility": "on"}]
+    },
+    {
+      "featureType": "poi.business",
+      "stylers": [{"visibility": "simplified"}]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry.stroke",
+      "stylers": [{"color": "#e5e5e5"}]
+    },
+    {
+      "featureType": "road.arterial",
+      "elementType": "geometry.stroke",
+      "stylers": [{"color": "#e5e5e5"}]
+    },
+    {
+      "featureType": "road.local",
+      "elementType": "geometry.stroke",
+      "stylers": [{"color": "#e5e5e5"}]
+    }
+  ]
+  ''';
+
+  // iOS 스타일 Dark 모드 맵 스타일 (텍스트 가독성 개선)
+  String get darkMapStyle => '''
+  [
+    {
+      "featureType": "all",
+      "elementType": "geometry",
+      "stylers": [{"color": "#242424"}]
     },
     {
       "featureType": "water",
       "elementType": "geometry",
-      "stylers": [
-        { "color": "#000000" }
-      ]
+      "stylers": [{"color": "#1a2632"}]
+    },
+    {
+      "featureType": "landscape",
+      "elementType": "geometry",
+      "stylers": [{"color": "#2d2d2d"}]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry",
+      "stylers": [{"color": "#424242"}]
+    },
+    {
+      "featureType": "road.arterial",
+      "elementType": "geometry",
+      "stylers": [{"color": "#373737"}]
+    },
+    {
+      "featureType": "road.local",
+      "elementType": "geometry",
+      "stylers": [{"color": "#333333"}]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "geometry",
+      "stylers": [{"color": "#263c3f"}]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "labels.text.fill",
+      "stylers": [{"color": "#d5d5d5"}]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "labels.text.stroke",
+      "stylers": [{"color": "#1f1f1f"}]
+    },
+    {
+      "featureType": "road",
+      "elementType": "labels.text.fill",
+      "stylers": [{"color": "#d5d5d5"}]
+    },
+    {
+      "featureType": "road",
+      "elementType": "labels.text.stroke",
+      "stylers": [{"color": "#1f1f1f"}]
+    },
+    {
+      "featureType": "transit",
+      "elementType": "labels.text.fill",
+      "stylers": [{"color": "#d5d5d5"}]
+    },
+    {
+      "featureType": "transit",
+      "elementType": "labels.text.stroke",
+      "stylers": [{"color": "#1f1f1f"}]
+    },
+    {
+      "featureType": "administrative",
+      "elementType": "labels.text.fill",
+      "stylers": [{"color": "#d5d5d5"}]
+    },
+    {
+      "featureType": "administrative",
+      "elementType": "labels.text.stroke",
+      "stylers": [{"color": "#1f1f1f"}]
+    },
+    {
+      "featureType": "transit",
+      "stylers": [{"visibility": "on"}]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry.stroke",
+      "stylers": [{"color": "#4a4a4a"}]
+    },
+    {
+      "featureType": "road.arterial",
+      "elementType": "geometry.stroke",
+      "stylers": [{"color": "#444444"}]
+    },
+    {
+      "featureType": "road.local",
+      "elementType": "geometry.stroke",
+      "stylers": [{"color": "#3a3a3a"}]
+    },
+    {
+      "featureType": "administrative.locality",
+      "elementType": "labels",
+      "stylers": [{"visibility": "on"}]
+    },
+    {
+      "featureType": "administrative.locality",
+      "elementType": "labels.text.fill",
+      "stylers": [{"color": "#e5e5e5"}]
+    },
+    {
+      "featureType": "administrative.locality",
+      "elementType": "labels.text.stroke",
+      "stylers": [{"color": "#1f1f1f"}]
     }
   ]
   ''';
