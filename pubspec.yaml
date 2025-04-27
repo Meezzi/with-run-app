@@ -41,6 +41,7 @@ dependencies:
   cloud_firestore: ^5.6.6
   firebase_core: ^3.13.0
   image_picker: ^1.1.2
+  time_range_picker: ^2.3.0
 
 dev_dependencies:
   flutter_test:
