@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:with_run_app/ui/pages/chat_create/date_picker_input.dart';
+import 'package:with_run_app/ui/pages/chat_create/time_picker_input.dart';
+import 'package:with_run_app/ui/pages/chat_create/time_range_picker_input.dart';
 
 class ChatCreatePage extends StatelessWidget {
   const ChatCreatePage({super.key});
@@ -14,19 +16,21 @@ class ChatCreatePage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                constraints: BoxConstraints(maxHeight: 1000),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      inputElement(name: '장소', readOnly: true),
-                      inputElement(name: '채팅방 이름', isRequired: true),
-                      inputElement(name: '날짜', isRequired: true, customInput: DatePickerInput()),
-                      inputElement(name: '시간', isRequired: true),
-                      inputElement(name: '설명', maxLines: 5),
-                    ],
+              Expanded(
+                child: Container(
+                  constraints: BoxConstraints(minHeight: 350),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        inputElement(name: '장소', readOnly: true),
+                        inputElement(name: '채팅방 이름', isRequired: true),
+                        inputElement(name: '날짜', isRequired: true, customInput: DatePickerInput()),
+                        inputElement(name: '시간', isRequired: true, customInput: TimeRangePickerInput()),
+                        inputElement(name: '설명', maxLines: 5),
+                      ],
+                    ),
                   ),
                 ),
               ),
