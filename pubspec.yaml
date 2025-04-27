@@ -33,6 +33,7 @@ dependencies:
   intl: ^0.20.2
 
   image_picker: ^1.1.2
+  time_range_picker: ^2.3.0
 
 dev_dependencies:
   flutter_test:
