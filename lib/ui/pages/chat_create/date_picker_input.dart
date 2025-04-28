@@ -1,0 +1,43 @@
+import 'package:flutter/material.dart';
+
+class DatePickerInput extends StatefulWidget {
+  const DatePickerInput({super.key});
+
+  @override
+  State<DatePickerInput> createState() => _DatePickerInputState();
+}
+
+class _DatePickerInputState extends State<DatePickerInput> {
+  DateTime? selectedDate;
+
+  Future<void> _selectDate() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2021, 7, 25),
+      firstDate: DateTime(2021),
+      lastDate: DateTime(2022),
+    );
+
+    setState(() {
+      selectedDate = pickedDate;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Text(
+          selectedDate != null
+              ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
+              : '선택된 날짜가 없습니다.',
+              style: TextStyle(
+                fontSize: 18,
+              ),
+        ),
+        OutlinedButton(onPressed: _selectDate, child: const Text('날짜 선택')),
+      ],
+    );
+  }
+}
