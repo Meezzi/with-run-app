@@ -16,7 +16,7 @@ class ChatRoomInfoWindow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeProvider = ref.watch(Provider<AppThemeProvider>((ref) => AppThemeProvider()));
+    final themeState = ref.watch(appThemeProvider);
     final addressState = ref.watch(chatRoomInfoViewModelProvider(chatRoom));
     final screenSize = MediaQuery.of(context).size;
     const infoWindowWidth = 350.0;
@@ -43,7 +43,7 @@ class ChatRoomInfoWindow extends ConsumerWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: themeProvider.isDarkMode
+                  colors: themeState.isDarkMode
                       ? [Colors.grey[800]!, Colors.grey[850]!]
                       : [Colors.white, Colors.grey[100]!],
                 ),
@@ -69,7 +69,7 @@ class ChatRoomInfoWindow extends ConsumerWidget {
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: themeProvider.isDarkMode
+                            colors: themeState.isDarkMode
                                 ? [Colors.blue[400]!, Colors.green[400]!]
                                 : [const Color(0xFF2196F3), const Color(0xFF00E676)],
                           ),
@@ -90,7 +90,7 @@ class ChatRoomInfoWindow extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: themeProvider.isDarkMode ? Colors.white : Colors.black87,
+                            color: themeState.isDarkMode ? Colors.white : Colors.black87,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -103,7 +103,7 @@ class ChatRoomInfoWindow extends ConsumerWidget {
                       chatRoom.description!,
                       style: TextStyle(
                         fontSize: 14,
-                        color: themeProvider.isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                        color: themeState.isDarkMode ? Colors.grey[300] : Colors.grey[700],
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -113,7 +113,7 @@ class ChatRoomInfoWindow extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: themeProvider.isDarkMode ? Colors.grey[700] : Colors.grey[200],
+                      color: themeState.isDarkMode ? Colors.grey[700] : Colors.grey[200],
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -121,7 +121,7 @@ class ChatRoomInfoWindow extends ConsumerWidget {
                         Icon(
                           Icons.location_on,
                           size: 16,
-                          color: themeProvider.isDarkMode ? Colors.blue[300] : Colors.blue[700],
+                          color: themeState.isDarkMode ? Colors.blue[300] : Colors.blue[700],
                         ),
                         const SizedBox(width: 8),
                         Expanded(
@@ -129,7 +129,7 @@ class ChatRoomInfoWindow extends ConsumerWidget {
                             address,
                             style: TextStyle(
                               fontSize: 12,
-                              color: themeProvider.isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                              color: themeState.isDarkMode ? Colors.grey[300] : Colors.grey[700],
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -147,7 +147,7 @@ class ChatRoomInfoWindow extends ConsumerWidget {
                         ref.read(chatRoomInfoViewModelProvider(chatRoom).notifier).joinChatRoom(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: themeProvider.isDarkMode
+                        backgroundColor: themeState.isDarkMode
                             ? Colors.blue[400]
                             : const Color(0xFF2196F3),
                         foregroundColor: Colors.white,
