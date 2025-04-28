@@ -121,7 +121,7 @@ class _MyInfoPageState extends ConsumerState<MyInfoPage> {
                     width: 50,
                     child: Text(
                       '완료',
-                      style: TextStyle(fontSize: 18, color: Colors.blue),
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
                 ),
