@@ -1,27 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:with_run_app/data/model/user.dart';
 
 class ChatRoom {
   final String? id;
   final String title;
   final String? description;
   final GeoPoint location;
-  final String creatorId;
+  final User?  creator;
   final DateTime createdAt;
   final List<String>? participants;
   final String? lastMessage;
   final DateTime? lastMessageTimestamp;
   final DateTime startTime; 
   final DateTime endTime; 
+  final String creatorId;
 
   ChatRoom({
     this.id,
     required this.title,
     this.description,
     required this.location,
-    required this.creatorId,
+    this.creator,
     required this.createdAt,
     required this.startTime,
     required this.endTime,
+    this.creatorId = '',
     this.participants,
     this.lastMessage,
     this.lastMessageTimestamp,
@@ -35,7 +38,7 @@ class ChatRoom {
       title: data['title'] ?? '',
       description: data['description'],
       location : data['location'],
-      creatorId: data['creatorId'] ?? '',
+      creator: data['creator'] ?? '',
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       participants: data['participants'] != null 
           ? List<String>.from(data['participants']) 
@@ -54,7 +57,7 @@ class ChatRoom {
       'title': title,
       'description': description,
       'location' : GeoPoint(location.latitude, location.longitude),
-      'creatorId': creatorId,
+      'creator': creator!.toJson(),
       'createdAt': Timestamp.fromDate(createdAt),
       'lastMessage': lastMessage,
       'lastMessageTimestamp': lastMessageTimestamp != null 

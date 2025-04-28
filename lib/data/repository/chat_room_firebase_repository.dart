@@ -1,9 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-<<<<<<< HEAD
 import 'package:with_run_app/data/model/user.dart';
-=======
->>>>>>> b0eb9b75791ccee419b7d06dfb11b6ed8e525f4c
 import 'package:with_run_app/data/repository/chat_room_repository.dart';
 import 'package:with_run_app/models/chat_room.dart';
 
