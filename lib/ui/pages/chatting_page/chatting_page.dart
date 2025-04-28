@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:with_run_app/ui/pages/chatting_page/message_provider.dart';
-import 'widgets/chat_bubble.dart';
-import 'widgets/chat_input_field.dart';
+import 'package:with_run_app/ui/pages/chatting_page/widgets/chat_bubble.dart';
+import 'package:with_run_app/ui/pages/chatting_page/widgets/chat_input_field.dart';
+import 'package:with_run_app/ui/pages/chatting_page/widgets/icon_button.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ChattingPage extends ConsumerStatefulWidget {
   final String chatRoomId;
@@ -54,15 +56,39 @@ class _ChattingPageState extends ConsumerState<ChattingPage> {
     final notifier = ref.read(messageProvider(_args).notifier);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(widget.roomName, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text(widget.location, style: const TextStyle(fontSize: 12)),
-          ],
-        ),
+    appBar: AppBar(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                widget.roomName,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                widget.location,
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
+          // 오른쪽 끝에 SVG 아이콘 3개 추가
+          Row(
+            children: [
+          Row(
+            children: [
+              iconButton('assets/icons/run_time.svg', Colors.black),
+              iconButton('assets/icons/user_list.svg', Colors.black),
+              iconButton('assets/icons/leading_icon.svg', Colors.black),
+            ],
+          ),
+            ],
+          ),
+        ],
       ),
+    ),
       body: Column(
         children: [
           Expanded(
@@ -79,7 +105,7 @@ class _ChattingPageState extends ConsumerState<ChattingPage> {
                         senderId: msg.senderId,
                         myUserId: widget.myUserId,
                         text: msg.text,
-                        time: DateFormat('a h:mm', 'ko_KR').format(msg.timestamp), // main에 수정사항 있음!
+                        time: DateFormat('a h:mm', 'ko_KR').format(msg.timestamp), // main에 수정사항 있음!~
                       );
                     },
                   ),
@@ -108,3 +134,4 @@ class _ChattingPageState extends ConsumerState<ChattingPage> {
     );
   }
 }
+
