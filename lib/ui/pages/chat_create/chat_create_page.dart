@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:time_range_picker/time_range_picker.dart';
@@ -7,6 +8,8 @@ import 'package:with_run_app/ui/pages/chat_create/chat_create_notifier.dart';
 import 'package:with_run_app/ui/pages/chat_create/date_picker_input.dart';
 import 'package:with_run_app/ui/pages/chat_create/time_range_picker_input.dart';
 import 'package:with_run_app/ui/pages/chat_create/util/chat_create_util.dart';
+import 'package:with_run_app/ui/pages/my_info/my_info_view_model.dart';
+import 'package:with_run_app/ui/pages/user_view_model.dart';
 
 class ChatCreatePage extends ConsumerStatefulWidget {
   const ChatCreatePage({super.key});
@@ -88,9 +91,10 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-
-                    notifier.create(createChatRoom());
+                  onPressed: () async {
+                    await ref.read(userViewModelProvider.notifier).getById(FirebaseAuth.instance.currentUser?.uid as String);
+                    final user = ref.read(userViewModelProvider);
+                    await notifier.create(createChatRoom(), user!);
                   },
                   child: Text('채팅방 만들기'),
                 ),

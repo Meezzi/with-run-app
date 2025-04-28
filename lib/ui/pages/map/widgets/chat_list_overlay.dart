@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:with_run_app/models/chat_room.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
-import 'package:with_run_app/ui/pages/map/viewmodels/chat_list_viewmodel.dart';
 import 'package:provider/provider.dart' as provider;
 
 class ChatListOverlay extends ConsumerWidget {
@@ -17,7 +16,6 @@ class ChatListOverlay extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeProvider = provider.Provider.of<AppThemeProvider>(context);
     final appBarHeight = AppBar().preferredSize.height + MediaQuery.of(context).padding.top;
-    final chatListState = ref.watch(chatListViewModelProvider);
 
     return Material(
       color: Colors.transparent,
@@ -54,20 +52,20 @@ class ChatListOverlay extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: chatListState.when(
-                data: (rooms) => Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildHeader(themeProvider),
-                    if (rooms.isEmpty)
-                      _buildEmptyView(themeProvider)
-                    else
-                      _buildRoomsList(context, themeProvider, rooms, ref),
-                  ],
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => Center(child: Text('오류: $error')),
-              ),
+              // child: chatListState.when(
+              //   data: (rooms) => Column(
+              //     mainAxisSize: MainAxisSize.min,
+              //     children: [
+              //       _buildHeader(themeProvider),
+              //       if (rooms.isEmpty)
+              //         _buildEmptyView(themeProvider)
+              //       else
+              //         _buildRoomsList(context, themeProvider, rooms, ref),
+              //     ],
+              //   ),
+              //   loading: () => const Center(child: CircularProgressIndicator()),
+              //   error: (error, stack) => Center(child: Text('오류: $error')),
+              // ),
             ),
           ),
         ],
@@ -226,7 +224,7 @@ class ChatListOverlay extends ConsumerWidget {
             ),
             onTap: () {
               onDismiss();
-              ref.read(chatListViewModelProvider.notifier).joinChatRoom(context, room);
+              // ref.read(chatListViewModelProvider.notifier).joinChatRoom(context, room);
             },
             dense: true,
           );
