@@ -1,25 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatRoom {
-  final String id;
+  final String? id;
   final String title;
   final String? description;
-  final double latitude;
-  final double longitude;
+  final GeoPoint location;
   final String creatorId;
   final DateTime createdAt;
   final List<String>? participants;
   final String? lastMessage;
   final DateTime? lastMessageTimestamp;
+  final DateTime startTime; 
+  final DateTime endTime; 
 
   ChatRoom({
-    required this.id,
+    this.id,
     required this.title,
     this.description,
-    required this.latitude,
-    required this.longitude,
+    required this.location,
     required this.creatorId,
     required this.createdAt,
+    required this.startTime,
+    required this.endTime,
     this.participants,
     this.lastMessage,
     this.lastMessageTimestamp,
@@ -32,8 +34,7 @@ class ChatRoom {
       id: doc.id,
       title: data['title'] ?? '',
       description: data['description'],
-      latitude: (data['latitude'] as num).toDouble(),
-      longitude: (data['longitude'] as num).toDouble(),
+      location : data['location'],
       creatorId: data['creatorId'] ?? '',
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       participants: data['participants'] != null 
@@ -43,6 +44,8 @@ class ChatRoom {
       lastMessageTimestamp: data['lastMessageTimestamp'] != null 
           ? (data['lastMessageTimestamp'] as Timestamp).toDate() 
           : null,
+      startTime: data['startTime'],
+      endTime : data['endTime'],
     );
   }
 
@@ -50,8 +53,7 @@ class ChatRoom {
     return {
       'title': title,
       'description': description,
-      'latitude': latitude,
-      'longitude': longitude,
+      'location' : GeoPoint(location.latitude, location.longitude),
       'creatorId': creatorId,
       'createdAt': Timestamp.fromDate(createdAt),
       'participants': participants ?? [],
@@ -59,6 +61,8 @@ class ChatRoom {
       'lastMessageTimestamp': lastMessageTimestamp != null 
           ? Timestamp.fromDate(lastMessageTimestamp!) 
           : null,
+      'startTime' : startTime,
+      'endTime' : endTime,
     };
   }
 }
