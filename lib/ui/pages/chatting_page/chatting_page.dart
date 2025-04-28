@@ -5,7 +5,6 @@ import 'package:with_run_app/ui/pages/chatting_page/message_provider.dart';
 import 'package:with_run_app/ui/pages/chatting_page/widgets/chat_bubble.dart';
 import 'package:with_run_app/ui/pages/chatting_page/widgets/chat_input_field.dart';
 import 'package:with_run_app/ui/pages/chatting_page/widgets/icon_button.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class ChattingPage extends ConsumerStatefulWidget {
   final String chatRoomId;
@@ -74,7 +73,6 @@ class _ChattingPageState extends ConsumerState<ChattingPage> {
               ),
             ],
           ),
-          // 오른쪽 끝에 SVG 아이콘 3개 추가
           Row(
             children: [
           Row(

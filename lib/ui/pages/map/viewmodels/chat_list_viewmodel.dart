@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:with_run_app/models/chat_room.dart';
 import 'package:with_run_app/services/chat_service.dart';
-import 'package:with_run_app/ui/pages/chat/chat_room_page.dart';
+import 'package:with_run_app/ui/pages/chatting_page/chatting_page.dart';
 import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
 
 class ChatListViewModel extends StateNotifier<AsyncValue<List<ChatRoom>>> {
@@ -37,20 +37,20 @@ class ChatListViewModel extends StateNotifier<AsyncValue<List<ChatRoom>>> {
       return;
     }
 
-    try {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatRoomPage(
-            chatRoom: chatRoom,
-            onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id),
-          ),
-        ),
-      );
-    } catch (e) {
-      debugPrint('채팅방 참여 오류: $e');
-      _showSnackBar(context, '오류 발생: $e', isError: true);
-    }
+    // try {
+    //   Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //       builder: (context) => ChatRoomPage(
+    //         chatRoom: chatRoom,
+    //         onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id),
+    //       ),
+    //     ),
+    //   );
+    // } catch (e) {
+    //   debugPrint('채팅방 참여 오류: $e');
+    //   _showSnackBar(context, '오류 발생: $e', isError: true);
+    // }
   }
 
   void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
