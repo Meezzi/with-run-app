@@ -55,13 +55,13 @@ class MyApp extends ConsumerWidget {
     return provider.Consumer<AppThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
-          theme: themeProvider.lightTheme.copyWith(
-            highlightColor: const Color(0xff2196F3),
-          ),
-          darkTheme: themeProvider.darkTheme.copyWith(
-            highlightColor: const Color(0xff2196F3),
-          ),
-          themeMode: themeProvider.themeMode,
+          // theme: themeProvider.lightTheme.copyWith(
+          //   highlightColor: const Color(0xff2196F3),
+          // ),
+          // darkTheme: themeProvider.darkTheme.copyWith(
+          //   highlightColor: const Color(0xff2196F3),
+          // ),
+          // themeMode: themeProvider.themeMode,
           home:
               FirebaseAuth.instance.currentUser != null
                   ? MapPage()

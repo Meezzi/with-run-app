@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:with_run_app/ui/pages/map/map_page.dart';
 import 'package:with_run_app/ui/pages/my_info/my_info_view_model.dart';
 import 'package:with_run_app/ui/pages/my_info/widgets/nickname_field.dart';
-import 'package:with_run_app/ui/pages/my_info/widgets/ProfileImagePicker.dart';
+import 'package:with_run_app/ui/pages/my_info/widgets/profile_image_picker.dart';
 import 'package:with_run_app/ui/pages/user_view_model.dart';
 
 class MyInfoPage extends ConsumerStatefulWidget {
