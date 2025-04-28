@@ -64,4 +64,7 @@ class RunningViewModel extends StateNotifier<RunningState> {
           errorMessage: '',
         ),
       );
+
+  // 현재 걸음 수
+  int get currentSteps => _currentSteps;
 }
