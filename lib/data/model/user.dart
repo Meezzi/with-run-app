@@ -5,6 +5,14 @@ class User {
 
   User({this.uid, this.nickname, this.profileImageUrl});
 
+  User copyWith({String? uid, String? nickname, String? profileImageUrl}) {
+    return User(
+      uid: uid ?? this.uid,
+      nickname: nickname ?? this.nickname,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+    );
+  }
+
   // 1. fromJson 네임드 생성자
   User.fromJson(Map<String, dynamic> map)
     : this(
