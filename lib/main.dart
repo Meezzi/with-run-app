@@ -11,6 +11,7 @@ import 'package:with_run_app/firebase_options.dart';
 import 'package:with_run_app/ui/pages/login/login_page.dart';
 import 'package:with_run_app/ui/pages/map/map_page.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
+import 'package:with_run_app/ui/pages/running/running_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,7 +54,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: FirebaseAuth.instance.currentUser != null ? MapPage() : LoginPage(),
+      home: RunningPage(chatRoomId: 'minzi_test', userId: 'EeNQRimOTeP9rOkCh2SyjCvBAKb2', isCreator: true)
+      // FirebaseAuth.instance.currentUser != null ? MapPage() : LoginPage(),
     );
   }
 }
