@@ -84,6 +84,8 @@ class MapViewModel extends StateNotifier<bool> {
   }
 
   void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
+    if (!context.mounted) return;
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -94,6 +96,68 @@ class MapViewModel extends StateNotifier<bool> {
         elevation: 4,
       ),
     );
+  }
+
+  Future<void> moveToCurrentLocation(BuildContext context) async {
+    final locationState = _ref.read(locationProvider);
+    
+    // 위치 정보가 없으면 새로고침
+    if (locationState.currentPosition == null) {
+      _showSnackBar(context, "위치 정보를 가져오는 중입니다...");
+      await _ref.read(locationProvider.notifier).refreshLocation();
+      
+      // 위치 정보를 다시 확인
+      final updatedLocationState = _ref.read(locationProvider);
+      if (!context.mounted) return;
+      
+      if (updatedLocationState.currentPosition == null) {
+        if (updatedLocationState.error != null) {
+          _showSnackBar(context, updatedLocationState.error!, isError: true);
+        } else {
+          _showSnackBar(context, "위치 정보를 가져올 수 없습니다.", isError: true);
+        }
+        return;
+      }
+    }
+    
+    // 실제 지도 이동 로직
+    try {
+      final mapState = _ref.read(mapProvider);
+      if (!mapState.mapController.isCompleted) {
+        if (context.mounted) {
+          _showSnackBar(context, "지도가 초기화되지 않았습니다.", isError: true);
+        }
+        return;
+      }
+      
+      final controller = await mapState.mapController.future;
+      if (!context.mounted) return;
+      
+      final position = locationState.currentPosition!;
+      
+      await controller.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(
+              position.latitude,
+              position.longitude,
+            ),
+            zoom: 15.0,
+          ),
+        ),
+      );
+      
+      debugPrint("카메라가 현재 위치(${position.latitude}, ${position.longitude})로 이동했습니다");
+      
+      if (context.mounted) {
+        _showSnackBar(context, "현재 위치로 이동했습니다");
+      }
+    } catch (e) {
+      debugPrint("카메라 이동 실패: $e");
+      if (context.mounted) {
+        _showSnackBar(context, "위치로 이동하는데 실패했습니다", isError: true);
+      }
+    }
   }
 
   Future<void> startChatRoomCreationMode(BuildContext context) async {
@@ -166,18 +230,6 @@ class MapViewModel extends StateNotifier<bool> {
         ),
       ),
     );
-  }
-
-  Future<void> moveToCurrentLocation(BuildContext context) async {
-    final locationState = _ref.read(locationProvider);
-    if (locationState.currentPosition != null) {
-      _ref.read(mapProvider.notifier).moveToCurrentLocation();
-    } else if (locationState.error != null) {
-      _showSnackBar(context, locationState.error!, isError: true);
-    } else {
-      _showSnackBar(context, "위치 정보를 가져오는 중입니다...");
-      await _ref.read(locationProvider.notifier).refreshLocation();
-    }
   }
 
   @override

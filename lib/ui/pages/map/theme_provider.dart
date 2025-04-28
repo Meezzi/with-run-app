@@ -1,58 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AppThemeProvider with ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.light;
+// 테마 상태 클래스
+class AppThemeState {
+  final ThemeMode themeMode;
 
-  ThemeMode get themeMode => _themeMode;
+  AppThemeState({this.themeMode = ThemeMode.light});
 
-  bool get isDarkMode => _themeMode == ThemeMode.dark;
+  bool get isDarkMode => themeMode == ThemeMode.dark;
 
-  void toggleTheme() {
-    _themeMode = isDarkMode ? ThemeMode.light : ThemeMode.dark;
-    notifyListeners();
+  AppThemeState copyWith({ThemeMode? themeMode}) {
+    return AppThemeState(
+      themeMode: themeMode ?? this.themeMode,
+    );
   }
-
-  ThemeData get lightTheme => ThemeData(
-        brightness: Brightness.light,
-        primarySwatch: Colors.blue,
-        highlightColor: Colors.blueAccent,
-        scaffoldBackgroundColor: Colors.white,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor: Colors.blue,
-          ),
-        ),
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Colors.black),
-          bodyMedium: TextStyle(color: Colors.black87),
-        ),
-      );
-
-  ThemeData get darkTheme => ThemeData(
-        brightness: Brightness.dark,
-        primarySwatch: Colors.blueGrey,
-        highlightColor: Colors.blueGrey,
-        scaffoldBackgroundColor: Colors.grey[900],
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.blueGrey,
-          foregroundColor: Colors.white,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor: Colors.blueGrey,
-          ),
-        ),
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Colors.white),
-          bodyMedium: TextStyle(color: Colors.white70),
-        ),
-      );
 
   // iOS 스타일 Light 모드 맵 스타일
   String get lightMapStyle => '''
@@ -252,4 +213,62 @@ class AppThemeProvider with ChangeNotifier {
     }
   ]
   ''';
+
+  ThemeData get lightTheme => ThemeData(
+        brightness: Brightness.light,
+        primarySwatch: Colors.blue,
+        highlightColor: Colors.blueAccent,
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: Colors.blue,
+          ),
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.black),
+          bodyMedium: TextStyle(color: Colors.black87),
+        ),
+      );
+
+  ThemeData get darkTheme => ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: Colors.blueGrey,
+        highlightColor: Colors.blueGrey,
+        scaffoldBackgroundColor: Colors.grey[900],
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.blueGrey,
+          foregroundColor: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: Colors.blueGrey,
+          ),
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white70),
+        ),
+      );
 }
+
+// 테마 상태 관리 NotifierProvider
+class AppThemeNotifier extends StateNotifier<AppThemeState> {
+  AppThemeNotifier() : super(AppThemeState());
+
+  void toggleTheme() {
+    state = state.copyWith(
+      themeMode: state.isDarkMode ? ThemeMode.light : ThemeMode.dark,
+    );
+  }
+}
+
+// 테마 프로바이더
+final appThemeProvider = StateNotifierProvider<AppThemeNotifier, AppThemeState>((ref) {
+  return AppThemeNotifier();
+});

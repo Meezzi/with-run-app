@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:provider/provider.dart' as provider;
 import 'package:with_run_app/firebase_options.dart';
 import 'package:with_run_app/ui/pages/login/login_page.dart';
 import 'package:with_run_app/ui/pages/map/map_page.dart';
@@ -39,21 +38,23 @@ void main() async {
 
   runApp(
     ProviderScope(
-      child: provider.ChangeNotifierProvider(
-        create: (context) => AppThemeProvider(),
-        child: const MyApp(),
-      ),
+      child: const MyApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeState = ref.watch(appThemeProvider);
+    
     return MaterialApp(
-      home: FirebaseAuth.instance.currentUser != null ? MapPage() : LoginPage(),
+      theme: themeState.lightTheme,
+      darkTheme: themeState.darkTheme,
+      themeMode: themeState.themeMode,
+      home: FirebaseAuth.instance.currentUser != null ? const MapPage() : LoginPage(),
     );
   }
 }
