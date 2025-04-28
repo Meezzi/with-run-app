@@ -1,8 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:with_run_app/core/google_sign_in_helper.dart';
-import 'package:with_run_app/ui/pages/map/map_page.dart';
 import 'package:with_run_app/ui/pages/my_info/my_info_page.dart';
 
 class LoginPage extends StatelessWidget {
@@ -34,16 +32,13 @@ class LoginPage extends StatelessWidget {
                     if (credential != null &&
                         (credential.user?.emailVerified ?? false)) {
                       if (context.mounted) {
-                        Navigator.pushAndRemoveUntil(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (context) {
                               return MyInfoPage(uid: credential.user!.uid);
                             },
                           ),
-                          (route) {
-                            return route.isCurrent;
-                          },
                         );
                       }
                     } else {
