@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-/// 말풍선 
 class ChatBubble extends StatelessWidget {
   final String senderId;
   final String myUserId;
   final String text;
   final String time;
+  final String nickname;
+  final String profileImageUrl;
 
   const ChatBubble({
     super.key,
@@ -13,6 +14,8 @@ class ChatBubble extends StatelessWidget {
     required this.myUserId,
     required this.text,
     required this.time,
+    required this.nickname,
+    required this.profileImageUrl,
   });
 
   @override
@@ -28,7 +31,9 @@ class ChatBubble extends StatelessWidget {
           if (!isMyMessage) ...[
             CircleAvatar(
               radius: 16,
-              backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+              backgroundImage: NetworkImage(profileImageUrl.isNotEmpty
+                  ? profileImageUrl
+                  : 'https://via.placeholder.com/150'),
             ),
             const SizedBox(width: 8),
           ],
@@ -42,7 +47,7 @@ class ChatBubble extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text(
-                      senderId,
+                      nickname,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -69,7 +74,9 @@ class ChatBubble extends StatelessWidget {
             const SizedBox(width: 8),
             CircleAvatar(
               radius: 16,
-              backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+              backgroundImage: NetworkImage(profileImageUrl.isNotEmpty
+                  ? profileImageUrl
+                  : 'https://via.placeholder.com/150'),
             ),
           ],
         ],
