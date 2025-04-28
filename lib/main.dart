@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:with_run_app/firebase_options.dart';
 import 'package:with_run_app/ui/pages/login/login_page.dart';
+import 'package:with_run_app/ui/pages/map/map_page.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
 
 void main() async {
@@ -14,7 +16,7 @@ void main() async {
 
   // 환경변수 로드
   await dotenv.load(fileName: ".env");
-  
+
   // iOS에서 GoogleMaps 초기화
   if (Platform.isIOS) {
     final String? apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
@@ -49,6 +51,7 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    print('✅firebaseAuth - ${FirebaseAuth.instance.currentUser}');
     return provider.Consumer<AppThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
@@ -59,7 +62,10 @@ class MyApp extends ConsumerWidget {
             highlightColor: const Color(0xff2196F3),
           ),
           themeMode: themeProvider.themeMode,
-          home:  LoginPage(),
+          home:
+              FirebaseAuth.instance.currentUser != null
+                  ? MapPage()
+                  : LoginPage(),
         );
       },
     );
