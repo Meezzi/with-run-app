@@ -14,11 +14,13 @@ enum ChatRoomCreateState {
 }
 
 class ChatCreateNotifier extends AutoDisposeNotifier<ChatRoomCreateState>{
-  void create(ChatRoomModel chatRoom, User creator){
+  Future<String> create(ChatRoomModel chatRoom, User creator) async{
     state = ChatRoomCreateState.submitted;
     final repository = ref.read(repositoryProvider);
-    repository.create(chatRoom, creator);
+    final result = await repository.create(chatRoom, creator);
     state = ChatRoomCreateState.done;
+    print(result);
+    return result;
   }
   @override
   ChatRoomCreateState build() {
