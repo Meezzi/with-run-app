@@ -19,7 +19,7 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
   Future<void> _getAddress() async {
     state = const AsyncValue.loading();
     try {
-      final address = await _getAddressFromLatLng(chatRoom.latitude, chatRoom.longitude);
+      final address = await _getAddressFromLatLng(chatRoom.location.latitude, chatRoom.location.longitude);
       state = AsyncValue.data(address);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
@@ -49,21 +49,6 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
 
     // 사용자가 채팅방 생성자인 경우는 참여 가능
     if (chatRoom.creatorId == userId) {
-      // try {
-      //   Navigator.push(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => ChatRoomPage(
-      //         chatRoom: chatRoom,
-      //         onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id),
-      //       ),
-      //     ),
-      //   );
-      // } catch (e) {
-      //   debugPrint('채팅방 참여 오류: $e'); // 전역 함수로 호출
-      //   _showSnackBar(context, '오류 발생: $e', isError: true);
-      // }
-      return;
     }
 
     // 채팅방 참여 제한 확인

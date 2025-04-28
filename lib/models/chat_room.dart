@@ -56,7 +56,6 @@ class ChatRoom {
       'location' : GeoPoint(location.latitude, location.longitude),
       'creatorId': creatorId,
       'createdAt': Timestamp.fromDate(createdAt),
-      'participants': participants ?? [],
       'lastMessage': lastMessage,
       'lastMessageTimestamp': lastMessageTimestamp != null 
           ? Timestamp.fromDate(lastMessageTimestamp!) 

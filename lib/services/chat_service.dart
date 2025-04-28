@@ -24,7 +24,7 @@ class ChatService {
         // 거리 계산 (지구의 곡률을 고려한 간단한 근사)
         double distance = _calculateDistance(
           latitude, longitude, 
-          chatRoom.latitude, chatRoom.longitude,
+          chatRoom.location.latitude, chatRoom.location.longitude,
         );
         
         // 주어진 반경 내에 있는 채팅방만 추가
@@ -100,11 +100,12 @@ class ChatService {
         id: newChatRoomRef.id,
         title: title,
         description: description,
-        latitude: latitude,
-        longitude: longitude,
+        location: GeoPoint(latitude, longitude),
         creatorId: user.uid,
         createdAt: DateTime.now(),
         participants: [user.uid], // 생성자를 참여자로 자동 추가
+        startTime: DateTime.now(),
+        endTime: DateTime.now(),
       );
 
       await newChatRoomRef.set(chatRoom.toMap());

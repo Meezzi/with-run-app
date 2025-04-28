@@ -128,7 +128,7 @@ class MapNotifier extends StateNotifier<MapState> {
         currentMarkers.add(
           Marker(
             markerId: MarkerId('chatRoom_${room.id}'),
-            position: LatLng(room.latitude, room.longitude),
+            position: LatLng(room.location.latitude, room.location.longitude),
             icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
             onTap: () {
               onChatRoomMarkerTap(room);

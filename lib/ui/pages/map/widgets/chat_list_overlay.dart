@@ -16,7 +16,6 @@ class ChatListOverlay extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(appThemeProvider);
     final appBarHeight = AppBar().preferredSize.height + MediaQuery.of(context).padding.top;
-    final chatListState = ref.watch(chatListViewModelProvider);
 
     return Material(
       color: Colors.transparent,
@@ -53,20 +52,20 @@ class ChatListOverlay extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: chatListState.when(
-                data: (rooms) => Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildHeader(themeState),
-                    if (rooms.isEmpty)
-                      _buildEmptyView(themeState)
-                    else
-                      _buildRoomsList(context, themeState, rooms, ref),
-                  ],
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => Center(child: Text('오류: $error')),
-              ),
+              // child: chatListState.when(
+              //   data: (rooms) => Column(
+              //     mainAxisSize: MainAxisSize.min,
+              //     children: [
+              //       _buildHeader(themeState),
+              //       if (rooms.isEmpty)
+              //         _buildEmptyView(themeState)
+              //       else
+              //         _buildRoomsList(context, themeState, rooms, ref),
+              //     ],
+              //   ),
+              //   loading: () => const Center(child: CircularProgressIndicator()),
+              //   error: (error, stack) => Center(child: Text('오류: $error')),
+              // ),
             ),
           ),
         ],
@@ -225,7 +224,7 @@ class ChatListOverlay extends ConsumerWidget {
             ),
             onTap: () {
               onDismiss();
-              ref.read(chatListViewModelProvider.notifier).joinChatRoom(context, room);
+              // ref.read(chatListViewModelProvider.notifier).joinChatRoom(context, room);
             },
             dense: true,
           );
