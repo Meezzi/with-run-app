@@ -169,3 +169,9 @@ class RunningViewModel extends StateNotifier<RunningState> {
     state = state.copyWith(errorMessage: e.toString());
   }
 }
+
+// RunningViewModel에서 chatRoomIdProvider 사용
+final runningViewModelProvider =
+    StateNotifierProvider.family<RunningViewModel, RunningState, String>(
+      (ref, chatRoomId) => RunningViewModel(chatRoomId: chatRoomId),
+    );
