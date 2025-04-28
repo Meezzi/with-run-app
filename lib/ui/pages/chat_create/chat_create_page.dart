@@ -9,6 +9,7 @@ import 'package:with_run_app/ui/pages/chat_create/chat_create_notifier.dart';
 import 'package:with_run_app/ui/pages/chat_create/date_picker_input.dart';
 import 'package:with_run_app/ui/pages/chat_create/time_range_picker_input.dart';
 import 'package:with_run_app/ui/pages/chat_create/util/chat_create_util.dart';
+import 'package:with_run_app/ui/pages/user_view_model.dart';
 
 class ChatCreatePage extends ConsumerStatefulWidget {
   const ChatCreatePage({super.key});
@@ -90,10 +91,10 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     await ref.read(userViewModelProvider.notifier).getById(FirebaseAuth.instance.currentUser?.uid as String);
-                    User? user = ref.read(userViewModelProvider);
-                    notifier.create(createChatRoom());
+                    final user = await ref.read(userViewModelProvider);
+                    notifier.create(getChatRoom(user!), user);
                   },
                   child: Text('채팅방 만들기'),
                 ),
@@ -136,12 +137,12 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
     );
   }
 
-  ChatRoomModel createChatRoom() {
+  ChatRoomModel getChatRoom(User user) {
     return ChatRoomModel(
       title: titleController.text,
       description: descriptionController.text,
       location: GeoPoint(37.355149, 126.922238),
-      creatorId: '',
+      creator: user,
       createdAt: DateTime.now(),
       startTime: makeDateTimeWithTime(date!, timeRange!.startTime),
       endTime: makeDateTimeWithTime(date!, timeRange!.endTime),

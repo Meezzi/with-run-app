@@ -14,7 +14,6 @@ class ChatRoomModel {
   final DateTime? lastMessageTimestamp;
   final DateTime startTime; 
   final DateTime endTime; 
-  final String creatorId;
 
   ChatRoomModel({
     this.id,
@@ -25,7 +24,6 @@ class ChatRoomModel {
     required this.createdAt,
     required this.startTime,
     required this.endTime,
-    this.creatorId = '',
     this.participants,
     this.lastMessage,
     this.lastMessageTimestamp,
@@ -58,7 +56,7 @@ class ChatRoomModel {
       'title': title,
       'description': description,
       'location' : GeoPoint(location.latitude, location.longitude),
-      'creator': null,//creator!.toJson(),
+      'creator': creator!.toJson(),
       'createdAt': Timestamp.fromDate(createdAt),
       'lastMessage': lastMessage,
       'lastMessageTimestamp': lastMessageTimestamp != null 
