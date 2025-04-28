@@ -43,7 +43,7 @@ class ChatListViewModel extends StateNotifier<AsyncValue<List<ChatRoom>>> {
         MaterialPageRoute(
           builder: (context) => ChatRoomPage(
             chatRoom: chatRoom,
-            onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id),
+            onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id!),
           ),
         ),
       );

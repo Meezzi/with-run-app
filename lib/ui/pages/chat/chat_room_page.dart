@@ -89,7 +89,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   Widget _buildMessageList(AppThemeProvider themeProvider) {
     final currentUserId = _auth.currentUser?.uid;
     return StreamBuilder<List<Message>>(
-      stream: _chatService.getMessages(widget.chatRoom.id),
+      stream: _chatService.getMessages(widget.chatRoom.id!),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -288,7 +288,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   void _sendMessage() {
     if (_messageController.text.trim().isNotEmpty) {
       _chatService.sendMessage(
-        widget.chatRoom.id,
+        widget.chatRoom.id!,
         _messageController.text.trim(),
       );
       setState(() {
@@ -412,7 +412,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   Future<void> _deleteChatRoom() async {
     try {
       final chatService = ChatService();
-      final success = await chatService.deleteChatRoom(widget.chatRoom.id);
+      final success = await chatService.deleteChatRoom(widget.chatRoom.id!);
       
       if (success) {
         // 채팅방 삭제 성공 시 콜백 호출
@@ -450,7 +450,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       if (userId == null) return;
       
       final chatService = ChatService();
-      final success = await chatService.leaveChatRoom(widget.chatRoom.id, userId);
+      final success = await chatService.leaveChatRoom(widget.chatRoom.id!, userId);
       
       if (success) {
         if (mounted) {

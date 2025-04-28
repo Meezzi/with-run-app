@@ -20,7 +20,7 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
   Future<void> _getAddress() async {
     state = const AsyncValue.loading();
     try {
-      final address = await _getAddressFromLatLng(chatRoom.latitude, chatRoom.longitude);
+      final address = await _getAddressFromLatLng(chatRoom.location.latitude, chatRoom.location.longitude);
       state = AsyncValue.data(address);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
@@ -56,7 +56,7 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
           MaterialPageRoute(
             builder: (context) => ChatRoomPage(
               chatRoom: chatRoom,
-              onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id),
+              onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id!),
             ),
           ),
         );
@@ -77,7 +77,7 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
     }
 
     try {
-      final result = await _chatService.joinChatRoom(chatRoom.id);
+      final result = await _chatService.joinChatRoom(chatRoom.id!);
       if (!context.mounted) return;
       if (result) {
         Navigator.push(
@@ -85,7 +85,7 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
           MaterialPageRoute(
             builder: (context) => ChatRoomPage(
               chatRoom: chatRoom,
-              onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id),
+              onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id!),
             ),
           ),
         );
