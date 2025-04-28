@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
 import 'package:with_run_app/ui/pages/map/viewmodels/create_chat_room_button_viewmodel.dart';
-import 'package:provider/provider.dart' as provider;
 
 class CreateChatRoomButton extends ConsumerStatefulWidget {
   final VoidCallback onCreateButtonTap;
@@ -33,7 +32,7 @@ class _CreateChatRoomButtonState extends ConsumerState<CreateChatRoomButton> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = provider.Provider.of<AppThemeProvider>(context);
+    final themeState = ref.watch(appThemeProvider);
 
     return Center(
       child: Container(
@@ -43,7 +42,7 @@ class _CreateChatRoomButtonState extends ConsumerState<CreateChatRoomButton> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: themeProvider.isDarkMode
+            colors: themeState.isDarkMode
                 ? [Colors.blue[400]!, Colors.green[400]!]
                 : [const Color(0xFF2196F3), const Color(0xFF00E676)],
           ),
@@ -70,13 +69,13 @@ class _CreateChatRoomButtonState extends ConsumerState<CreateChatRoomButton> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CircleAvatar(
-                  backgroundColor: themeProvider.isDarkMode
+                  backgroundColor: themeState.isDarkMode
                       ? const Color.fromARGB(255, 255, 255, 255)
                       : Colors.white,
                   radius: 14,
                   child: Icon(
                     Icons.add_comment_outlined,
-                    color: themeProvider.isDarkMode
+                    color: themeState.isDarkMode
                         ? Colors.blue[600]
                         : const Color(0xFF2196F3),
                     size: 16,
@@ -86,7 +85,7 @@ class _CreateChatRoomButtonState extends ConsumerState<CreateChatRoomButton> {
                 Text(
                   '새 채팅방 만들기',
                   style: TextStyle(
-                    color: themeProvider.isDarkMode ? Colors.white : Colors.white,
+                    color: themeState.isDarkMode ? Colors.white : Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
