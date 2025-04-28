@@ -25,4 +25,18 @@ class UserRepository {
       return false;
     }
   }
+
+  Future<User?> getById(String uid) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final collectionRef = firestore.collection('users');
+      final documentRef = collectionRef.doc(uid);
+      final doc = await documentRef.get();
+
+      return User.fromJson({...doc.data()!});
+    } catch (e) {
+      print('UserRepository.getById catch문 - $e');
+      return null;
+    }
+  }
 }
