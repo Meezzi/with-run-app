@@ -67,4 +67,7 @@ class RunningViewModel extends StateNotifier<RunningState> {
 
   // 현재 걸음 수
   int get currentSteps => _currentSteps;
+
+  // 현재 이동 거리 (1걸음 = 0.7m로 가정)
+  double get currentDistance => _currentSteps * 0.7;
 }
