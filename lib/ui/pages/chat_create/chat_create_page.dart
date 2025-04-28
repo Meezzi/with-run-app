@@ -1,13 +1,40 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:time_range_picker/time_range_picker.dart';
+import 'package:with_run_app/models/chat_room.dart';
+import 'package:with_run_app/ui/pages/chat_create/chat_create_notifier.dart';
 import 'package:with_run_app/ui/pages/chat_create/date_picker_input.dart';
-import 'package:with_run_app/ui/pages/chat_create/time_picker_input.dart';
 import 'package:with_run_app/ui/pages/chat_create/time_range_picker_input.dart';
+import 'package:with_run_app/ui/pages/chat_create/util/chat_create_util.dart';
 
-class ChatCreatePage extends StatelessWidget {
+class ChatCreatePage extends ConsumerStatefulWidget {
   const ChatCreatePage({super.key});
 
   @override
+  ConsumerState<ChatCreatePage> createState() => _ChatCreatePage();
+}
+
+class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
+  final titleController = TextEditingController();
+  final locationController = TextEditingController();
+  final descriptionController = TextEditingController();
+  TimeRange? timeRange;
+  DateTime? date;
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    locationController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final notifier = ref.watch(chatCreateNotifier.notifier);
+    
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(centerTitle: true, title: Text('채팅방 만들기')),
@@ -24,11 +51,35 @@ class ChatCreatePage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        inputElement(name: '장소', readOnly: true),
-                        inputElement(name: '채팅방 이름', isRequired: true),
-                        inputElement(name: '날짜', isRequired: true, customInput: DatePickerInput()),
-                        inputElement(name: '시간', isRequired: true, customInput: TimeRangePickerInput()),
-                        inputElement(name: '설명', maxLines: 5),
+                        inputElement(
+                          name: '장소',
+                          readOnly: true,
+                          controller: locationController,
+                        ),
+                        inputElement(
+                          name: '채팅방 이름',
+                          isRequired: true,
+                          controller: titleController,
+                        ),
+                        inputElement(
+                          name: '날짜',
+                          isRequired: true,
+                          customInput: DatePickerInput(onDateChanged: (date) {
+                            this.date = date;
+                          },),
+                        ),
+                        inputElement(
+                          name: '시간',
+                          isRequired: true,
+                          customInput: TimeRangePickerInput(onRangeChanged: (timeRange) {
+                            this.timeRange = timeRange;
+                          },),
+                        ),
+                        inputElement(
+                          name: '설명',
+                          maxLines: 5,
+                          controller: descriptionController,
+                        ),
                       ],
                     ),
                   ),
@@ -37,10 +88,13 @@ class ChatCreatePage extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {}, 
+                  onPressed: () {
+
+                    notifier.create(createChatRoom());
+                  },
                   child: Text('채팅방 만들기'),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -48,30 +102,50 @@ class ChatCreatePage extends StatelessWidget {
     );
   }
 
-  Widget inputElement({required String name, bool isRequired = false, int maxLines = 1, bool readOnly = false, Widget? customInput = null}) {
+  Widget inputElement({
+    required String name,
+    bool isRequired = false,
+    int maxLines = 1,
+    bool readOnly = false,
+    Widget? customInput,
+    TextEditingController? controller,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(requiredInput(name, isRequired), ),
+          Text(requiredInput(name, isRequired)),
           SizedBox(height: 8),
-          customInput ?? TextFormField(
-            readOnly: readOnly,
-            maxLines: maxLines,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+          customInput ??
+              TextFormField(
+                controller: controller,
+                readOnly: readOnly,
+                maxLines: maxLines,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               ),
-            ),
-          ),
         ],
       ),
     );
   }
 
-  
-  String requiredInput(String name, bool isRequired){
+  ChatRoom createChatRoom() {
+    return ChatRoom(
+      title: titleController.text,
+      description: descriptionController.text,
+      location: GeoPoint(37.355149, 126.922238),
+      creatorId: '',
+      createdAt: DateTime.now(),
+      startTime: makeDateTimeWithTime(date!, timeRange!.startTime),
+      endTime: makeDateTimeWithTime(date!, timeRange!.endTime),
+    );
+  }
+
+  String requiredInput(String name, bool isRequired) {
     return isRequired ? '* $name' : name;
   }
 }

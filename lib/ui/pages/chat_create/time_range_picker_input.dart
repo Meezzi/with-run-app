@@ -1,10 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:time_range_picker/time_range_picker.dart';
 
 class TimeRangePickerInput extends StatefulWidget {
-  const TimeRangePickerInput({super.key});
+  const TimeRangePickerInput({super.key, required this.onRangeChanged});
+
+  final void Function(TimeRange timeRange) onRangeChanged;
 
   @override
   State<TimeRangePickerInput> createState() => _TimeRangePickerInputState();
@@ -16,11 +17,12 @@ class _TimeRangePickerInputState extends State<TimeRangePickerInput> {
     DateTime.now().add(const Duration(hours: 3)),
   );
 
-  void onRangeChanged(TimeRange result){
+  void onRangeChanged(TimeRange? result){
     setState(() {
-      _startTime = result.startTime;
+      _startTime = result!.startTime;
       _endTime = result.endTime;
     });
+    widget.onRangeChanged(result!);
   }
 
   Widget build(BuildContext context) {
@@ -71,7 +73,7 @@ class _TimeRangePickerInputState extends State<TimeRangePickerInput> {
               // ),
               clockRotation: 180.0,
             );
-        
+            onRangeChanged(result);
             if (kDebugMode) {
               print("result $result");
             }
