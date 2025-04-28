@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:with_run_app/models/chat_room.dart';
-import 'package:with_run_app/services/chat_service.dart';
-import 'package:with_run_app/ui/pages/chat/chat_room_page.dart';
-import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:with_run_app/ui/pages/map/viewmodels/chat_list_viewmodel.dart';
 import 'package:provider/provider.dart' as provider;
 
 class ChatListOverlay extends ConsumerWidget {
-  final Function(String, {bool isError}) onShowSnackBar;
   final VoidCallback onDismiss;
 
   const ChatListOverlay({
     super.key,
-    required this.onShowSnackBar,
     required this.onDismiss,
   });
 
@@ -22,70 +17,61 @@ class ChatListOverlay extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeProvider = provider.Provider.of<AppThemeProvider>(context);
     final appBarHeight = AppBar().preferredSize.height + MediaQuery.of(context).padding.top;
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    final chatService = ChatService();
+    final chatListState = ref.watch(chatListViewModelProvider);
 
-    return FutureBuilder<List<ChatRoom>>(
-      future: userId != null ? chatService.getJoinedChatRooms(userId) : Future.value([]),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final rooms = snapshot.data ?? [];
-        
-        return Material(
-          color: Colors.transparent,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: onDismiss,
-                  child: Container(color: const Color(0x80000000)),
-                ),
-              ),
-              Positioned(
-                top: appBarHeight,
-                right: 16,
-                width: 250,
-                child: Container(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.6,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors:
-                          themeProvider.isDarkMode
-                              ? [Colors.grey[800]!, Colors.grey[850]!]
-                              : [Colors.white, Colors.grey[100]!],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(51),
-                        blurRadius: 10,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildHeader(themeProvider),
-                      if (rooms.isEmpty)
-                        _buildEmptyView(themeProvider)
-                      else
-                        _buildRoomsList(context, themeProvider, rooms, ref),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+    return Material(
+      color: Colors.transparent,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: onDismiss,
+              child: Container(color: const Color(0x80000000)),
+            ),
           ),
-        );
-      },
+          Positioned(
+            top: appBarHeight,
+            right: 16,
+            width: 250,
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6,
+              ),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: themeProvider.isDarkMode
+                      ? [Colors.grey[800]!, Colors.grey[850]!]
+                      : [Colors.white, Colors.grey[100]!],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(51),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: chatListState.when(
+                data: (rooms) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildHeader(themeProvider),
+                    if (rooms.isEmpty)
+                      _buildEmptyView(themeProvider)
+                    else
+                      _buildRoomsList(context, themeProvider, rooms, ref),
+                  ],
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(child: Text('오류: $error')),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -96,10 +82,9 @@ class ChatListOverlay extends ConsumerWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors:
-              themeProvider.isDarkMode
-                  ? [Colors.blue[400]!, Colors.green[400]!]
-                  : [const Color(0xFF2196F3), const Color(0xFF00E676)],
+          colors: themeProvider.isDarkMode
+              ? [Colors.blue[400]!, Colors.green[400]!]
+              : [const Color(0xFF2196F3), const Color(0xFF00E676)],
         ),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -172,10 +157,10 @@ class ChatListOverlay extends ConsumerWidget {
   }
 
   Widget _buildRoomsList(
-    BuildContext context, 
-    AppThemeProvider themeProvider, 
+    BuildContext context,
+    AppThemeProvider themeProvider,
     List<ChatRoom> rooms,
-    WidgetRef ref
+    WidgetRef ref,
   ) {
     return Flexible(
       child: ListView.separated(
@@ -186,9 +171,7 @@ class ChatListOverlay extends ConsumerWidget {
           height: 1,
           indent: 16,
           endIndent: 16,
-          color: themeProvider.isDarkMode
-              ? Colors.grey[700]
-              : Colors.grey[300],
+          color: themeProvider.isDarkMode ? Colors.grey[700] : Colors.grey[300],
         ),
         itemBuilder: (context, index) {
           final room = rooms[index];
@@ -208,7 +191,6 @@ class ChatListOverlay extends ConsumerWidget {
               ),
               child: const Center(
                 child: Icon(
-                 // chat_list_overlay.dart (계속)
                   Icons.chat_bubble_outline_rounded,
                   size: 22,
                   color: Colors.white,
@@ -244,7 +226,7 @@ class ChatListOverlay extends ConsumerWidget {
             ),
             onTap: () {
               onDismiss();
-              _joinChatRoom(context, room, ref);
+              ref.read(chatListViewModelProvider.notifier).joinChatRoom(context, room);
             },
             dense: true,
           );
@@ -252,29 +234,4 @@ class ChatListOverlay extends ConsumerWidget {
       ),
     );
   }
-
-  Future<void> _joinChatRoom(BuildContext context, ChatRoom chatRoom, WidgetRef ref) async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) {
-      onShowSnackBar('로그인이 필요합니다.', isError: true);
-      return;
-    }
-
-    try {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatRoomPage(
-            chatRoom: chatRoom,
-            onRoomDeleted: () => ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id),
-          ),
-        ),
-      );
-    } catch (e) {
-      debugPrint('채팅방 참여 오류: $e');
-      onShowSnackBar('오류 발생: $e', isError: true);
-    }
-  }
 }
-
-
