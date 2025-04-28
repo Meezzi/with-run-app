@@ -1,60 +1,45 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:with_run_app/ui/pages/chat_create/chat_create_page.dart';
-import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
+import 'package:with_run_app/ui/pages/map/viewmodels/create_chat_room_dialog_viewmodel.dart';
 
-class CreateChatRoomDialog extends ConsumerStatefulWidget {
+class CreateChatRoomDialog extends ConsumerWidget {
   final LatLng position;
-  final Function(String, {bool isError}) onShowSnackBar;
   final VoidCallback onDismiss;
 
   const CreateChatRoomDialog({
     super.key,
     required this.position,
-    required this.onShowSnackBar,
     required this.onDismiss,
   });
 
   @override
-  ConsumerState<CreateChatRoomDialog> createState() => _CreateChatRoomDialogState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final viewModel = ref.read(createChatRoomDialogViewModelProvider(position).notifier);
 
-class _CreateChatRoomDialogState extends ConsumerState<CreateChatRoomDialog> {
-  @override
-Widget build(BuildContext context) {
-  return CupertinoAlertDialog(
-    title: const Text('새 채팅방 위치'),
-    content: const Padding(
-      padding: EdgeInsets.only(top: 4), // content를 위로 올리기 위해 상단 여백 축소
-      child: Text('이 위치에 채팅방을 생성하시겠습니까?'),
-    ),
-    actions: [
-      CupertinoDialogAction(
-        onPressed: () {
-          ref.read(mapProvider.notifier).removeTemporaryMarker();
-          widget.onDismiss();
-        },
-        child: const Text('아니요'),
+    return CupertinoAlertDialog(
+      title: const Text('새 채팅방 위치'),
+      content: const Padding(
+        padding: EdgeInsets.only(top: 4),
+        child: Text('이 위치에 채팅방을 생성하시겠습니까?'),
       ),
-      CupertinoDialogAction(
-        isDefaultAction: true,
-        onPressed: _navigateToChatCreatePage,
-        child: const Text('예'),
-      ),
-    ],
-  );
-}
-
-  void _navigateToChatCreatePage() {
-    widget.onDismiss();
-    if (!mounted) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ChatCreatePage(),
-      ),
+      actions: [
+        CupertinoDialogAction(
+          onPressed: () {
+            viewModel.onCancel();
+            onDismiss();
+          },
+          child: const Text('아니요'),
+        ),
+        CupertinoDialogAction(
+          isDefaultAction: true,
+          onPressed: () {
+            onDismiss();
+            viewModel.onConfirm(context);
+          },
+          child: const Text('예'),
+        ),
+      ],
     );
   }
 }
