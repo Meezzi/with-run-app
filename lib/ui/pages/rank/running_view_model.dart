@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pedometer/pedometer.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:with_run_app/data/repository/running_repository.dart';
 
 // RunningState 클래스: 러닝의 상태를 저장
@@ -80,4 +81,18 @@ class RunningViewModel extends StateNotifier<RunningState> {
 
   // 현재 소모된 칼로리
   int get currentCalories => (_currentSteps * 0.04).round();
+
+  // 러닝 시작 메서드
+  Future<bool> startRunning() async {
+    final status = await Permission.activityRecognition.request();
+    if (!status.isGranted) {
+      _handleError(Exception('걸음 수 측정 권한이 필요합니다.'));
+      return false;
+    }
+  }
+
+  // 권한 에러 처리
+  void _handleError(Exception e) {
+    state = state.copyWith(errorMessage: e.toString());
+  }
 }
