@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 
-class NicknameField extends StatefulWidget {
+class NicknameField extends StatelessWidget {
   TextEditingController nicknameController;
 
-  NicknameField(this.nicknameController);
+  NicknameField(this.nicknameController, {super.key});
 
-  @override
-  State<NicknameField> createState() => _NicknameFieldState();
-}
-
-class _NicknameFieldState extends State<NicknameField> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: widget.nicknameController,
+      controller: nicknameController,
       decoration: InputDecoration(
         hintText: '닉네임을 입력해 주세요',
         enabledBorder: OutlineInputBorder(

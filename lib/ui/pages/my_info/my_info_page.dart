@@ -5,13 +5,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:with_run_app/ui/pages/map/map_page.dart';
 import 'package:with_run_app/ui/pages/my_info/my_info_view_model.dart';
 import 'package:with_run_app/ui/pages/my_info/widgets/nickname_field.dart';
-import 'package:with_run_app/ui/pages/my_info/widgets/profile.dart';
+import 'package:with_run_app/ui/pages/my_info/widgets/ProfileImagePicker.dart';
 import 'package:with_run_app/ui/pages/user_view_model.dart';
 
 class MyInfoPage extends ConsumerStatefulWidget {
-  String uid;
+  final String uid;
 
-  MyInfoPage({required this.uid});
+  const MyInfoPage({super.key, required this.uid});
 
   @override
   ConsumerState<MyInfoPage> createState() => _MyInfoPageState();
@@ -20,29 +20,30 @@ class MyInfoPage extends ConsumerStatefulWidget {
 class _MyInfoPageState extends ConsumerState<MyInfoPage> {
   final formKey = GlobalKey<FormState>();
   final nicknameController = TextEditingController();
+  late final myInfoVm = ref.read(myInfoViewModelProvider.notifier);
   bool isAndroid = Platform.isAndroid;
   bool isClosed = false;
-  bool isImageValid = false;
 
   /// 완료 버튼 이벤트
-  void _onComplete(myInfoState) async {
+  void _onComplete() async {
     final isNicknameValid = formKey.currentState!.validate();
+    final userVm = ref.read(userViewModelProvider.notifier);
+    final myInfoState = ref.read(myInfoViewModelProvider);
 
-    if (myInfoState?.imageUrl == null) {
-      setState(() {
-        isImageValid = true;
-      });
+    if (myInfoState.xFile == null) {
+      myInfoVm.changeValid(true);
     }
 
-    if (isNicknameValid && myInfoState?.imageUrl != null) {
-      final userVm = ref.read(userViewModelProvider.notifier);
+    if (isNicknameValid && myInfoState.xFile != null) {
+      MyInfoState? newState = await myInfoVm.uploadImage(myInfoState.xFile!);
+
       final isSignin = await userVm.insert(
         uid: widget.uid,
         nickname: nicknameController.text,
-        profileImageUrl: myInfoState?.imageUrl,
+        profileImageUrl: newState?.imageUrl,
       );
 
-      if (isSignin != null) {
+      if (isSignin) {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -57,19 +58,13 @@ class _MyInfoPageState extends ConsumerState<MyInfoPage> {
 
   /// 프로필 사진 추가 이벤트
   void _onSelectImage() async {
-    print('프로필 추가');
     // 이미지 피커 객체 생성
     ImagePicker imagePicker = ImagePicker();
 
     XFile? xFile = await imagePicker.pickImage(source: ImageSource.gallery);
-
     if (xFile != null) {
-      final myInfoVm = ref.read(myInfoViewModelProvider.notifier);
-      await myInfoVm.uploadImage(xFile);
-
-      setState(() {
-        isImageValid = false;
-      });
+      myInfoVm.selectImage(xFile);
+      myInfoVm.changeValid(false);
     }
   }
 
@@ -106,7 +101,7 @@ class _MyInfoPageState extends ConsumerState<MyInfoPage> {
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
-                    _onComplete(myInfoState);
+                    _onComplete();
                   },
                   child: Container(
                     alignment: Alignment.center,
@@ -131,7 +126,10 @@ class _MyInfoPageState extends ConsumerState<MyInfoPage> {
                   children: [
                     GestureDetector(
                       onTap: _onSelectImage,
-                      child: Profile(myInfoState?.imageUrl, isImageValid),
+                      child: ProfileImagePicker(
+                        myInfoState.xFile,
+                        myInfoState.isImageValid,
+                      ),
                     ),
                     SizedBox(height: 20),
                     NicknameField(nicknameController),

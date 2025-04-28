@@ -15,6 +15,10 @@ class User {
 
   // 2. toJson 메서드
   Map<String, dynamic> toJson() {
-    return {'uid': uid, 'nickname': nickname, 'profileImage': profileImageUrl};
+    return {
+      'uid': uid,
+      'nickname': nickname,
+      'profileImageUrl': profileImageUrl,
+    };
   }
 }

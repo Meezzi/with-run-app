@@ -9,7 +9,7 @@ class UserViewModel extends Notifier<User?> {
   }
 
   /// 상태에 User정보 추가
-  Future<bool?> insert({
+  Future<bool> insert({
     required uid,
     required nickname,
     required profileImageUrl,
@@ -22,15 +22,15 @@ class UserViewModel extends Notifier<User?> {
 
     if (result) {
       state = User(
-        uid: uid ?? '',
-        nickname: nickname ?? '',
-        profileImageUrl: profileImageUrl ?? '',
+        uid: uid,
+        nickname: nickname,
+        profileImageUrl: profileImageUrl,
       );
 
       return true;
     }
 
-    return null;
+    return false;
   }
 }
 

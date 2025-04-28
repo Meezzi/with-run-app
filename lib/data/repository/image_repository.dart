@@ -16,7 +16,7 @@ class ImageRepository {
       // 3. 파일 이름 만들어 참조하기
       String imageName =
           '${DateTime.now().microsecondsSinceEpoch}_${xFile.name}';
-      Reference fileRef = ref.child(imageName);
+      Reference fileRef = ref.child('user/$imageName');
 
       // 4. 쓰기
       await fileRef.putFile(File(xFile.path));
@@ -27,11 +27,12 @@ class ImageRepository {
         'imageName': imageName,
       };
     } catch (e) {
-      print(e);
+      print('ImageRepository.uploadImage catch문 - $e');
       return null;
     }
   }
 
+  /// firestorage에 있는 이미지 삭제
   Future<bool?> deleteImage(String imageName) async {
     try {
       final storageRef = FirebaseStorage.instance.ref();
@@ -42,6 +43,7 @@ class ImageRepository {
       return true;
     } catch (e) {
       print('파일 삭제 실패');
+      print('ImageRepository.deleteImage catch문 - $e');
       return null;
     }
   }

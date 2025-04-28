@@ -4,9 +4,9 @@ import 'package:with_run_app/data/model/user.dart';
 class UserRepository {
   /// firebase database에 로그인한 User정보 추가
   Future<bool> insert({
-    String? uid,
-    String? nickname,
-    String? profileImageUrl,
+    required String uid,
+    required String nickname,
+    required String profileImageUrl,
   }) async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -21,7 +21,7 @@ class UserRepository {
 
       return true;
     } catch (e) {
-      print(e);
+      print('UserRepository.insert catch문 - $e');
       return false;
     }
   }
