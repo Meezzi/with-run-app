@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:time_range_picker/time_range_picker.dart';
@@ -8,8 +8,8 @@ import 'package:with_run_app/ui/pages/chat_create/chat_create_notifier.dart';
 import 'package:with_run_app/ui/pages/chat_create/date_picker_input.dart';
 import 'package:with_run_app/ui/pages/chat_create/time_range_picker_input.dart';
 import 'package:with_run_app/ui/pages/chat_create/util/chat_create_util.dart';
-import 'package:with_run_app/ui/pages/my_info/my_info_view_model.dart';
 import 'package:with_run_app/ui/pages/user_view_model.dart';
+import 'package:with_run_app/data/model/user.dart';
 
 class ChatCreatePage extends ConsumerStatefulWidget {
   const ChatCreatePage({super.key});
@@ -93,8 +93,8 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                 child: ElevatedButton(
                   onPressed: () async {
                     await ref.read(userViewModelProvider.notifier).getById(FirebaseAuth.instance.currentUser?.uid as String);
-                    final user = ref.read(userViewModelProvider);
-                    await notifier.create(createChatRoom(), user!);
+                    User? user = ref.read(userViewModelProvider);
+                    await notifier.create(createChatRoom(user!), user!);
                   },
                   child: Text('채팅방 만들기'),
                 ),
@@ -137,12 +137,12 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
     );
   }
 
-  ChatRoom createChatRoom() {
+  ChatRoom createChatRoom(User creator) {
     return ChatRoom(
       title: titleController.text,
       description: descriptionController.text,
       location: GeoPoint(37.355149, 126.922238),
-      creatorId: '',
+      creator: creator,
       createdAt: DateTime.now(),
       startTime: makeDateTimeWithTime(date!, timeRange!.startTime),
       endTime: makeDateTimeWithTime(date!, timeRange!.endTime),
