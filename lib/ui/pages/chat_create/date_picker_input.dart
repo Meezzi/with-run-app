@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class DatePickerInput extends StatefulWidget {
-  const DatePickerInput({super.key});
+  const DatePickerInput({super.key, required this.onDateChanged});
+  final void Function(DateTime? date) onDateChanged;
 
   @override
   State<DatePickerInput> createState() => _DatePickerInputState();
@@ -21,6 +22,7 @@ class _DatePickerInputState extends State<DatePickerInput> {
     setState(() {
       selectedDate = pickedDate;
     });
+    widget.onDateChanged(pickedDate);
   }
 
   @override
