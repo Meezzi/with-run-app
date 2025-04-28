@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:with_run_app/models/chat_room.dart';
 import 'package:with_run_app/services/chat_service.dart';
-import 'package:with_run_app/ui/pages/chat/chat_room_page.dart';
+// import 'package:with_run_app/ui/pages/chat/chat_room_page.dart';
 import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
 
 
@@ -50,20 +50,20 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
 
     // 사용자가 채팅방 생성자인 경우는 참여 가능
     if (chatRoom.creatorId == userId) {
-      try {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatRoomPage(
-              chatRoom: chatRoom,
-              onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id),
-            ),
-          ),
-        );
-      } catch (e) {
-        debugPrint('채팅방 참여 오류: $e'); // 전역 함수로 호출
-        _showSnackBar(context, '오류 발생: $e', isError: true);
-      }
+      // try {
+      //   Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //       builder: (context) => ChatRoomPage(
+      //         chatRoom: chatRoom,
+      //         onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id),
+      //       ),
+      //     ),
+      //   );
+      // } catch (e) {
+      //   debugPrint('채팅방 참여 오류: $e'); // 전역 함수로 호출
+      //   _showSnackBar(context, '오류 발생: $e', isError: true);
+      // }
       return;
     }
 
@@ -76,26 +76,26 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
       return;
     }
 
-    try {
-      final result = await _chatService.joinChatRoom(chatRoom.id);
-      if (!context.mounted) return;
-      if (result) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatRoomPage(
-              chatRoom: chatRoom,
-              onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id),
-            ),
-          ),
-        );
-      } else {
-        _showSnackBar(context, '채팅방 참여에 실패했습니다.', isError: true);
-      }
-    } catch (e) {
-      debugPrint('채팅방 참여 오류: $e'); // 전역 함수로 호출
-      _showSnackBar(context, '오류 발생: $e', isError: true);
-    }
+    // try {
+    //   final result = await _chatService.joinChatRoom(chatRoom.id);
+    //   if (!context.mounted) return;
+    //   if (result) {
+    //     Navigator.push(
+    //       context,
+    //       MaterialPageRoute(
+    //         builder: (context) => ChatRoomPage(
+    //           chatRoom: chatRoom,
+    //           onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id),
+    //         ),
+    //       ),
+    //     );
+    //   } else {
+    //     _showSnackBar(context, '채팅방 참여에 실패했습니다.', isError: true);
+    //   }
+    // } catch (e) {
+    //   debugPrint('채팅방 참여 오류: $e'); // 전역 함수로 호출
+    //   _showSnackBar(context, '오류 발생: $e', isError: true);
+    // }
   }
 
   Future<bool> _checkUserHasJoinedRoom(String userId) async {
