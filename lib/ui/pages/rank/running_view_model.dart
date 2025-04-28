@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:with_run_app/core/result/result.dart';
+import 'package:with_run_app/data/model/running_data.dart';
 import 'package:with_run_app/data/repository/running_repository.dart';
 
 // RunningState 클래스: 러닝의 상태를 저장
@@ -114,6 +116,30 @@ class RunningViewModel extends StateNotifier<RunningState> {
       return true;
     } catch (e) {
       _handleError(Exception('러닝 시작 실패: $e'));
+      return false;
+    }
+  }
+
+  // 러닝 종료 메서드
+  Future<bool> stopRunning() async {
+    if (!_stopwatch.isRunning) return false;
+
+    try {
+      _stopwatch.stop();
+      await _stepSubscription?.cancel();
+
+      final data = RunningData(
+        steps: _currentSteps,
+        distance: currentDistance,
+        speed: currentSpeed,
+        calories: currentCalories,
+        runningTime: _stopwatch.elapsed.inSeconds,
+      );
+
+      final result = await runningRepository.saveRunningData(data);
+      return result is Ok;
+    } catch (e) {
+      _handleError(Exception('러닝 종료 실패: $e'));
       return false;
     }
   }
