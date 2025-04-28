@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:time_range_picker/time_range_picker.dart';
-import 'package:with_run_app/models/chat_room.dart';
+import 'package:with_run_app/data/model/chat_room_model.dart';
+import 'package:with_run_app/data/model/user.dart';
 import 'package:with_run_app/ui/pages/chat_create/chat_create_notifier.dart';
 import 'package:with_run_app/ui/pages/chat_create/date_picker_input.dart';
 import 'package:with_run_app/ui/pages/chat_create/time_range_picker_input.dart';
@@ -89,7 +91,8 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-
+                    await ref.read(userViewModelProvider.notifier).getById(FirebaseAuth.instance.currentUser?.uid as String);
+                    User? user = ref.read(userViewModelProvider);
                     notifier.create(createChatRoom());
                   },
                   child: Text('채팅방 만들기'),
@@ -133,8 +136,8 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
     );
   }
 
-  ChatRoom createChatRoom() {
-    return ChatRoom(
+  ChatRoomModel createChatRoom() {
+    return ChatRoomModel(
       title: titleController.text,
       description: descriptionController.text,
       location: GeoPoint(37.355149, 126.922238),

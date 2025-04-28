@@ -1,9 +1,9 @@
 
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:with_run_app/data/model/chat_room_model.dart';
 import 'package:with_run_app/data/repository/chat_room_firebase_repository.dart';
 import 'package:with_run_app/data/repository/chat_room_repository.dart';
-import 'package:with_run_app/models/chat_room.dart';
 
 enum ChatRoomCreateState {
   intialize,
@@ -13,10 +13,9 @@ enum ChatRoomCreateState {
 }
 
 class ChatCreateNotifier extends AutoDisposeNotifier<ChatRoomCreateState>{
-  void create(ChatRoom chatRoom){
+  void create(ChatRoomModel chatRoom){
     state = ChatRoomCreateState.submitted;
     final repository = ref.read(repositoryProvider);
-    print(chatRoom);
     repository.create(chatRoom);
     state = ChatRoomCreateState.done;
   }
