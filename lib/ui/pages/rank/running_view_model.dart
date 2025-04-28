@@ -164,6 +164,13 @@ class RunningViewModel extends StateNotifier<RunningState> {
     });
   }
 
+  // 러닝 시간 1초씩 증가
+  void increaseRunningTime() {
+    state = state.copyWith(
+      runningTime: (int.parse(state.runningTime) + 1).toString(),
+    );
+  }
+
   // 권한 에러 처리
   void _handleError(Exception e) {
     state = state.copyWith(errorMessage: e.toString());
