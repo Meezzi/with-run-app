@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:with_run_app/core/google_sign_in_helper.dart';
@@ -28,9 +29,10 @@ class LoginPage extends StatelessWidget {
                 onTap: () async {
                   try {
                     final credential = await signInWithGoogle();
-                    
+
                     // 로그인 성공 후 이메일 인증 확인
-                    if (credential != null && (credential.user?.emailVerified ?? false)) {
+                    if (credential != null &&
+                        (credential.user?.emailVerified ?? false)) {
                       if (context.mounted) {
                         Navigator.pushAndRemoveUntil(
                           context,
