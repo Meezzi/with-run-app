@@ -152,6 +152,18 @@ class RunningViewModel extends StateNotifier<RunningState> {
     return false;
   }
 
+  // 러닝 상태 스트림
+  Stream<bool> runningStatusStream() {
+    return runningRepository.runningStatusStream().map((result) {
+      if (result is Ok<bool>) {
+        return result.value;
+      } else {
+        _handleError((result as Error).error);
+        return false;
+      }
+    });
+  }
+
   // 권한 에러 처리
   void _handleError(Exception e) {
     state = state.copyWith(errorMessage: e.toString());
