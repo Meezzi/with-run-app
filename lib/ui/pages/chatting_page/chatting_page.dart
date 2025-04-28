@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:with_run_app/ui/pages/chatting_page/message_provider.dart';
-import 'chat_bubble.dart';
-import 'chat_input_field.dart';
+import 'widgets/chat_bubble.dart';
+import 'widgets/chat_input_field.dart';
 
 class ChattingPage extends ConsumerStatefulWidget {
   final String chatRoomId;
@@ -79,7 +79,7 @@ class _ChattingPageState extends ConsumerState<ChattingPage> {
                         senderId: msg.senderId,
                         myUserId: widget.myUserId,
                         text: msg.text,
-                        time: DateFormat('a h:mm', 'ko_KR').format(msg.timestamp),
+                        time: DateFormat('a h:mm', 'ko_KR').format(msg.timestamp), // main에 수정사항 있음!
                       );
                     },
                   ),
