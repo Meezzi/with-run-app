@@ -47,27 +47,13 @@ void main() async {
   );
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return provider.Consumer<AppThemeProvider>(
-      builder: (context, themeProvider, child) {
-        return MaterialApp(
-          theme: themeProvider.lightTheme.copyWith(
-            highlightColor: const Color(0xff2196F3),
-          ),
-          darkTheme: themeProvider.darkTheme.copyWith(
-            highlightColor: const Color(0xff2196F3),
-          ),
-          themeMode: themeProvider.themeMode,
-          home:
-              FirebaseAuth.instance.currentUser != null
-                  ? MapPage()
-                  : LoginPage(),
-        );
-      },
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: FirebaseAuth.instance.currentUser != null ? MapPage() : LoginPage(),
     );
   }
 }
