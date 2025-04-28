@@ -25,6 +25,7 @@ class _TimeRangePickerInputState extends State<TimeRangePickerInput> {
     widget.onRangeChanged(result!);
   }
 
+  @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
