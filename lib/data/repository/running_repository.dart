@@ -25,4 +25,15 @@ class RunningRepository {
       return Result.error(Exception('러닝 데이터 저장 실패: $e'));
     }
   }
+
+  /// 채팅방의 러닝 상태(isStart)를 업데이트
+  Future<Result<bool>> updateRunningStatus(bool isRunning) async {
+    try {
+      final docRef = _firestore.collection('chat_rooms').doc(chatRoomId);
+      await docRef.update({'isStart': isRunning});
+      return Result.ok(true);
+    } catch (e) {
+      return Result.error(Exception('러닝 상태 업데이트 실패: $e'));
+    }
+  }
 }
