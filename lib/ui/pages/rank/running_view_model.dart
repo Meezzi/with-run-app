@@ -144,6 +144,14 @@ class RunningViewModel extends StateNotifier<RunningState> {
     }
   }
 
+  // 러닝 상태 업데이트
+  Future<bool> setRunningStatus(bool isRunning) async {
+    final result = await runningRepository.updateRunningStatus(isRunning);
+    if (result is Ok) return true;
+    _handleError((result as Error).error);
+    return false;
+  }
+
   // 권한 에러 처리
   void _handleError(Exception e) {
     state = state.copyWith(errorMessage: e.toString());
