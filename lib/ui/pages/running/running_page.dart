@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:with_run_app/ui/pages/rank/running_view_model.dart';
 import 'package:with_run_app/ui/pages/running/controller/running_animation_controller.dart';
-import 'package:with_run_app/ui/pages/running/running_controller.dart';
+import 'package:with_run_app/ui/pages/running/controller/running_controller.dart';
 import 'package:with_run_app/ui/pages/running/widgets/running_host_button.dart';
 import 'package:with_run_app/ui/pages/running/widgets/running_lottie_animation.dart';
 import 'package:with_run_app/ui/pages/running/widgets/running_status_card.dart';
