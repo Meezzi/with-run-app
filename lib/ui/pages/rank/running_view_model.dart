@@ -70,4 +70,11 @@ class RunningViewModel extends StateNotifier<RunningState> {
 
   // 현재 이동 거리 (1걸음 = 0.7m로 가정)
   double get currentDistance => _currentSteps * 0.7;
+
+  // 현재 속도 (시속 km 단위)
+  double get currentSpeed {
+    final seconds = _stopwatch.elapsed.inSeconds;
+    if (seconds == 0) return 0;
+    return (currentDistance / 1000) / (seconds / 3600);
+  }
 }
