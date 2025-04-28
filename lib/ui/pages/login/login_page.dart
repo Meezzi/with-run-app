@@ -34,16 +34,13 @@ class LoginPage extends StatelessWidget {
                     if (credential != null &&
                         (credential.user?.emailVerified ?? false)) {
                       if (context.mounted) {
-                        Navigator.pushAndRemoveUntil(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (context) {
                               return MyInfoPage(uid: credential.user!.uid);
                             },
                           ),
-                          (route) {
-                            return route.isCurrent;
-                          },
                         );
                       }
                     } else {
