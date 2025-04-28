@@ -9,6 +9,8 @@ import 'package:with_run_app/ui/pages/chat_create/chat_create_notifier.dart';
 import 'package:with_run_app/ui/pages/chat_create/date_picker_input.dart';
 import 'package:with_run_app/ui/pages/chat_create/time_range_picker_input.dart';
 import 'package:with_run_app/ui/pages/chat_create/util/chat_create_util.dart';
+import 'package:with_run_app/ui/pages/chat_information/chat_information_page.dart';
+import 'package:with_run_app/ui/pages/chatting_page/chat_room_view_model.dart';
 import 'package:with_run_app/ui/pages/user_view_model.dart';
 
 class ChatCreatePage extends ConsumerStatefulWidget {
@@ -36,7 +38,6 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
   @override
   Widget build(BuildContext context) {
     final notifier = ref.watch(chatCreateNotifier.notifier);
-    
 
     return SafeArea(
       child: Scaffold(
@@ -67,16 +68,20 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                         inputElement(
                           name: '날짜',
                           isRequired: true,
-                          customInput: DatePickerInput(onDateChanged: (date) {
-                            this.date = date;
-                          },),
+                          customInput: DatePickerInput(
+                            onDateChanged: (date) {
+                              this.date = date;
+                            },
+                          ),
                         ),
                         inputElement(
                           name: '시간',
                           isRequired: true,
-                          customInput: TimeRangePickerInput(onRangeChanged: (timeRange) {
-                            this.timeRange = timeRange;
-                          },),
+                          customInput: TimeRangePickerInput(
+                            onRangeChanged: (timeRange) {
+                              this.timeRange = timeRange;
+                            },
+                          ),
                         ),
                         inputElement(
                           name: '설명',
@@ -92,9 +97,26 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    await ref.read(userViewModelProvider.notifier).getById(FirebaseAuth.instance.currentUser?.uid as String);
+                    await ref
+                        .read(userViewModelProvider.notifier)
+                        .getById(
+                          FirebaseAuth.instance.currentUser?.uid as String,
+                        );
                     final user = await ref.read(userViewModelProvider);
-                    notifier.create(getChatRoom(user!), user);
+                    final result = await notifier.create(
+                      getChatRoom(user!),
+                      user,
+                    );
+                    print(result);
+                    // ref
+                    //     .read(chatViewModelProvider.notifier)
+                    //     .streamChatRoom(result);
+                    // ref.watch(chatRoomStreamProvider(result));
+                    await ref.read(chatRoomViewModel.notifier).enterChatRoom(result);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ChatInformationPage()),
+                    );
                   },
                   child: Text('채팅방 만들기'),
                 ),
