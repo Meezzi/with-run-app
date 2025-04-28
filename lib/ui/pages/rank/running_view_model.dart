@@ -89,6 +89,33 @@ class RunningViewModel extends StateNotifier<RunningState> {
       _handleError(Exception('걸음 수 측정 권한이 필요합니다.'));
       return false;
     }
+
+    try {
+      _stopwatch.start();
+      _stepSubscription = Pedometer.stepCountStream.listen(
+        (event) {
+          _initialSteps = _initialSteps == 0 ? event.steps : _initialSteps;
+          _currentSteps = event.steps - _initialSteps;
+
+          // 상태 갱신
+          state = state.copyWith(
+            isStart: true,
+            steps: _currentSteps.toString(),
+            distance: currentDistance.toString(),
+            speed: currentSpeed.toString(),
+            colories: currentCalories.toString(),
+            runningTime: _stopwatch.elapsed.inSeconds.toString(),
+          );
+        },
+        onError: (error) {
+          _handleError(Exception('Pedometer 오류: $error'));
+        },
+      );
+      return true;
+    } catch (e) {
+      _handleError(Exception('러닝 시작 실패: $e'));
+      return false;
+    }
   }
 
   // 권한 에러 처리
