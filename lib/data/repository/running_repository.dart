@@ -36,4 +36,18 @@ class RunningRepository {
       return Result.error(Exception('러닝 상태 업데이트 실패: $e'));
     }
   }
+
+  /// 채팅방의 러닝 상태를 실시간 스트림으로 반환
+  Stream<Result<bool>> runningStatusStream() {
+    final docRef = _firestore.collection('chat_rooms').doc(chatRoomId);
+    return docRef.snapshots().map((snapshot) {
+      try {
+        final data = snapshot.data();
+        if (data == null) return Result.ok(false);
+        return Result.ok(data['isStart'] ?? false);
+      } catch (e) {
+        return Result.error(Exception('러닝 상태 스트림 오류: $e'));
+      }
+    });
+  }
 }
