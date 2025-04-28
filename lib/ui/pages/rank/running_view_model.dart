@@ -77,4 +77,7 @@ class RunningViewModel extends StateNotifier<RunningState> {
     if (seconds == 0) return 0;
     return (currentDistance / 1000) / (seconds / 3600);
   }
+
+  // 현재 소모된 칼로리
+  int get currentCalories => (_currentSteps * 0.04).round();
 }
