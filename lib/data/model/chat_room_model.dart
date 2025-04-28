@@ -1,19 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:with_run_app/data/model/user.dart';
 
-
 class ChatRoomModel {
   final String? id;
   final String title;
   final String? description;
   final GeoPoint location;
-  final User?  creator;
+  final User? creator;
   final DateTime createdAt;
   final List<String>? participants;
   final String? lastMessage;
   final DateTime? lastMessageTimestamp;
-  final DateTime startTime; 
-  final DateTime endTime; 
+  final DateTime startTime;
+  final DateTime endTime;
 
   ChatRoomModel({
     this.id,
@@ -30,24 +29,29 @@ class ChatRoomModel {
   });
 
   factory ChatRoomModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    
+    final rawData = doc.data();
+    if (rawData == null) {
+      throw Exception('Document data is null');
+    }
+    final data = rawData as Map<String, dynamic>;
+
     return ChatRoomModel(
       id: doc.id,
       title: data['title'] ?? '',
       description: data['description'],
-      location : data['location'],
-      creator: data['creator'] ?? '',
+      location: data['location'],
+      creator: User.fromJson(data['creator']),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
-      participants: data['participants'] != null 
-          ? List<String>.from(data['participants']) 
-          : null,
+      participants:
+          data['participants'] != null
+              ? List<String>.from(data['participants'])
+              : null,
       lastMessage: data['lastMessage'],
       lastMessageTimestamp: data['lastMessageTimestamp'] != null 
-          ? (data['lastMessageTimestamp'] as Timestamp).toDate() 
-          : null,
-      startTime: data['startTime'],
-      endTime : data['endTime'],
+        ? (data['lastMessageTimestamp'] as Timestamp).toDate()
+        : null,
+      startTime: (data['startTime'] as Timestamp).toDate(),
+      endTime: (data['endTime'] as Timestamp).toDate(),
     );
   }
 
@@ -55,15 +59,16 @@ class ChatRoomModel {
     return {
       'title': title,
       'description': description,
-      'location' : GeoPoint(location.latitude, location.longitude),
+      'location': GeoPoint(location.latitude, location.longitude),
       'creator': creator!.toJson(),
       'createdAt': Timestamp.fromDate(createdAt),
       'lastMessage': lastMessage,
-      'lastMessageTimestamp': lastMessageTimestamp != null 
-          ? Timestamp.fromDate(lastMessageTimestamp!) 
-          : null,
-      'startTime' : startTime,
-      'endTime' : endTime,
+      'lastMessageTimestamp':
+          lastMessageTimestamp != null
+              ? Timestamp.fromDate(lastMessageTimestamp!)
+              : null,
+      'startTime': startTime,
+      'endTime': endTime,
     };
   }
 }
