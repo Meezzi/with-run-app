@@ -6,18 +6,69 @@
 
 ## 🏃‍♂️ 개요
 
-**withRun**은 Flutter 개발된 모바일 애플리케이션입니다.  
-Google Maps API를 활용하여 사용자의 현재 위치를 표시하고, 채팅방을 개설해 함께 러닝을 즐길 수 있도록 지원합니다.  
-러닝 종료 후에는 결과와 랭킹을 확인할 수 있습니다.
-<br>
+**withRun**을 통해 친구들과 함께 러닝을 즐겨보세요!
+- **Google Maps**를 통해 내 현재 위치를 바로 확인할 수 있어요.
+- 원하는 위치에서 **채팅방**을 개설하고, 함께 달릴 친구들을 쉽게 모집할 수 있어요.
+- **러닝**이 끝나면 **이동 거리**, **속도**, **소모 칼로리**, **시간**을 기록으로 남길 수 있어요.
+- **참가자**들끼리 달린 **기록**을 비교하고, 오늘의 **TOP 러너**도 확인할 수 있어요.
+- **다크 모드** 지원으로 밤에도 눈에 편하게 앱을 사용할 수 있어요.
 
+<br>
+<br>
 
 ## 👥 Team - 3조 타코야끼 대머리 클럽
 
-| 강민지 (조장) | 김기현 (조원) | 김지은 (조원) | 이성엽 (조원) | 이현진 (조원) |
-|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
-| [@Meezzi](https://github.com/Meezzi) | [@arcmee](https://github.com/arcmee) | [@jek1m](https://github.com/jek1m) | [@bang9lee](https://github.com/bang9lee) | [@hyunjin912](https://github.com/hyunjin912) |
-| 전체 총괄 | 채팅 | 채팅 | 지도 | 로그인 |
+<table align="center">
+  <tr>
+    <td align="center" width="180px"><b>강민지 (조장)</b></td>
+    <td align="center" width="180px"><b>김기현 (조원)</b></td>
+    <td align="center" width="180px"><b>김지은 (조원)</b></td>
+    <td align="center" width="180px"><b>이성엽 (조원)</b></td>
+    <td align="center" width="180px"><b>이현진 (조원)</b></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/Meezzi">Meezzi</a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/arcmee">arcmee</a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/jek1m">jek1m</a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/bang9lee">bang9lee</a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/hyunjin912">hyunjin912</a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://github.com/Meezzi.png" width="100" height="100">
+    </td>
+    <td align="center">
+      <img src="https://github.com/arcmee.png" width="100" height="100">
+    </td>
+    <td align="center">
+      <img src="https://github.com/jek1m.png" width="100" height="100">
+    </td>
+    <td align="center">
+      <img src="https://github.com/bang9lee.png" width="100" height="100">
+    </td>
+    <td align="center">
+      <img src="https://github.com/hyunjin912.png" width="100" height="100">
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><b>전체 총괄</b></td>
+    <td align="center"><b>채팅</b></td>
+    <td align="center"><b>채팅</b></td>
+    <td align="center"><b>지도</b></td>
+    <td align="center"><b>로그인</b></td>
+  </tr>
+</table>
+
 
 <br>
 
@@ -74,6 +125,8 @@ Google Maps API를 활용하여 사용자의 현재 위치를 표시하고, 채�
 - **Architecture**: MVVM (Model-View-ViewModel)
 - **State Management**: Riverpod
 
+<br>
+
 ## 🔌 주요 패키지 기능 설명
 
 | 패키지 | 설명 |
@@ -103,8 +156,11 @@ Google Maps API를 활용하여 사용자의 현재 위치를 표시하고, 채�
 <br>
 
 ## 📂 Directory Structure
+
 (작성 예정)
+
 <br>
+
 ## 📝 Additional Notes
 
 향후 디렉토리 구조 설명, 기능 흐름도, 시연 영상 추가 예정
@@ -123,31 +179,29 @@ Google Maps API를 활용하여 사용자의 현재 위치를 표시하고, 채�
 <br>
 
 
-# 1. 프로젝트 클론
+### 1. 프로젝트 클론
 
 - git clone https://github.com/Meezzi/with-run-app.git
 
 <br>
 
-# 2. 의존성 설치
+### 2. 의존성 설치
 
 - flutter pub get
 
 <br>
 
-## 🔐 .env 파일 설정
+### 🔐 .env 파일 설정
 
 - GOOGLE_MAPS_API_KEY=<your-api-key>
 
 <br>
 
-## 🍎 iOS 설정
+### 🍎 iOS 설정
 
 - ios/Flutter/Environment.xcconfig 파일에 추가
 
 - GOOGLE_MAPS_API_KEY=<your-api-key>
-
-<br>
 
 - ios/Runner/Info.plist에 추가 (필요 시)
 
@@ -156,24 +210,27 @@ Google Maps API를 활용하여 사용자의 현재 위치를 표시하고, 채�
 
 <br>
 
-## ▶ 앱 실행
+### ▶ 앱 실행
 
 - flutter run
 
 <br>
 
-## 📁 .gitignore
+### 📁 .gitignore
 
 - gitignore
 
-*.tmp
 -android/app/google-services.json
+
 -ios/Runner/GoogleService-Info.plist
+
 -lib/firebase_options.dart
+
 -.env
+
 -ios/Flutter/Environment.xcconfig
 
 <br>
 
 
-### 🔥 withRun: 함께 뛰는 러닝을 시작하세요!
+# 🔥 withRun: 함께 뛰는 러닝을 시작하세요!
