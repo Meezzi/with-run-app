@@ -1,0 +1,45 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:with_run_app/data/model/chat_room_model.dart';
+import 'package:with_run_app/data/model/user.dart';
+import 'package:with_run_app/data/repository/chat_room_repository.dart';
+
+class ChatRoomFirebaseRepository implements ChatRoomRepository {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  Future<String> create(ChatRoomModel chatRoom, User creator) async {
+    final result = await _firestore
+        .collection('chatRooms')
+        .add(chatRoom.toMap())
+        .then((documentSnapshot) {
+          print("Added Data with ID: ${documentSnapshot.id}");
+          addParticipant(creator, documentSnapshot.id);
+          return documentSnapshot.id;
+        });
+    return result;
+  }
+
+  @override
+  Future<ChatRoomModel> get(String id) async {
+    final doc = await _firestore.collection('chatRooms').doc(id).get();
+
+    if (!doc.exists) {
+      throw Exception('ChatRoom not found');
+    }
+
+    return ChatRoomModel.fromFirestore(doc);
+  }
+
+  @override
+  Future<void> addParticipant(User user, String chatRoomId) async {
+    _firestore
+        .collection('chatRooms')
+        .doc(chatRoomId)
+        .collection('participants')
+        .doc(user.uid)
+        .set({
+          'nickName': user.nickname,
+          'profileImageUrl': user.profileImageUrl,
+        });
+  }
+}
