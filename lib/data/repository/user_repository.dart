@@ -26,7 +26,7 @@ class UserRepository {
     }
   }
 
-  Future<User?> getById(String uid) async {
+  Future<User?> getById(String? uid) async {
     try {
       final firestore = FirebaseFirestore.instance;
       final collectionRef = firestore.collection('users');

@@ -90,17 +90,14 @@ class _MyInfoPageState extends ConsumerState<MyInfoPage> {
       child: PopScope(
         canPop: isAndroid ? isClosed : true,
         onPopInvokedWithResult: (didPop, result) {
-          print('hhhhhhhhh  hhhhhhhh: $isAndroid');
-
           setState(() {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 behavior: SnackBarBehavior.floating,
-                // showCloseIcon: true,
                 content: Text('앱을 종료하시려면 한번 더 뒤로가기 버튼을 눌러주세요'),
               ),
             );
-            print('앱을 종료하시려면 한번 더 뒤로가기 버튼을 눌러주세요');
+
             isClosed = true;
           });
         },
