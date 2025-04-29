@@ -8,7 +8,7 @@ class ChatRoomModel {
   final GeoPoint location;
   final User? creator;
   final DateTime createdAt;
-  final List<String>? participants;
+  final List<User>? participants;
   final String? lastMessage;
   final DateTime? lastMessageTimestamp;
   final DateTime startTime;
@@ -28,12 +28,19 @@ class ChatRoomModel {
     this.lastMessageTimestamp,
   });
 
-  factory ChatRoomModel.fromFirestore(DocumentSnapshot doc) {
+  factory ChatRoomModel.fromFirestore(
+    DocumentSnapshot doc,
+    List<User> participants,
+  ) {
     final rawData = doc.data();
     if (rawData == null) {
       throw Exception('Document data is null');
     }
     final data = rawData as Map<String, dynamic>;
+
+    participants.forEach((e){
+      print(e.nickname);
+    });
 
     return ChatRoomModel(
       id: doc.id,
@@ -42,14 +49,12 @@ class ChatRoomModel {
       location: data['location'],
       creator: User.fromJson(data['creator']),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
-      participants:
-          data['participants'] != null
-              ? List<String>.from(data['participants'])
-              : null,
+      participants: participants,
       lastMessage: data['lastMessage'],
-      lastMessageTimestamp: data['lastMessageTimestamp'] != null 
-        ? (data['lastMessageTimestamp'] as Timestamp).toDate()
-        : null,
+      lastMessageTimestamp:
+          data['lastMessageTimestamp'] != null
+              ? (data['lastMessageTimestamp'] as Timestamp).toDate()
+              : null,
       startTime: (data['startTime'] as Timestamp).toDate(),
       endTime: (data['endTime'] as Timestamp).toDate(),
     );

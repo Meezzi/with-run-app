@@ -125,10 +125,11 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                       user,
                     );
                     await ref.read(chatRoomViewModel.notifier).enterChatRoom(result);
-
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ChatInformationPage()),
+                      MaterialPageRoute(
+                        builder: (context) => ChatInformationPage()  
+                      ),
                     );
 
                   },
