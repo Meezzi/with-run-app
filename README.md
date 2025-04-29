@@ -1,12 +1,12 @@
 ### ✨ withRun: 함께 뛰는 즐거움
 
-<p align="center">
+<p align="left">
   <img src="https://github.com/user-attachments/assets/b6d379b4-214c-4bf9-bb66-8e2eb693238c" alt="withRun Main Banner" width="600"/>
 </p>
 
 ---
 
-## 🏃‍♂️ Overview
+## 🏃‍♂️ 개요
 
 **withRun**은 Flutter와 Dart로 개발된 모바일 애플리케이션입니다.  
 Google Maps API를 활용하여 사용자의 현재 위치를 표시하고, 채팅방을 개설해 함께 러닝을 즐길 수 있도록 지원합니다.  
@@ -23,40 +23,51 @@ Google Maps API를 활용하여 사용자의 현재 위치를 표시하고, 채�
 
 ---
 
-## 📱 App Screenshots
+### 📱 앱 스크린샷
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/7e0d128b-ef7a-4ec1-8958-4d43e155d699" alt="Login Screen" width="250"/>
-  <img src="https://github.com/user-attachments/assets/7e88d3d6-690e-4752-9611-a91283a8005e" alt="Map Screen" width="250"/>
-  <img src="https://github.com/user-attachments/assets/7bed3759-d43d-470f-b8d5-f262efd92ad5" alt="Dark Mode Map Screen" width="250"/>
+  <img src="https://github.com/user-attachments/assets/b8ac29b3-e24a-45cb-b8ad-edaa2ddf9ba7" alt="Login Screen" width="250"/>
+  <img src="https://github.com/user-attachments/assets/03244ca5-cb49-4b6c-9321-53377be02f64" alt="Map Screen" width="250"/>
+  <img src="https://github.com/user-attachments/assets/042ecf41-6f14-4828-b953-9de79423442e" alt="Dark Mode Map Screen" width="250"/>
 </p>
 
 ---
 
-## 🏃‍♂️ App Features Preview
+## 🏃‍♂️ 앱 주요 기능 미리보기
 
 - 📱 간편한 **Google 로그인**으로 빠르게 시작
+
 - 🗺️ **현재 위치 기반 지도 표시** 및 **채팅방 생성**
+
 - 🌙 **다크 모드 지원**으로 야간에도 편리한 이용
 
 ---
 
-## ✨ Features
+## ✨ 상세 기능 소개
 
 - **Google 로그인**: 사용자 인증 및 프로필 설정 (사진, 닉네임)
+
 - **Google Maps 연동**: 현재 위치 표시, 채팅방 개설/참여, 채팅방 목록 확인
+
 - **채팅방 기능**
+
   - 개설자: 시작/종료 버튼 제공
   - 참여자: "러닝 대기중" 상태 표시
+  - 위치기반으로 채팅을 개설
+  - 내주변의 채팅방 지도화면에서 마커로 확인가능
+
 - **러닝 결과 표시**
+
   - 총 이동 거리 (km), 평균 속도, 소모 칼로리, 이동 시간
+
 - **랭킹 기능**
+
   - 채팅방 내 닉네임 기반 랭킹
   - "오늘의 TOP 러너" 표시 (닉네임, 키로수, 이동 시간)
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ 사용 기술 스택
 
 - **Flutter (Dart)**
 - **Architecture**: MVVM (Model-View-ViewModel)
@@ -90,7 +101,7 @@ Google Maps API를 활용하여 사용자의 현재 위치를 표시하고, 채�
 
 ---
 
-## 🔧 Requirements
+## 🔧 설치 및 실행 방법
 
 - Google Maps API 키
 - Firebase 인증 및 콘솔 설정
@@ -98,8 +109,6 @@ Google Maps API를 활용하여 사용자의 현재 위치를 표시하고, 채�
 - 인터넷 연결 및 위치 정보 접근 허용
 
 ---
-
-## 🚀 Installation
 
 
 # 1. 프로젝트 클론
