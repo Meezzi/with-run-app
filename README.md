@@ -1,95 +1,151 @@
-### withRun
+### ✨ withRun: 함께 뛰는 즐거움
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/b6d379b4-214c-4bf9-bb66-8e2eb693238c" alt="withRun Main Banner" width="600"/>
+</p>
+
+---
+
+## 🏃‍♂️ Overview
+
+**withRun**은 Flutter와 Dart로 개발된 모바일 애플리케이션입니다.  
+Google Maps API를 활용하여 사용자의 현재 위치를 표시하고, 채팅방을 개설해 함께 러닝을 즐길 수 있도록 지원합니다.  
+러닝 종료 후에는 결과와 랭킹을 확인할 수 있습니다.
+
+---
+
+## 👥 Team - 3조 타코야끼 대머리 클럽
+
+| 강민지 (조장) | 김기현 (조원) | 김지은 (조원) | 이성엽 (조원) | 이현진 (조원) |
+|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| [@Meezzi](https://github.com/Meezzi) | [@arcmee](https://github.com/arcmee) | [@jek1m](https://github.com/jek1m) | [@bang9lee](https://github.com/bang9lee) | [@hyunjin912](https://github.com/hyunjin912) |
+| 전체 총괄 | 채팅 | 채팅 | 지도 | 로그인 |
+
+---
+
+## 📱 App Screenshots
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/7e0d128b-ef7a-4ec1-8958-4d43e155d699" alt="Login Screen" width="250"/>
+  <img src="https://github.com/user-attachments/assets/7e88d3d6-690e-4752-9611-a91283a8005e" alt="Map Screen" width="250"/>
+  <img src="https://github.com/user-attachments/assets/7bed3759-d43d-470f-b8d5-f262efd92ad5" alt="Dark Mode Map Screen" width="250"/>
+</p>
+
+---
+
+## 🏃‍♂️ App Features Preview
+
+- 📱 간편한 **Google 로그인**으로 빠르게 시작
+- 🗺️ **현재 위치 기반 지도 표시** 및 **채팅방 생성**
+- 🌙 **다크 모드 지원**으로 야간에도 편리한 이용
+
+---
+
+## ✨ Features
+
+- **Google 로그인**: 사용자 인증 및 프로필 설정 (사진, 닉네임)
+- **Google Maps 연동**: 현재 위치 표시, 채팅방 개설/참여, 채팅방 목록 확인
+- **채팅방 기능**
+  - 개설자: 시작/종료 버튼 제공
+  - 참여자: "러닝 대기중" 상태 표시
+- **러닝 결과 표시**
+  - 총 이동 거리 (km), 평균 속도, 소모 칼로리, 이동 시간
+- **랭킹 기능**
+  - 채팅방 내 닉네임 기반 랭킹
+  - "오늘의 TOP 러너" 표시 (닉네임, 키로수, 이동 시간)
+
+---
+
+## 🛠️ Tech Stack
+
+- **Flutter (Dart)**
+- **Architecture**: MVVM (Model-View-ViewModel)
+- **State Management**: Riverpod
+
+### 🔌 주요 패키지 기능 설명
+
+| 패키지 | 설명 |
+|:------|:-----|
+| `firebase_auth` | Firebase 기반 사용자 인증 |
+| `cloud_firestore` | 실시간 채팅 및 유저 정보 저장용 NoSQL 데이터베이스 |
+| `firebase_core` | Firebase 앱 초기화 및 연결 |
+| `firebase_storage` | 사용자 프로필 이미지 저장 |
+| `google_sign_in` | Google 계정 로그인 지원 |
+| `google_maps_flutter` | 지도 및 위치 마커 구현 |
+| `geolocator` | 현재 위치 및 위치 권한 처리 |
+| `geocoding` | 위도/경도를 주소로 변환 |
+| `flutter_dotenv` | `.env` 파일을 통한 API 키 관리 |
+| `flutter_riverpod` | 상태 관리 라이브러리 (MVVM 아키텍처에 적합) |
+| `provider` | 의존성 주입과 간단한 상태 관리 |
+| `cupertino_icons` | iOS 스타일 기본 아이콘 제공 |
+| `flutter_svg` | SVG 이미지 렌더링 |
+| `http` | HTTP 통신 (서버와 데이터 송수신) |
+| `intl` | 날짜, 시간, 숫자 포맷 처리 |
+| `image_picker` | 갤러리/카메라에서 이미지 선택 |
+| `time_range_picker` | 시간 범위 선택 UI |
+| `shared_preferences` | 간단한 로컬 저장소 (ex: 토큰 저장) |
+| `permission_handler` | 위치/사진 등 접근 권한 요청 처리 |
+| `pedometer` | 걸음 수 측정 기능 제공 |
+| `lottie` | 애니메이션 효과로 UI 향상 |
+
+---
+
+## 🔧 Requirements
+
+- Google Maps API 키
+- Firebase 인증 및 콘솔 설정
+- `.env` 파일에 API 키 입력
+- 인터넷 연결 및 위치 정보 접근 허용
+
+---
+
+## 🚀 Installation
 
 
-### Overview
-withRun은 Flutter와 Dart로 개발된 모바일 앱으로, Google Maps API를 활용해 사용자의 위치를 표시하고 채팅방을 개설해 함께 러닝을 즐길 수 있는 서비스입니다. 러닝 종료 후 결과와 랭킹을 확인할 수 있습니다.
+# 1. 프로젝트 클론
 
-### Features
+- git clone https://github.com/Meezzi/with-run-app.git
 
-Google 로그인: 사용자 인증 및 프로필 설정(사진, 닉네임).
-Google Maps 페이지: 현재 위치 표시, 채팅방 개설/참여, 채팅방 목록 확인.
-채팅방 기능:
-개설자: 시작/종료 버튼 제공.
-참여자: "러닝 대기중" 문구 표시.
+# 2. 의존성 설치
 
+- flutter pub get
 
-러닝 결과:
-키로수, 속도, 소모 칼로리, 이동 시간 표시.
-채팅방 인원 간 닉네임 기반 랭킹 제공.
+## 🔐 .env 파일 설정
 
+- GOOGLE_MAPS_API_KEY=<your-api-key>
 
-오늘의 TOP 러너: 닉네임, 키로수, 이동 시간 표시.
+## 🍎 iOS 설정
 
-### How It Works
+- ios/Flutter/Environment.xcconfig 파일에 추가
 
-앱 실행 후 Google 로그인.
-프로필 설정(사진, 닉네임).
-Google Maps 페이지에서:
-현재 위치 확인.
-채팅방 개설 또는 참여.
-채팅방 목록 확인.
+- GOOGLE_MAPS_API_KEY=<your-api-key>
 
+- ios/Runner/Info.plist에 추가 (필요 시)
 
-채팅방에서:
-개설자는 시작/종료 버튼으로 러닝 관리.
-참여자는 대기 상태 확인.
+- <key>GoogleMapsApiKey</key>
+- <string>$(GOOGLE_MAPS_API_KEY)</string>
 
+## ▶ 앱 실행
 
-러닝 종료 후:
-키로수, 속도, 칼로리, 이동 시간 확인.
-채팅방 인원 랭킹 및 "오늘의 TOP 러너" 확인.
+- flutter run
 
+## 📁 .gitignore
 
+- gitignore
 
-### Requirements
-
-Google Maps API 키
-Google 로그인 설정
-인터넷 연결
-위치 정보 접근 허용
-
-### Installation
-
-Google Maps API 키와 Google 로그인 설정.
-프로젝트 클론 및 의존성 설치:git clone <repository-url>
-cd withRun
-flutter pub get
-
-
-.env 파일에 API 키 추가:GOOGLE_MAPS_API_KEY=<your-api-key>
-
-
-iOS 설정:
-ios/Flutter/Environment.xcconfig 파일에 Google Maps API 키 추가:GOOGLE_MAPS_API_KEY=<your-api-key>
-
-
-ios/Runner/Info.plist에 API 키 추가 (필요 시):<key>GoogleMapsApiKey</key>
-<string>$(GOOGLE_MAPS_API_KEY)</string>
-
-
-
-
-앱 실행:flutter run
-
-
-
-.gitignore
 *.tmp
-android/app/google-services.json
-ios/Runner/GoogleService-Info.plist
-lib/firebase_options.dart
-.env
-ios/Flutter/Environment.xcconfig
+-android/app/google-services.json
+-ios/Runner/GoogleService-Info.plist
+-lib/firebase_options.dart
+-.env
+-ios/Flutter/Environment.xcconfig
 
-### Usage
+## 📂 Directory Structure
+(작성 예정)
 
-Google 로그인 후 프로필 설정.
-Google Maps 페이지에서 채팅방 개설/참여.
-채팅방에서 러닝 시작 및 종료.
-러닝 결과와 랭킹 확인.
+## 📝 Additional Notes
+향후 디렉토리 구조 설명, 기능 흐름도, 시연 영상 추가 예정
 
-### Contributing
+조별과제 및 발표용 문서로 최적화 완료
 
-기여를 원하시면 이슈를 등록하거나 풀 리퀘스트를 보내주세요.
-
-
+### 🔥 withRun: 함께 뛰는 러닝을 시작하세요!
