@@ -92,5 +92,4 @@ Google Maps 페이지에서 채팅방 개설/참여.
 
 기여를 원하시면 이슈를 등록하거나 풀 리퀘스트를 보내주세요.
 
-### License
-MIT License
+
