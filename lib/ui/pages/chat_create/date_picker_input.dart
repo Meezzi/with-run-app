@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 
 class DatePickerInput extends StatefulWidget {
-  const DatePickerInput({super.key, required this.onDateChanged});
+  const DatePickerInput({
+    Key? key,
+    required this.onDateChanged,
+    required this.validator,
+  }) : super(key: key);
+
   final void Function(DateTime? date) onDateChanged;
+  final String? Function(DateTime?) validator;
 
   @override
   State<DatePickerInput> createState() => _DatePickerInputState();
 }
 
 class _DatePickerInputState extends State<DatePickerInput> {
-  DateTime? selectedDate;
+  DateTime? _selectedDate;
+  final _fieldKey = GlobalKey<FormFieldState>();
 
   Future<void> _selectDate() async {
     final DateTime? pickedDate = await showDatePicker(
@@ -19,27 +26,52 @@ class _DatePickerInputState extends State<DatePickerInput> {
       lastDate: DateTime.now().add(Duration(days: 365)),
     );
 
-    setState(() {
-      selectedDate = pickedDate;
-    });
-    widget.onDateChanged(pickedDate);
+    if (pickedDate != null) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+      _fieldKey.currentState?.didChange(pickedDate);
+      widget.onDateChanged(pickedDate);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Text(
-          selectedDate != null
-              ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
-              : '선택된 날짜가 없습니다.',
-              style: TextStyle(
-                fontSize: 18,
+    return FormField<DateTime>(
+      key: _fieldKey,
+      validator: widget.validator,
+      builder: (state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    _selectedDate != null
+                        ? '${_selectedDate!.year}/${_selectedDate!.month}/${_selectedDate!.day}'
+                        : '선택된 날짜가 없습니다.',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ),
+                OutlinedButton(
+                  onPressed: _selectDate,
+                  child: const Text('날짜 선택'),
+                ),
+              ],
+            ),
+            if (state.hasError)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  state.errorText!,
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                ),
               ),
-        ),
-        OutlinedButton(onPressed: _selectDate, child: const Text('날짜 선택')),
-      ],
+          ],
+        );
+      },
     );
   }
 }

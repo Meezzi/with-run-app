@@ -8,6 +8,7 @@ import 'package:with_run_app/data/model/user.dart';
 import 'package:with_run_app/ui/pages/chat_create/chat_create_notifier.dart';
 import 'package:with_run_app/ui/pages/chat_create/date_picker_input.dart';
 import 'package:with_run_app/ui/pages/chat_create/time_range_picker_input.dart';
+import 'package:with_run_app/ui/pages/chat_create/util/chat_creat_input_validator.dart';
 import 'package:with_run_app/ui/pages/chat_create/util/chat_create_util.dart';
 import 'package:with_run_app/ui/pages/chat_information/chat_information_page.dart';
 import 'package:with_run_app/ui/pages/chatting_page/chat_room_view_model.dart';
@@ -38,7 +39,7 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
   @override
   Widget build(BuildContext context) {
     final notifier = ref.watch(chatCreateNotifier.notifier);
-
+    final formKey = GlobalKey<FormState>();
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(centerTitle: true, title: Text('채팅방 만들기')),
@@ -51,6 +52,7 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                 child: Container(
                   constraints: BoxConstraints(minHeight: 350),
                   child: Form(
+                    key: formKey,
                     child: SingleChildScrollView(
                       scrollDirection: Axis.vertical,
                       child: Column(
@@ -65,11 +67,13 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                             name: '채팅방 이름',
                             isRequired: true,
                             controller: titleController,
+                            validator: titleInputValidator,
                           ),
                           inputElement(
                             name: '날짜',
                             isRequired: true,
                             customInput: DatePickerInput(
+                              validator: datePickerValidation,
                               onDateChanged: (date) {
                                 this.date = date;
                               },
@@ -79,6 +83,7 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                             name: '시간',
                             isRequired: true,
                             customInput: TimeRangePickerInput(
+                              validator: timeRangePickerValidator,
                               onRangeChanged: (timeRange) {
                                 this.timeRange = timeRange;
                               },
@@ -105,18 +110,28 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                           FirebaseAuth.instance.currentUser?.uid as String,
                         );
                     final user = await ref.read(userViewModelProvider);
+                    final isFormValid =
+                        formKey.currentState?.validate() ?? false;
+
+                    // 커스텀 위젯 유효성 검사
+
+                    if (!isFormValid) {
+                      // 유효하지 않으면 종료
+                      return;
+                    }
+                    final chatRoom = getChatRoom(user!);
                     final result = await notifier.create(
-                      getChatRoom(user!),
+                      chatRoom,
                       user,
                     );
-                    final a = await ref.read(chatRoomViewModel.notifier).enterChatRoom(result);
-                    print(a!.participants);
+                    await ref.read(chatRoomViewModel.notifier).enterChatRoom(result);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => ChatInformationPage()  
                       ),
                     );
+
                   },
                   child: Text('채팅방 만들기'),
                 ),
@@ -135,7 +150,7 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
     bool readOnly = false,
     Widget? customInput,
     TextEditingController? controller,
-    Function? validator,
+    String? Function(String?) validator = alwaysValid,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
@@ -146,6 +161,7 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
           SizedBox(height: 8),
           customInput ??
               TextFormField(
+                validator: validator,
                 controller: controller,
                 readOnly: readOnly,
                 maxLines: maxLines,
