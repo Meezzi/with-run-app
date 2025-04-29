@@ -7,26 +7,18 @@ class SettingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.pink[100],
+      backgroundColor: isDarkMode ? Colors.blue[900] : Colors.blue[100],
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
+      appBar: AppBar(backgroundColor: Colors.transparent),
       body: Column(
         children: const [
-          Flexible(
-            flex: 3,
-            child: ProfileHeader(),
-          ),
-          Flexible(
-            flex: 6,
-            child: SettingBodyContainer(),
-          ),
+          Flexible(flex: 3, child: ProfileHeader()),
+          Flexible(flex: 6, child: SettingBodyContainer()),
         ],
       ),
     );
   }
 }
-

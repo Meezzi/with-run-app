@@ -6,6 +6,8 @@ class SettingBodyContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Positioned(
       top: MediaQuery.of(context).size.height * 0.32,
       left: 0,
@@ -13,7 +15,7 @@ class SettingBodyContainer extends StatelessWidget {
       bottom: 0,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.grey[100],
+          color: isDarkMode ? Colors.grey[900] : Colors.grey[100],
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(48),
             topRight: Radius.circular(48),

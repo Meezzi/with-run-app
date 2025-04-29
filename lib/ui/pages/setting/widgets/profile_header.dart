@@ -30,15 +30,15 @@ class ProfileHeader extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             user?.nickname ?? "닉네임 없음",
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           Text(
             firebaseUser?.displayName ?? "이름 없음",
-            style: TextStyle(fontSize: 16, color: Colors.grey[800]),
+            style: TextStyle(fontSize: 16, fontWeight:  FontWeight.bold),
           ),
           Text(
             firebaseUser?.email ?? "이메일 없음",
-            style: TextStyle(fontSize: 14, color: Colors.grey),
+            style: TextStyle(fontSize: 14, fontWeight:  FontWeight.bold),
           ),
         ],
       ),
