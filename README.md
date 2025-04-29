@@ -191,13 +191,13 @@
 
 <br>
 
-### 🔐 .env 파일 설정
+### 3. .env 파일 설정
 
 - GOOGLE_MAPS_API_KEY=<your-api-key>
 
 <br>
 
-### 🍎 iOS 설정
+### 4. iOS 설정
 
 - ios/Flutter/Environment.xcconfig 파일에 추가
 
@@ -210,13 +210,13 @@
 
 <br>
 
-### ▶ 앱 실행
+### 5. 앱 실행
 
 - flutter run
 
 <br>
 
-### 📁 .gitignore
+### 6. .gitignore
 
 - gitignore
 
