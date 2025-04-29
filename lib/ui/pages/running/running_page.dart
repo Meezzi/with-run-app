@@ -98,17 +98,33 @@ class _RunningPageState extends ConsumerState<RunningPage>
     super.dispose();
   }
 
-  void _onHostButtonPressed() {
-    final viewModel = ref.read(runningViewModelProvider(widget.chatRoomId));
+  void _onHostButtonPressed() async {
     final viewModelNotifier = ref.read(
       runningViewModelProvider(widget.chatRoomId).notifier,
     );
-    if (viewModel.isStart) {
-      viewModelNotifier.setRunningStatus(false);
-      animationController.stopAnimation();
+    final viewModel = ref.read(runningViewModelProvider(widget.chatRoomId));
+
+    final isRunning = viewModel.isStart;
+
+    final success =
+        isRunning
+            ? await viewModelNotifier.stopRunning()
+            : await viewModelNotifier.startRunning();
+
+    if (success) {
+      await viewModelNotifier.setRunningStatus(!isRunning);
+      isRunning
+          ? animationController.stopAnimation()
+          : animationController.startAnimation();
     } else {
-      viewModelNotifier.setRunningStatus(true);
-      animationController.startAnimation();
+      final errorMessage =
+          ref.read(runningViewModelProvider(widget.chatRoomId)).errorMessage;
+      final displayMessage =
+          errorMessage.isNotEmpty ? errorMessage : '알 수 없는 오류';
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(displayMessage)));
     }
   }
 }
