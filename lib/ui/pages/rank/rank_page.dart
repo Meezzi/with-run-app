@@ -28,8 +28,6 @@ class RankPage extends ConsumerWidget {
             return Center(child: Text('참가자가 없습니다.'));
           }
 
-          final myData = participants.firstWhere((p) => p['id'] == userId);
-
           // 거리순 내림차순 정렬 (복사본 만들기)
           final sortedParticipants = [...participants];
           sortedParticipants.sort((a, b) {
