@@ -29,7 +29,7 @@ class RunningRepository {
   /// 채팅방의 러닝 상태(isStart)를 업데이트
   Future<Result<bool>> updateRunningStatus(bool isRunning) async {
     try {
-      final docRef = _firestore.collection('chat_rooms').doc(chatRoomId);
+      final docRef = _firestore.collection('chatRooms').doc(chatRoomId);
       await docRef.update({'isStart': isRunning});
       return Result.ok(true);
     } catch (e) {
@@ -39,7 +39,7 @@ class RunningRepository {
 
   /// 채팅방의 러닝 상태를 실시간 스트림으로 반환
   Stream<Result<bool>> runningStatusStream() {
-    final docRef = _firestore.collection('chat_rooms').doc(chatRoomId);
+    final docRef = _firestore.collection('chatRooms').doc(chatRoomId);
     return docRef.snapshots().map((snapshot) {
       try {
         final data = snapshot.data();
