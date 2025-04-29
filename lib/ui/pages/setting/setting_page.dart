@@ -8,14 +8,25 @@ class SettingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.transparent),
+      backgroundColor: Colors.pink[100],
       extendBodyBehindAppBar: true,
-      body: Stack(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Column(
         children: const [
-          ProfileHeader(),
-          SettingBodyContainer(),
+          Flexible(
+            flex: 3,
+            child: ProfileHeader(),
+          ),
+          Flexible(
+            flex: 6,
+            child: SettingBodyContainer(),
+          ),
         ],
       ),
     );
   }
 }
+
