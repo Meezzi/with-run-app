@@ -1,10 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:with_run_app/ui/pages/rank/running_view_model.dart';
+import 'package:with_run_app/ui/pages/user_view_model.dart';
 
-class MyResultSummaryCard extends StatelessWidget {
-  const MyResultSummaryCard({super.key});
+class MyResultSummaryCard extends ConsumerStatefulWidget {
+  final String chatRoomId;
+
+  const MyResultSummaryCard({super.key, required this.chatRoomId});
 
   @override
+  _MyResultSummaryCardState createState() => _MyResultSummaryCardState();
+}
+
+class _MyResultSummaryCardState extends ConsumerState<MyResultSummaryCard> {
+  @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userViewModelProvider);
+    final runningState = ref.watch(
+      runningViewModelProvider(widget.chatRoomId),
+    );
+
+    // 유저 정보 아직 로딩 중이면 로딩 표시
+    if (user == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -13,7 +33,7 @@ class MyResultSummaryCard extends StatelessWidget {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundImage: NetworkImage('https://picsum.photos/200'),
+                  backgroundImage: NetworkImage(user.profileImageUrl!),
                   radius: 48,
                   backgroundColor: Colors.blue[100],
                 ),
@@ -22,7 +42,7 @@ class MyResultSummaryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '김닉네임',
+                      user.nickname!,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -30,7 +50,8 @@ class MyResultSummaryCard extends StatelessWidget {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      '5.2 km',
+                      '${((double.tryParse(runningState.distance) ?? 0) / 1000.0).toStringAsFixed(2)} km',
+
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -40,14 +61,23 @@ class MyResultSummaryCard extends StatelessWidget {
                 ),
               ],
             ),
-
             SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                DetailResult(title: '평균 속도', content: '10.0km'),
-                DetailResult(title: '칼로리', content: '305'),
-                DetailResult(title: '걸음 수', content: '7056'),
+                DetailResult(
+                  title: '평균 속도',
+                  content:
+                      '${double.tryParse(runningState.speed)?.toStringAsFixed(1) ?? '0.0'} km/h',
+                ),
+                DetailResult(
+                  title: '칼로리',
+                  content: '${runningState.colories} kcal',
+                ),
+                DetailResult(
+                  title: '걸음 수',
+                  content: '${runningState.steps} 걸음',
+                ),
               ],
             ),
           ],

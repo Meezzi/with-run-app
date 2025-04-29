@@ -10,6 +10,7 @@ import 'package:with_run_app/firebase_options.dart';
 import 'package:with_run_app/ui/pages/login/login_page.dart';
 import 'package:with_run_app/ui/pages/map/map_page.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
+import 'package:with_run_app/ui/pages/running/running_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,11 +37,7 @@ void main() async {
   await initializeDateFormatting('ko_KR', null); // 'ko_KR' 초기화
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(
-    ProviderScope(
-      child: const MyApp(),
-    ),
-  );
+  runApp(ProviderScope(child: const MyApp()));
 }
 
 class MyApp extends ConsumerWidget {
@@ -49,12 +46,9 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(appThemeProvider);
-    
+
     return MaterialApp(
-      theme: themeState.lightTheme,
-      darkTheme: themeState.darkTheme,
-      themeMode: themeState.themeMode,
-      home: FirebaseAuth.instance.currentUser != null ? const MapPage() : LoginPage(),
+      home: FirebaseAuth.instance.currentUser != null ? MapPage() : LoginPage(),
     );
   }
 }
