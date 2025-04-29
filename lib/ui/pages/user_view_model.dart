@@ -6,7 +6,7 @@ import 'package:with_run_app/data/repository/user_repository.dart';
 class UserViewModel extends Notifier<User?> {
   @override
   User? build() {
-    getById(FirebaseAuth.instance.currentUser?.uid as String);
+    getById(FirebaseAuth.instance.currentUser?.uid);
     return null;
   }
 
@@ -36,9 +36,11 @@ class UserViewModel extends Notifier<User?> {
   }
 
   /// 해당 User의 정보를 가져옴
-  Future<void> getById(String uid) async {
+  Future<User?> getById(String? uid) async {
     User? user = await UserRepository().getById(uid);
     state = user;
+
+    return user;
   }
 }
 
