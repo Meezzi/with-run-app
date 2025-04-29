@@ -38,16 +38,12 @@ class ChatRoomModel {
     }
     final data = rawData as Map<String, dynamic>;
 
-    participants.forEach((e){
-      print(e.nickname);
-    });
-
     return ChatRoomModel(
       id: doc.id,
       title: data['title'] ?? '',
       description: data['description'],
       location: data['location'],
-      creator: User.fromJson(data['creator']),
+      creator: data['creator'] != null ? User.fromJson(data['creator']) : null,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       participants: participants,
       lastMessage: data['lastMessage'],
@@ -72,8 +68,8 @@ class ChatRoomModel {
           lastMessageTimestamp != null
               ? Timestamp.fromDate(lastMessageTimestamp!)
               : null,
-      'startTime': startTime,
-      'endTime': endTime,
+      'startTime': Timestamp.fromDate(startTime),
+      'endTime': Timestamp.fromDate(endTime),
     };
   }
 }

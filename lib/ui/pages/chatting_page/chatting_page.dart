@@ -67,10 +67,10 @@ class _ChattingPageState extends ConsumerState<ChattingPage> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  widget.location,
-                  style: const TextStyle(fontSize: 12),
-                ),
+             //   Text(
+             //     widget.location,
+            //      style: const TextStyle(fontSize: 12),
+            //    ),
               ],
             ),
             Row(

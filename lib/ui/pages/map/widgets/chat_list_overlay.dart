@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/models/chat_room.dart';
+import 'package:with_run_app/data/model/chat_room_model.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
 import 'package:with_run_app/ui/pages/map/viewmodels/chat_list_viewmodel.dart';
 
@@ -64,8 +64,18 @@ class ChatListOverlay extends ConsumerWidget {
                       _buildRoomsList(context, themeState, rooms, ref),
                   ],
                 ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => Center(child: Text('오류: $error')),
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (error, stack) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text('오류: $error'),
+                  ),
+                ),
               ),
             ),
           ),
@@ -158,7 +168,7 @@ class ChatListOverlay extends ConsumerWidget {
   Widget _buildRoomsList(
     BuildContext context,
     AppThemeState themeState,
-    List<ChatRoom> rooms,
+    List<ChatRoomModel> rooms,
     WidgetRef ref,
   ) {
     return Flexible(

@@ -2,24 +2,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:with_run_app/models/chat_room.dart';
-import 'package:with_run_app/services/chat_service.dart';
-
-
+import 'package:with_run_app/data/model/chat_room_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
-  
-  final ChatService _chatService = ChatService();
-  final ChatRoom chatRoom;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ChatRoomModel chatRoom;
 
-  ChatRoomInfoViewModel( this.chatRoom) : super(const AsyncValue.loading()) {
+  ChatRoomInfoViewModel(this.chatRoom) : super(const AsyncValue.loading()) {
     _getAddress();
   }
 
   Future<void> _getAddress() async {
     state = const AsyncValue.loading();
     try {
-      final address = await _getAddressFromLatLng(chatRoom.latitude, chatRoom.longitude);
+      final address = await _getAddressFromLatLng(
+          chatRoom.location.latitude, chatRoom.location.longitude);
       state = AsyncValue.data(address);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
@@ -35,7 +33,7 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
       }
       return '주소를 가져올 수 없습니다';
     } catch (e) {
-      debugPrint('Geocoding 오류: $e'); // 전역 함수로 호출
+      debugPrint('Geocoding 오류: $e');
       return '주소 변환 실패';
     }
   }
@@ -48,21 +46,8 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
     }
 
     // 사용자가 채팅방 생성자인 경우는 참여 가능
-    if (chatRoom.creatorId == userId) {
-      // try {
-      //   Navigator.push(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => ChatRoomPage(
-      //         chatRoom: chatRoom,
-      //         onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id),
-      //       ),
-      //     ),
-      //   );
-      // } catch (e) {
-      //   debugPrint('채팅방 참여 오류: $e'); // 전역 함수로 호출
-      //   _showSnackBar(context, '오류 발생: $e', isError: true);
-      // }
+    if (chatRoom.creator?.uid == userId) {
+      _navigateToChatRoom(context);
       return;
     }
 
@@ -75,36 +60,57 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
       return;
     }
 
-    // try {
-    //   final result = await _chatService.joinChatRoom(chatRoom.id);
-    //   if (!context.mounted) return;
-    //   if (result) {
-    //     Navigator.push(
-    //       context,
-    //       MaterialPageRoute(
-    //         builder: (context) => ChatRoomPage(
-    //           chatRoom: chatRoom,
-    //           onRoomDeleted: () => _ref.read(mapProvider.notifier).refreshMapAfterRoomDeletion(chatRoom.id),
-    //         ),
-    //       ),
-    //     );
-    //   } else {
-    //     _showSnackBar(context, '채팅방 참여에 실패했습니다.', isError: true);
-    //   }
-    // } catch (e) {
-    //   debugPrint('채팅방 참여 오류: $e'); // 전역 함수로 호출
-    //   _showSnackBar(context, '오류 발생: $e', isError: true);
-    // }
+    try {
+      // 사용자 정보 가져오기
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      
+      if (!userDoc.exists) {
+        _showSnackBar(context, '사용자 정보를 찾을 수 없습니다.', isError: true);
+        return;
+      }
+      
+      final userData = userDoc.data() as Map<String, dynamic>;
+      
+      // 참가자로 추가
+      await _firestore
+          .collection('chatRooms')
+          .doc(chatRoom.id)
+          .collection('participants')
+          .doc(userId)
+          .set({
+            'nickname': userData['nickname'] ?? '사용자',
+            'profileImageUrl': userData['profileImageUrl'] ?? '',
+          });
+      
+      if (!context.mounted) return;
+      
+      _showSnackBar(context, '채팅방에 참여했습니다.');
+      _navigateToChatRoom(context);
+    } catch (e) {
+      debugPrint('채팅방 참여 오류: $e');
+      if (context.mounted) {
+        _showSnackBar(context, '오류 발생: $e', isError: true);
+      }
+    }
   }
 
   Future<bool> _checkUserHasJoinedRoom(String userId) async {
     try {
-      final rooms = await _chatService.getJoinedChatRooms(userId);
-      return rooms.isNotEmpty;
+      final rooms = await _firestore
+          .collection('chatRooms')
+          .where('participants', arrayContains: userId)
+          .limit(1)
+          .get();
+      return rooms.docs.isNotEmpty;
     } catch (e) {
-      debugPrint('사용자 참여 채팅방 확인 오류: $e'); // 전역 함수로 호출
+      debugPrint('사용자 참여 채팅방 확인 오류: $e');
       return false;
     }
+  }
+
+  void _navigateToChatRoom(BuildContext context) {
+    // 채팅방 화면 이동 로직 구현
+    // 예: Navigator.push(context, MaterialPageRoute(builder: (context) => ChatRoomPage(chatRoom: chatRoom)));
   }
 
   void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
@@ -121,6 +127,6 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
   }
 }
 
-final chatRoomInfoViewModelProvider = StateNotifierProvider.family<ChatRoomInfoViewModel, AsyncValue<String>, ChatRoom>(
+final chatRoomInfoViewModelProvider = StateNotifierProvider.family<ChatRoomInfoViewModel, AsyncValue<String>, ChatRoomModel>(
   (ref, chatRoom) => ChatRoomInfoViewModel(chatRoom),
 );
