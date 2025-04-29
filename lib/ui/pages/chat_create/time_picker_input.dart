@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 class TimePickerInput extends StatefulWidget {
   const TimePickerInput({super.key});
-  final String? Function(String?) validator;
 
   @override
   State<TimePickerInput> createState() => _TimePickerInputState();

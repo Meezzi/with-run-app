@@ -119,10 +119,7 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                       // 유효하지 않으면 종료
                       return;
                     }
-                    print('created');
                     final chatRoom = getChatRoom(user!);
-                    
-
                     final result = await notifier.create(
                       chatRoom,
                       user,
@@ -132,17 +129,6 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => ChatInformationPage()),
-                    );
-
-                     final result = await notifier.create(
-                       chatRoom,
-                       user,
-                     );
-                     await ref.read(chatRoomViewModel.notifier).enterChatRoom(result);
-
-                     Navigator.push(
-                       context,
-                       MaterialPageRoute(builder: (context) => ChatInformationPage()),
                     );
 
                   },
