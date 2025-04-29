@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:with_run_app/models/chat_room.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
 import 'package:with_run_app/ui/pages/map/viewmodels/chat_list_viewmodel.dart';
-import 'package:provider/provider.dart' as provider;
 
 class ChatListOverlay extends ConsumerWidget {
   final VoidCallback onDismiss;
@@ -15,7 +14,7 @@ class ChatListOverlay extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeProvider = provider.Provider.of<AppThemeProvider>(context);
+    final themeState = ref.watch(appThemeProvider);
     final appBarHeight = AppBar().preferredSize.height + MediaQuery.of(context).padding.top;
     final chatListState = ref.watch(chatListViewModelProvider);
 
@@ -41,7 +40,7 @@ class ChatListOverlay extends ConsumerWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: themeProvider.isDarkMode
+                  colors: themeState.isDarkMode
                       ? [Colors.grey[800]!, Colors.grey[850]!]
                       : [Colors.white, Colors.grey[100]!],
                 ),
@@ -58,11 +57,11 @@ class ChatListOverlay extends ConsumerWidget {
                 data: (rooms) => Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildHeader(themeProvider),
+                    _buildHeader(themeState),
                     if (rooms.isEmpty)
-                      _buildEmptyView(themeProvider)
+                      _buildEmptyView(themeState)
                     else
-                      _buildRoomsList(context, themeProvider, rooms, ref),
+                      _buildRoomsList(context, themeState, rooms, ref),
                   ],
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -75,14 +74,14 @@ class ChatListOverlay extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(AppThemeProvider themeProvider) {
+  Widget _buildHeader(AppThemeState themeState) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: themeProvider.isDarkMode
+          colors: themeState.isDarkMode
               ? [Colors.blue[400]!, Colors.green[400]!]
               : [const Color(0xFF2196F3), const Color(0xFF00E676)],
         ),
@@ -98,14 +97,14 @@ class ChatListOverlay extends ConsumerWidget {
             children: [
               Icon(
                 Icons.forum_rounded,
-                color: themeProvider.isDarkMode ? Colors.white : Colors.white,
+                color: themeState.isDarkMode ? Colors.white : Colors.white,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
                 '내 채팅방',
                 style: TextStyle(
-                  color: themeProvider.isDarkMode ? Colors.white : Colors.white,
+                  color: themeState.isDarkMode ? Colors.white : Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -116,7 +115,7 @@ class ChatListOverlay extends ConsumerWidget {
             icon: Icon(
               Icons.close,
               size: 20,
-              color: themeProvider.isDarkMode ? Colors.white : Colors.white,
+              color: themeState.isDarkMode ? Colors.white : Colors.white,
             ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -127,7 +126,7 @@ class ChatListOverlay extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyView(AppThemeProvider themeProvider) {
+  Widget _buildEmptyView(AppThemeState themeState) {
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -135,7 +134,7 @@ class ChatListOverlay extends ConsumerWidget {
           Icon(
             Icons.forum_outlined,
             size: 48,
-            color: themeProvider.isDarkMode
+            color: themeState.isDarkMode
                 ? Colors.grey[500]
                 : const Color(0xFFBDBDBD),
           ),
@@ -143,7 +142,7 @@ class ChatListOverlay extends ConsumerWidget {
           Text(
             '참여 중인 채팅방이 없습니다.',
             style: TextStyle(
-              color: themeProvider.isDarkMode
+              color: themeState.isDarkMode
                   ? Colors.grey[300]
                   : const Color(0xFF757575),
               fontSize: 14,
@@ -158,7 +157,7 @@ class ChatListOverlay extends ConsumerWidget {
 
   Widget _buildRoomsList(
     BuildContext context,
-    AppThemeProvider themeProvider,
+    AppThemeState themeState,
     List<ChatRoom> rooms,
     WidgetRef ref,
   ) {
@@ -171,7 +170,7 @@ class ChatListOverlay extends ConsumerWidget {
           height: 1,
           indent: 16,
           endIndent: 16,
-          color: themeProvider.isDarkMode ? Colors.grey[700] : Colors.grey[300],
+          color: themeState.isDarkMode ? Colors.grey[700] : Colors.grey[300],
         ),
         itemBuilder: (context, index) {
           final room = rooms[index];
@@ -183,7 +182,7 @@ class ChatListOverlay extends ConsumerWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: themeProvider.isDarkMode
+                  colors: themeState.isDarkMode
                       ? [Colors.blue[400]!, Colors.green[400]!]
                       : [const Color(0xFF2196F3), const Color(0xFF00E676)],
                 ),
@@ -202,7 +201,7 @@ class ChatListOverlay extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: themeProvider.isDarkMode
+                color: themeState.isDarkMode
                     ? Colors.white
                     : const Color(0xFF212121),
               ),
@@ -212,7 +211,7 @@ class ChatListOverlay extends ConsumerWidget {
               '참여자: ${room.participants?.length ?? 0}명',
               style: TextStyle(
                 fontSize: 12,
-                color: themeProvider.isDarkMode
+                color: themeState.isDarkMode
                     ? Colors.grey[400]
                     : const Color(0xFF757575),
               ),
@@ -220,7 +219,7 @@ class ChatListOverlay extends ConsumerWidget {
             trailing: Icon(
               Icons.arrow_forward_ios_rounded,
               size: 14,
-              color: themeProvider.isDarkMode
+              color: themeState.isDarkMode
                   ? Colors.grey[400]
                   : const Color(0xFF9E9E9E),
             ),

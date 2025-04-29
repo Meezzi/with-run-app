@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:with_run_app/models/chat_room.dart';
 import 'package:with_run_app/services/chat_service.dart';
-import 'package:with_run_app/ui/pages/chatting_page/chatting_page.dart';
-import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
+
 
 class ChatListViewModel extends StateNotifier<AsyncValue<List<ChatRoom>>> {
-  final Ref _ref;
+ 
   final ChatService _chatService = ChatService();
 
-  ChatListViewModel(this._ref) : super(const AsyncValue.loading()) {
+  ChatListViewModel() : super(const AsyncValue.loading()) {
     loadJoinedChatRooms();
   }
 
@@ -69,5 +68,5 @@ class ChatListViewModel extends StateNotifier<AsyncValue<List<ChatRoom>>> {
 
 final chatListViewModelProvider =
     StateNotifierProvider<ChatListViewModel, AsyncValue<List<ChatRoom>>>((ref) {
-  return ChatListViewModel(ref);
+  return ChatListViewModel();
 });

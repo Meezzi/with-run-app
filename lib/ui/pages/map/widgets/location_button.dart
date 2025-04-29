@@ -2,19 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
 import 'package:with_run_app/ui/pages/map/viewmodels/location_button_viewmodel.dart';
-import 'package:provider/provider.dart' as provider;
 
 class LocationButton extends ConsumerWidget {
   const LocationButton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeProvider = provider.Provider.of<AppThemeProvider>(context);
+    final themeState = ref.watch(appThemeProvider);
 
     return Container(
       margin: const EdgeInsets.only(right: 8),
       decoration: BoxDecoration(
-        color: themeProvider.isDarkMode ? Colors.white : Colors.grey[300],
+        color: themeState.isDarkMode ? Colors.white : Colors.grey[300],
         shape: BoxShape.circle,
         boxShadow: const [
           BoxShadow(
@@ -27,7 +26,7 @@ class LocationButton extends ConsumerWidget {
       child: IconButton(
         icon: Icon(
           Icons.my_location,
-          color: themeProvider.isDarkMode ? Colors.blue[600] : const Color(0xFF2196F3),
+          color: themeState.isDarkMode ? Colors.blue[600] : const Color(0xFF2196F3),
         ),
         tooltip: '내 위치로 이동',
         onPressed: () => ref.read(locationButtonViewModelProvider.notifier).onLocationButtonTap(context),

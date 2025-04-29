@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:with_run_app/core/loading_bar.dart';
 import 'package:with_run_app/ui/pages/map/map_page.dart';
 import 'package:with_run_app/ui/pages/my_info/my_info_view_model.dart';
 import 'package:with_run_app/ui/pages/my_info/widgets/nickname_field.dart';
@@ -21,6 +22,7 @@ class _MyInfoPageState extends ConsumerState<MyInfoPage> {
   final formKey = GlobalKey<FormState>();
   final nicknameController = TextEditingController();
   late final myInfoVm = ref.read(myInfoViewModelProvider.notifier);
+  final loadingBar = LoadingOverlay();
   bool isAndroid = Platform.isAndroid;
   bool isClosed = false;
 
@@ -35,6 +37,8 @@ class _MyInfoPageState extends ConsumerState<MyInfoPage> {
     }
 
     if (isNicknameValid && myInfoState.xFile != null) {
+      loadingBar.show(context);
+
       MyInfoState? newState = await myInfoVm.uploadImage(myInfoState.xFile!);
 
       final isSignin = await userVm.insert(
@@ -43,8 +47,10 @@ class _MyInfoPageState extends ConsumerState<MyInfoPage> {
         profileImageUrl: newState?.imageUrl,
       );
 
+      loadingBar.hide();
+
       if (isSignin) {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) {
@@ -87,6 +93,13 @@ class _MyInfoPageState extends ConsumerState<MyInfoPage> {
           print('hhhhhhhhh  hhhhhhhh: $isAndroid');
 
           setState(() {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                behavior: SnackBarBehavior.floating,
+                // showCloseIcon: true,
+                content: Text('앱을 종료하시려면 한번 더 뒤로가기 버튼을 눌러주세요'),
+              ),
+            );
             print('앱을 종료하시려면 한번 더 뒤로가기 버튼을 눌러주세요');
             isClosed = true;
           });
@@ -108,7 +121,7 @@ class _MyInfoPageState extends ConsumerState<MyInfoPage> {
                     width: 50,
                     child: Text(
                       '완료',
-                      style: TextStyle(fontSize: 18, color: Colors.blue),
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
                 ),

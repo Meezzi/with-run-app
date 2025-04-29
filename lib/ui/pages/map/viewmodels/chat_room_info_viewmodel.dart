@@ -4,16 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:with_run_app/models/chat_room.dart';
 import 'package:with_run_app/services/chat_service.dart';
-// import 'package:with_run_app/ui/pages/chat/chat_room_page.dart';
-import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
+
 
 
 class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
-  final Ref _ref;
+  
   final ChatService _chatService = ChatService();
   final ChatRoom chatRoom;
 
-  ChatRoomInfoViewModel(this._ref, this.chatRoom) : super(const AsyncValue.loading()) {
+  ChatRoomInfoViewModel( this.chatRoom) : super(const AsyncValue.loading()) {
     _getAddress();
   }
 
@@ -123,5 +122,5 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
 }
 
 final chatRoomInfoViewModelProvider = StateNotifierProvider.family<ChatRoomInfoViewModel, AsyncValue<String>, ChatRoom>(
-  (ref, chatRoom) => ChatRoomInfoViewModel(ref, chatRoom),
+  (ref, chatRoom) => ChatRoomInfoViewModel(chatRoom),
 );
