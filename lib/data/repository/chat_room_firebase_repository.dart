@@ -26,8 +26,23 @@ class ChatRoomFirebaseRepository implements ChatRoomRepository {
     if (!doc.exists) {
       throw Exception('ChatRoom not found');
     }
+    // 서브 컬렉션 participants 불러오기
+    final participantsSnapshot =
+        await _firestore
+            .collection('chatRooms')
+            .doc(id)
+            .collection('participants')
+            .get();
 
-    return ChatRoomModel.fromFirestore(doc);
+    final participants =
+        participantsSnapshot.docs.map((e) {
+          print('${e.id} : ${e.data()['nickName']}');
+          final user = User.fromJson(e.data());
+          user.uid = e.id;
+          return user;
+        }).toList();
+
+    return ChatRoomModel.fromFirestore(doc, participants);
   }
 
   @override
@@ -38,7 +53,7 @@ class ChatRoomFirebaseRepository implements ChatRoomRepository {
         .collection('participants')
         .doc(user.uid)
         .set({
-          'nickName': user.nickname,
+          'nickname': user.nickname,
           'profileImageUrl': user.profileImageUrl,
         });
   }
