@@ -23,13 +23,6 @@ class SettingActionBox extends StatelessWidget {
       child: Column(
         children: [
           ListTile(
-            leading: Icon(Icons.dark_mode, color: Colors.blue),
-            title: Text("다크 모드 변환"),
-            trailing: Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {},
-          ),
-          Divider(),
-          ListTile(
             leading: Icon(Icons.logout, color: Colors.red),
             title: Text("로그아웃"),
             trailing: Icon(Icons.arrow_forward_ios, size: 16),
