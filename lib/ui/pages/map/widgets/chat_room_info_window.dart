@@ -5,6 +5,8 @@ import 'package:with_run_app/ui/pages/map/theme_provider.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:with_run_app/ui/pages/chat_information/chat_information_page.dart';
 import 'package:with_run_app/ui/pages/chatting_page/chat_room_view_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:with_run_app/ui/pages/chatting_page/chatting_page.dart';
 
 class ChatRoomInfoWindow extends ConsumerStatefulWidget {
   final String chatRoomId;
@@ -33,8 +35,8 @@ class _ChatRoomInfoWindowState extends ConsumerState<ChatRoomInfoWindow> {
 
   Future<void> _loadChatRoom() async {
     try {
-      // 채팅방 정보 로드
-      final result = await ref.read(chatRoomViewModel.notifier).enterChatRoom(widget.chatRoomId);
+      // 채팅방 정보만 로드 (참여는 하지 않음)
+      final result = await ref.read(chatRoomViewModel.notifier).getChatRoomInfo(widget.chatRoomId);
       
       if (result != null) {
         setState(() {
@@ -94,6 +96,71 @@ class _ChatRoomInfoWindowState extends ConsumerState<ChatRoomInfoWindow> {
       }
       debugPrint('주소 로드 오류: $e');
     }
+  }
+  
+  // 채팅방 입장 처리
+  Future<void> _enterChatRoom() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        _showSnackBar('로그인이 필요합니다.', isError: true);
+        return;
+      }
+      
+      // 사용자가 이미 다른 채팅방에 참여 중인지 확인
+      final chatRoomVm = ref.read(chatRoomViewModel.notifier);
+      final isInAnyRoom = await chatRoomVm.isUserInAnyRoom();
+      
+      if (!mounted) return;
+      
+      if (isInAnyRoom) {
+        _showSnackBar('이미 참여 중인 채팅방이 있습니다. 한 번에 하나의 채팅방에만 참여할 수 있습니다.', isError: true);
+        return;
+      }
+      
+      // 채팅방에 입장하기 위한 처리
+      await chatRoomVm.enterChatRoom(widget.chatRoomId);
+      
+      // 참가자로 추가
+      await chatRoomVm.addParticipant(widget.chatRoomId);
+      
+      widget.onDismiss(); // 인포 윈도우 닫기
+      
+      if (!mounted) return;
+      
+      // 채팅방으로 이동
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChattingPage(
+            chatRoomId: widget.chatRoomId,
+            myUserId: user.uid,
+            roomName: chatRoom?.title ?? '채팅방',
+            location: address,
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('채팅방 입장 오류: $e');
+      if (mounted) {
+        _showSnackBar('채팅방 입장에 실패했습니다: $e', isError: true);
+      }
+    }
+  }
+  
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.redAccent : const Color(0xFF00E676),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.fromLTRB(16, 16, 16, 130),
+        elevation: 4,
+      ),
+    );
   }
 
   @override
@@ -286,15 +353,7 @@ class _ChatRoomInfoWindowState extends ConsumerState<ChatRoomInfoWindow> {
                     child: const Text('닫기'),
                   ),
                   ElevatedButton(
-                    onPressed: () {
-                      widget.onDismiss();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ChatInformationPage(),
-                        ),
-                      );
-                    },
+                    onPressed: _enterChatRoom,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: themeState.isDarkMode
                           ? Colors.blue[400]
@@ -307,7 +366,7 @@ class _ChatRoomInfoWindowState extends ConsumerState<ChatRoomInfoWindow> {
                       ),
                     ),
                     child: const Text(
-                      '채팅방 보기',
+                      '채팅방 입장하기',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,

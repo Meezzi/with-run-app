@@ -139,6 +139,10 @@ class MapNotifier extends StateNotifier<MapState> {
   // Firestore에서 채팅방 로드
   Future<void> refreshMap() async {
     try {
+      // 채팅방 생성 모드 상태 유지
+      final isCreatingChatRoom = state.isCreatingChatRoom;
+      final selectedPosition = state.selectedPosition;
+      
       final snapshot = await FirebaseFirestore.instance.collection('chatRooms').get();
       final currentMarkers = Set<Marker>.from(state.markers);
       
@@ -171,6 +175,11 @@ class MapNotifier extends StateNotifier<MapState> {
             ),
           );
         }
+      }
+      
+      // 임시 마커 유지
+      if (selectedPosition != null && isCreatingChatRoom) {
+        addTemporaryMarker(selectedPosition);
       }
       
       state = state.copyWith(markers: currentMarkers);

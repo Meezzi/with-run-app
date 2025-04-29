@@ -260,6 +260,10 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                       
                       loadingBar.hide();
                       
+                      // 채팅방 생성 후 임시 마커 제거 및 채팅방 생성 모드 비활성화
+                      ref.read(mapProvider.notifier).removeTemporaryMarker();
+                      ref.read(mapProvider.notifier).setCreatingChatRoom(false);
+                      
                       // 채팅방으로 바로 이동
                       Navigator.pushReplacement(
                         context,

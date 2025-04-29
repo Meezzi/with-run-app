@@ -26,7 +26,9 @@ class CreateChatRoomDialog extends ConsumerWidget {
       actions: [
         CupertinoDialogAction(
           onPressed: () {
+            // 취소 시 임시 마커 제거 및 채팅방 생성 모드 비활성화
             ref.read(mapProvider.notifier).removeTemporaryMarker();
+            ref.read(mapProvider.notifier).setCreatingChatRoom(false);
             onDismiss();
           },
           child: const Text('아니요'),

@@ -22,6 +22,17 @@ class ChatRoomViewModel extends Notifier<ChatRoomModel?>{
       return null;
     }
   }
+  
+  // 채팅방 정보만 가져오는 메서드 (상태 변경 없음)
+  Future<ChatRoomModel?> getChatRoomInfo(String roomId) async {
+    try {
+      ChatRoomModel result = await repository.get(roomId);
+      return result;
+    } catch (e) {
+      debugPrint('채팅방 정보 조회 오류: $e');
+      return null;
+    }
+  }
 
   Future<void> addParticipant(String chatRoomId) async {
     if (chatRoomId.isEmpty) return;

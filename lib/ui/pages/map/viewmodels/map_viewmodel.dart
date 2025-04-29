@@ -4,10 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:with_run_app/ui/pages/chat_create/chat_create_page.dart';
 import 'package:with_run_app/ui/pages/chatting_page/chat_room_view_model.dart';
-import 'package:with_run_app/ui/pages/chatting_page/chatting_page.dart';
 import 'package:with_run_app/ui/pages/map/providers/location_provider.dart';
 import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
 import 'package:with_run_app/ui/pages/map/widgets/chat_list_overlay.dart';
+import 'package:with_run_app/ui/pages/map/widgets/chat_room_info_window.dart';
 import 'package:with_run_app/ui/pages/map/widgets/create_chat_room_dialog.dart';
 
 class MapViewModel extends StateNotifier<bool> {
@@ -22,7 +22,7 @@ class MapViewModel extends StateNotifier<bool> {
     if (!_isInitialized) {
       _isInitialized = true;
       _ref.read(mapProvider.notifier).setOnChatRoomMarkerTapCallback((chatRoomId) {
-        _showChatRoomInfo(context, chatRoomId);
+        _showChatRoomInfoWindow(context, chatRoomId);
       });
       _ref.read(mapProvider.notifier).setOnTemporaryMarkerTapCallback((position) {
         _showCreateChatRoomConfirmDialog(context, position);
@@ -30,59 +30,22 @@ class MapViewModel extends StateNotifier<bool> {
     }
   }
 
-  Future<void> _showChatRoomInfo(BuildContext context, String chatRoomId) async {
+  // 채팅방 마커 클릭 시 인포 윈도우 표시 메서드
+  void _showChatRoomInfoWindow(BuildContext context, String chatRoomId) {
     _closeOverlays();
     
-    try {
-      // 사용자가 이미 다른 채팅방에 참여 중인지 확인
-      final chatRoomVm = _ref.read(chatRoomViewModel.notifier);
-      final isInAnyRoom = await chatRoomVm.isUserInAnyRoom();
-      
-      if (!context.mounted) return;
-      
-      if (isInAnyRoom) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('이미 참여 중인 채팅방이 있습니다. 한 번에 하나의 채팅방에만 참여할 수 있습니다.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-      
-      // 채팅방 정보 로드
-      final result = await chatRoomVm.enterChatRoom(chatRoomId);
-      
-      // 참가자 추가
-      await chatRoomVm.addParticipant(chatRoomId);
-      
-      // 채팅 페이지로 직접 이동
-      if (!context.mounted) return;
-      
-      if (result != null) {
-        final user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChattingPage(
-                chatRoomId: chatRoomId,
-                myUserId: user.uid,
-                roomName: result.title,
-                location: '${result.location.latitude}, ${result.location.longitude}',
-              ),
-            ),
-          );
-        }
-      } else {
-        _showSnackBar(context, '채팅방 정보를 불러올 수 없습니다.', isError: true);
-      }
-    } catch (e) {
-      debugPrint('채팅방 정보 로드 오류: $e');
-      if (context.mounted) {
-        _showSnackBar(context, '채팅방 정보를 불러올 수 없습니다.', isError: true);
-      }
-    }
+    _infoWindowOverlay = OverlayEntry(
+      builder: (context) => ChatRoomInfoWindow(
+        chatRoomId: chatRoomId,
+        onDismiss: () {
+          _infoWindowOverlay?.remove();
+          _infoWindowOverlay = null;
+        },
+      ),
+    );
+    
+    // 오버레이 삽입
+    Overlay.of(context).insert(_infoWindowOverlay!);
   }
 
   void _showCreateChatRoomConfirmDialog(BuildContext context, LatLng position) {
@@ -194,10 +157,13 @@ class MapViewModel extends StateNotifier<bool> {
       return;
     }
     
+    // 채팅방 생성 모드 활성화 및 위치 선택 안내
     final mapState = _ref.read(mapProvider);
+    // 이미 선택된 위치가 있는 경우 바로 생성 페이지로 이동
     if (mapState.selectedPosition != null) {
       _navigateToChatCreatePage(context);
     } else {
+      // 위치를 아직 선택하지 않은 경우 안내 다이얼로그 표시
       _ref.read(mapProvider.notifier).setCreatingChatRoom(true);
       _showLocationSelectionDialog(context);
     }
