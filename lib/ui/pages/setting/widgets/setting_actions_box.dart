@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:with_run_app/core/google_sign_in_helper.dart';
+import 'package:with_run_app/ui/pages/login/login_page.dart';
 
 class SettingActionBox extends StatelessWidget {
   const SettingActionBox({super.key});
@@ -25,10 +27,31 @@ class SettingActionBox extends StatelessWidget {
             leading: Icon(Icons.logout, color: Colors.red),
             title: Text("로그아웃"),
             trailing: Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {},
+            onTap: () async {
+              _logout(context);
+            },
           ),
         ],
       ),
     );
+  }
+
+  void _logout(BuildContext context) async {
+    try {
+      await signOutGoogle();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return LoginPage();
+          },
+        ),
+        (route) => false,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('로그아웃 중 오류가 발생했습니다.')));
+    }
   }
 }

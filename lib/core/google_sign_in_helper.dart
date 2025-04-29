@@ -29,3 +29,12 @@ Future<UserCredential?> signInWithGoogle() async {
     return null;
   }
 }
+
+Future<void> signOutGoogle() async {
+  try {
+    await GoogleSignIn().signOut();
+    await FirebaseAuth.instance.signOut();
+  } catch (e) {
+    debugPrint('로그아웃 오류: $e');
+  }
+}
