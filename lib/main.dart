@@ -37,11 +37,7 @@ void main() async {
   await initializeDateFormatting('ko_KR', null); // 'ko_KR' 초기화
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(
-    ProviderScope(
-      child: const MyApp(),
-    ),
-  );
+  runApp(ProviderScope(child: const MyApp()));
 }
 
 class MyApp extends ConsumerWidget {
@@ -50,10 +46,9 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(appThemeProvider);
-    
+
     return MaterialApp(
-      home: RunningPage(chatRoomId: 'minzi_test', userId: 'EeNQRimOTeP9rOkCh2SyjCvBAKb2', isCreator: true)
-      // FirebaseAuth.instance.currentUser != null ? MapPage() : LoginPage(),
+      home: FirebaseAuth.instance.currentUser != null ? MapPage() : LoginPage(),
     );
   }
 }
