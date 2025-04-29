@@ -233,6 +233,14 @@ class AppThemeState {
           bodyLarge: TextStyle(color: Colors.black),
           bodyMedium: TextStyle(color: Colors.black87),
         ),
+        colorScheme: const ColorScheme.light(
+          primary: Colors.blue,
+          onPrimary: Colors.white,
+          secondary: Colors.blueAccent,
+          onSecondary: Colors.white,
+          surface: Colors.white,
+          onSurface: Colors.black87,
+        ),
       );
 
   ThemeData get darkTheme => ThemeData(
@@ -253,6 +261,14 @@ class AppThemeState {
         textTheme: const TextTheme(
           bodyLarge: TextStyle(color: Colors.white),
           bodyMedium: TextStyle(color: Colors.white70),
+        ),
+        colorScheme: ColorScheme.dark(
+          primary: Colors.blueGrey,
+          onPrimary: Colors.white,
+          secondary: Colors.blueAccent,
+          onSecondary: Colors.white,
+          surface: Colors.grey[800]!,
+          onSurface: Colors.white,
         ),
       );
 }

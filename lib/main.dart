@@ -52,7 +52,8 @@ class _MyAppState extends ConsumerState<MyApp> {
     final themeState = ref.watch(appThemeProvider);
     final userState = ref.watch(userViewModelProvider);
 
-    return MaterialApp(
+  return MaterialApp(
+    
       theme: themeState.lightTheme,
       darkTheme: themeState.darkTheme,
       themeMode: themeState.themeMode,

@@ -16,6 +16,7 @@ import 'package:with_run_app/ui/pages/chat_create/util/chat_create_util.dart';
 import 'package:with_run_app/ui/pages/chatting_page/chat_room_view_model.dart';
 import 'package:with_run_app/ui/pages/chatting_page/chatting_page.dart';
 import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
+import 'package:with_run_app/ui/pages/map/providers/location_provider.dart';
 import 'package:with_run_app/ui/pages/user_view_model.dart';
 
 class ChatCreatePage extends ConsumerStatefulWidget {
@@ -51,9 +52,9 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
       final chatRoomVm = ref.read(chatRoomViewModel.notifier);
       final hasCreatedRoom = await chatRoomVm.userHasCreatedRoom();
       
+      if (!mounted) return;
+      
       if (hasCreatedRoom) {
-        if (!mounted) return;
-        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('이미 생성한 채팅방이 있습니다. 한 번에 하나의 채팅방만 만들 수 있습니다.'),
@@ -70,17 +71,26 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
   }
 
   Future<void> _loadLocationData() async {
+    if (!mounted) return;
+    
+    // 로딩 상태 설정
     setState(() {
       isLoadingLocation = true;
     });
+
+    debugPrint('위치 정보 로드 시작');
 
     try {
       // map_provider에서 selectedPosition 가져오기
       final mapState = ref.read(mapProvider);
       final position = mapState.selectedPosition;
 
+      debugPrint('Map Provider에서 받은 선택된 위치: $position');
+      
       if (position != null) {
-        selectedLocation = position;
+        setState(() {
+          selectedLocation = position;
+        });
         
         // 역지오코딩으로 주소 변환
         try {
@@ -89,34 +99,82 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
             position.longitude
           );
           
+          if (!mounted) return;
+          
           if (placemarks.isNotEmpty) {
             Placemark place = placemarks[0];
             String addressText = '${place.street ?? ''}, ${place.thoroughfare ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}'.trim();
             
-            if (addressText.isNotEmpty) {
-              locationController.text = addressText;
-            } else {
-              locationController.text = '${position.latitude}, ${position.longitude}';
-            }
+            setState(() {
+              locationController.text = addressText.isNotEmpty
+                  ? addressText
+                  : '${position.latitude}, ${position.longitude}';
+              isLoadingLocation = false;
+            });
+            
+            debugPrint('역지오코딩 결과: $addressText');
           } else {
-            locationController.text = '${position.latitude}, ${position.longitude}';
+            setState(() {
+              locationController.text = '${position.latitude}, ${position.longitude}';
+              isLoadingLocation = false;
+            });
+            
+            debugPrint('역지오코딩 결과 없음, 좌표 사용');
           }
         } catch (e) {
           debugPrint('주소 변환 오류: $e');
-          locationController.text = '${position.latitude}, ${position.longitude}';
+          if (!mounted) return;
+          
+          setState(() {
+            locationController.text = '${position.latitude}, ${position.longitude}';
+            isLoadingLocation = false;
+          });
         }
       } else {
-        locationController.text = '위치를 선택해주세요';
+        debugPrint('선택된 위치 없음, 맵 상태 디버그 출력');
+        ref.read(mapProvider.notifier).printDebugInfo();
+        
+        // 위치가 없으면 현재 위치로 설정 시도
+        _tryUseCurrentLocation();
       }
     } catch (e) {
       debugPrint('위치 초기화 오류: $e');
-      locationController.text = '위치 정보를 가져올 수 없습니다';
-    } finally {
-      if (mounted) {
-        setState(() {
-          isLoadingLocation = false;
-        });
-      }
+      if (!mounted) return;
+      
+      setState(() {
+        locationController.text = '위치 정보를 가져올 수 없습니다';
+        isLoadingLocation = false;
+      });
+    }
+  }
+
+  // 현재 위치 사용 메서드 분리
+  void _tryUseCurrentLocation() {
+    final locationState = ref.read(locationProvider);
+    if (locationState.currentPosition != null) {
+      debugPrint('현재 위치 사용: ${locationState.currentPosition}');
+      final currentPos = LatLng(
+        locationState.currentPosition!.latitude,
+        locationState.currentPosition!.longitude
+      );
+      
+      setState(() {
+        selectedLocation = currentPos;
+        locationController.text = '${currentPos.latitude}, ${currentPos.longitude}';
+        isLoadingLocation = false;
+      });
+      
+      // 임시 마커 추가
+      ref.read(mapProvider.notifier).addTemporaryMarker(currentPos);
+    } else {
+      debugPrint('현재 위치도 없음, 선택 요청 메시지 표시');
+      
+      if (!mounted) return;
+      
+      setState(() {
+        locationController.text = '위치를 선택해주세요';
+        isLoadingLocation = false;
+      });
     }
   }
 
@@ -130,7 +188,6 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
 
   @override
   Widget build(BuildContext context) {
-    final notifier = ref.watch(chatCreateNotifier.notifier);
     final formKey = GlobalKey<FormState>();
     
     return SafeArea(
@@ -204,18 +261,32 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                   ),
                 ),
               ),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () async {
+                  onPressed: () {
                     if (selectedLocation == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('지도에서 위치를 선택해주세요'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                      return;
+                      // 위치가 없으면 맵 상태 확인
+                      debugPrint('선택된 위치 없음, 맵 상태 확인');
+                      final mapState = ref.read(mapProvider);
+                      
+                      if (mapState.selectedPosition != null) {
+                        // 맵 상태에는 위치가 있는데 로컬 상태에는 없는 경우 업데이트
+                        debugPrint('맵 상태에 위치 있음, 로컬 상태 업데이트: ${mapState.selectedPosition}');
+                        setState(() {
+                          selectedLocation = mapState.selectedPosition;
+                        });
+                      } else {
+                        // 둘 다 없는 경우 메시지 표시
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('지도에서 위치를 선택해주세요'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
                     }
                     
                     // 폼 유효성 검사
@@ -224,82 +295,111 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                       return;
                     }
 
-                    try {
-                      loadingBar.show(context);
-                      
-                      // 사용자 정보 가져오기
-                      await ref
-                          .read(userViewModelProvider.notifier)
-                          .getById(
-                            FirebaseAuth.instance.currentUser?.uid as String,
-                          );
-                      final user = ref.read(userViewModelProvider);
-                      
-                      if (user == null) {
-                        throw Exception('사용자 정보를 가져올 수 없습니다.');
-                      }
-                      
-                      // 채팅방 생성
-                      final chatRoom = getChatRoom(user);
-                      final result = await notifier.create(chatRoom, user);
-                      
-                      // 이 시점에서 컨텍스트가 유효한지 확인
-                      if (!mounted) {
-                        return;
-                      }
-                      
-                      // 채팅방 입장
-                      await ref
-                          .read(chatRoomViewModel.notifier)
-                          .enterChatRoom(result);
-                      
-                      // 마운트 상태 재확인
-                      if (!mounted) {
-                        return;
-                      }
-                      
-                      loadingBar.hide();
-                      
-                      // 채팅방 생성 후 임시 마커 제거 및 채팅방 생성 모드 비활성화
-                      ref.read(mapProvider.notifier).removeTemporaryMarker();
-                      ref.read(mapProvider.notifier).setCreatingChatRoom(false);
-                      
-                      // 채팅방으로 바로 이동
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChattingPage(
-                            chatRoomId: result,
-                            myUserId: user.uid ?? '',
-                            roomName: chatRoom.title,
-                            location: locationController.text,
-                          ),
-                        ),
-                      );
-                    } catch (e) {
-                      // 이 시점에서 컨텍스트가 유효한지 확인
-                      if (!mounted) {
-                        return;
-                      }
-                      
-                      loadingBar.hide();
-                      
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('채팅방 생성 실패: ${e.toString()}'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
+                    // 비동기 작업을 자체 메소드로 분리
+                    _createChatRoom();
                   },
                   child: const Text('채팅방 만들기'),
                 ),
-              )
+              ),
+
+              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
     );
+  }
+
+  // 채팅방 생성 로직을 별도 메서드로 분리
+  Future<void> _createChatRoom() async {
+    // mounted 체크와 컨텍스트 사용을 한 곳에서 처리
+    if (!mounted) return;
+    
+    loadingBar.show(context);
+
+    try {
+      // 사용자 정보 가져오기
+      await ref
+          .read(userViewModelProvider.notifier)
+          .getById(
+            FirebaseAuth.instance.currentUser?.uid as String,
+          );
+      
+      if (!mounted) {
+        loadingBar.hide();
+        return;
+      }
+      
+      final user = ref.read(userViewModelProvider);
+      
+      if (user == null) {
+        loadingBar.hide();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('사용자 정보를 가져올 수 없습니다.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+      
+      // 채팅방 생성
+      final chatRoom = getChatRoom(user);
+      final result = await ref.read(chatCreateNotifier.notifier).create(chatRoom, user);
+      
+      // 마운트 상태 확인
+      if (!mounted) {
+        loadingBar.hide();
+        return;
+      }
+      
+      // 채팅방 입장
+      await ref
+          .read(chatRoomViewModel.notifier)
+          .enterChatRoom(result);
+      
+      // 마운트 상태 재확인
+      if (!mounted) {
+        loadingBar.hide();
+        return;
+      }
+      
+      // 채팅방 생성 후 임시 마커 제거 및 채팅방 생성 모드 비활성화
+      ref.read(mapProvider.notifier).removeTemporaryMarker();
+      ref.read(mapProvider.notifier).setCreatingChatRoom(false);
+      
+      loadingBar.hide();
+      
+      // 모든 비동기 작업 이후에 mounted 체크를 직접 해준 다음 NavigatorPushReplacement 호출
+      if (mounted) {
+        Navigator.pushReplacement(
+          context, // 여기서 context 사용은 바로 위의 mounted 체크로 보호됨
+          MaterialPageRoute(
+            builder: (context) => ChattingPage(
+              chatRoomId: result,
+              myUserId: user.uid ?? '',
+              roomName: chatRoom.title,
+              location: locationController.text,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // 마운트 상태 확인
+      loadingBar.hide();
+      
+      // 오류 메시지 표시
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('채팅방 생성 실패: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget inputElement({
@@ -345,12 +445,23 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
   }
 
   ChatRoomModel getChatRoom(User user) {
+    // 선택된 위치가 null인 경우, 맵 프로바이더에서 다시 가져오기 시도
+    if (selectedLocation == null) {
+      final mapState = ref.read(mapProvider);
+      if (mapState.selectedPosition != null) {
+        selectedLocation = mapState.selectedPosition;
+        debugPrint('getChatRoom: 맵 프로바이더에서 위치 가져옴: $selectedLocation');
+      } else {
+        debugPrint('getChatRoom: 위치 정보가 없음, 기본값 사용');
+      }
+    }
+
     return ChatRoomModel(
       title: titleController.text,
       description: descriptionController.text,
       location: selectedLocation != null 
         ? GeoPoint(selectedLocation!.latitude, selectedLocation!.longitude)
-        : GeoPoint(37.355149, 126.922238), // 기본값, 실제로는 유효성 검사에서 걸러짐
+        : const GeoPoint(37.355149, 126.922238), // 기본값, 실제로는 유효성 검사에서 걸러짐
       creator: user,
       createdAt: DateTime.now(),
       participants: [user], // 생성자를 participants에 추가

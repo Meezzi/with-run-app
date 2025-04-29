@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:with_run_app/data/model/user.dart';
 
 class UserRepository {
@@ -21,7 +22,7 @@ class UserRepository {
 
       return true;
     } catch (e) {
-      print('UserRepository.insert catch문 - $e');
+      debugPrint('UserRepository.insert catch문 - $e');
       return false;
     }
   }
@@ -35,7 +36,7 @@ class UserRepository {
 
       return User.fromJson({...doc.data()!});
     } catch (e) {
-      print('UserRepository.getById catch문 - $e');
+      debugPrint('UserRepository.getById catch문 - $e');
       return null;
     }
   }

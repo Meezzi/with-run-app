@@ -6,9 +6,9 @@ class ParticipantsListDialog extends ConsumerWidget {
   final String chatRoomId;
 
   const ParticipantsListDialog({
-    Key? key,
+    super.key,
     required this.chatRoomId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

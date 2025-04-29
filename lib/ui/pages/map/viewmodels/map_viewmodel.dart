@@ -21,19 +21,25 @@ class MapViewModel extends StateNotifier<bool> {
   void initialize(BuildContext context) {
     if (!_isInitialized) {
       _isInitialized = true;
-      _ref.read(mapProvider.notifier).setOnChatRoomMarkerTapCallback((chatRoomId) {
-        _showChatRoomInfoWindow(context, chatRoomId);
-      });
-      _ref.read(mapProvider.notifier).setOnTemporaryMarkerTapCallback((position) {
-        _showCreateChatRoomConfirmDialog(context, position);
+      // 위젯 트리 구축 후에 콜백 설정 지연
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _ref.read(mapProvider.notifier).setOnChatRoomMarkerTapCallback((chatRoomId) {
+          _showChatRoomInfoWindow(context, chatRoomId);
+        });
+        _ref.read(mapProvider.notifier).setOnTemporaryMarkerTapCallback((position) {
+          debugPrint('임시 마커 탭됨: $position');
+          // 임시 마커 클릭 시 다이얼로그 표시
+          _showCreateChatRoomConfirmDialog(context, position);
+        });
+        
+        // 초기화 시 디버그 정보 출력
+        _ref.read(mapProvider.notifier).printDebugInfo();
       });
     }
   }
 
-  // 채팅방 마커 클릭 시 인포 윈도우 표시 메서드
   void _showChatRoomInfoWindow(BuildContext context, String chatRoomId) {
     _closeOverlays();
-    
     _infoWindowOverlay = OverlayEntry(
       builder: (context) => ChatRoomInfoWindow(
         chatRoomId: chatRoomId,
@@ -43,12 +49,16 @@ class MapViewModel extends StateNotifier<bool> {
         },
       ),
     );
-    
-    // 오버레이 삽입
-    Overlay.of(context).insert(_infoWindowOverlay!);
+    if (context.mounted) {
+      Overlay.of(context).insert(_infoWindowOverlay!);
+    }
   }
 
   void _showCreateChatRoomConfirmDialog(BuildContext context, LatLng position) {
+    _closeOverlays(); // 기존 오버레이 닫기
+    debugPrint('다이얼로그 표시 시도: $position');
+    
+    // 다이얼로그 표시
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -74,7 +84,6 @@ class MapViewModel extends StateNotifier<bool> {
 
   void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
     if (!context.mounted) return;
-    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -88,15 +97,13 @@ class MapViewModel extends StateNotifier<bool> {
   }
 
   Future<void> moveToCurrentLocation(BuildContext context) async {
+    debugPrint('내 위치로 이동 요청');
     final locationState = _ref.read(locationProvider);
-    
-    // 위치 정보가 없으면 새로고침
     if (locationState.currentPosition == null) {
       _showSnackBar(context, "위치 정보를 가져오는 중입니다...");
       await _ref.read(locationProvider.notifier).refreshLocation();
-      
-      // 위치 정보를 다시 확인
       final updatedLocationState = _ref.read(locationProvider);
+      
       if (!context.mounted) return;
       
       if (updatedLocationState.currentPosition == null) {
@@ -109,10 +116,8 @@ class MapViewModel extends StateNotifier<bool> {
       }
     }
     
-    // 실제 지도 이동 로직
     try {
       await _ref.read(mapProvider.notifier).moveToCurrentLocation();
-      
       if (!context.mounted) return;
       _showSnackBar(context, "현재 위치로 이동했습니다");
     } catch (e) {
@@ -123,57 +128,86 @@ class MapViewModel extends StateNotifier<bool> {
   }
 
   Future<void> startChatRoomCreationMode(BuildContext context) async {
+    debugPrint('채팅방 생성 모드 시작');
     if (FirebaseAuth.instance.currentUser == null) {
       _showSnackBar(context, '로그인이 필요합니다.', isError: true);
+      debugPrint('로그인되지 않음');
       return;
     }
     
-    // 사용자가 이미 채팅방을 생성했는지 확인
     final chatRoomVm = _ref.read(chatRoomViewModel.notifier);
-    final hasCreatedRoom = await chatRoomVm.userHasCreatedRoom();
-    
-    if (!context.mounted) return;
-    
-    if (hasCreatedRoom) {
-      _showSnackBar(
-        context, 
-        '이미 생성한 채팅방이 있습니다. 한 번에 하나의 채팅방만 만들 수 있습니다.', 
-        isError: true
-      );
-      return;
-    }
-    
-    // 사용자가 이미 다른 채팅방에 참여 중인지 확인
-    final isInAnyRoom = await chatRoomVm.isUserInAnyRoom();
-    
-    if (!context.mounted) return;
-    
-    if (isInAnyRoom) {
-      _showSnackBar(
-        context, 
-        '이미 참여 중인 채팅방이 있습니다. 채팅방에서 나간 후 새로운 채팅방을 만들어주세요.', 
-        isError: true
-      );
-      return;
-    }
-    
-    // 채팅방 생성 모드 활성화 및 위치 선택 안내
-    final mapState = _ref.read(mapProvider);
-    // 이미 선택된 위치가 있는 경우 바로 생성 페이지로 이동
-    if (mapState.selectedPosition != null) {
-      _navigateToChatCreatePage(context);
-    } else {
-      // 위치를 아직 선택하지 않은 경우 안내 다이얼로그 표시
-      _ref.read(mapProvider.notifier).setCreatingChatRoom(true);
-      _showLocationSelectionDialog(context);
+    try {
+      final hasCreatedRoom = await chatRoomVm.userHasCreatedRoom();
+      debugPrint('이미 생성된 채팅방 여부: $hasCreatedRoom');
+      
+      if (!context.mounted) return;
+      
+      if (hasCreatedRoom) {
+        _showSnackBar(context, '이미 생성한 채팅방이 있습니다. 한 번에 하나의 채팅방만 만들 수 있습니다.', isError: true);
+        return;
+      }
+      
+      final isInAnyRoom = await chatRoomVm.isUserInAnyRoom();
+      debugPrint('다른 채팅방 참여 여부: $isInAnyRoom');
+      
+      if (!context.mounted) return;
+      
+      if (isInAnyRoom) {
+        _showSnackBar(context, '이미 참여 중인 채팅방이 있습니다. 채팅방에서 나간 후 새로운 채팅방을 만들어주세요.', isError: true);
+        return;
+      }
+      
+      // 처리 지연 - 위젯 생명주기 밖에서 상태 변경
+      Future.microtask(() {
+        if (!context.mounted) return;
+        
+        final mapState = _ref.read(mapProvider);
+        debugPrint('선택된 위치: ${mapState.selectedPosition}');
+        
+        // 이미 초록색 마커가 있는 경우(selectedPosition이 있는 경우)
+        if (mapState.selectedPosition != null) {
+          // 이미 마커가 있으면 바로 채팅방 생성 페이지로 이동
+          debugPrint('선택된 위치가 있음. 채팅방 생성 페이지로 바로 이동');
+          _navigateToChatCreatePage(context);
+        } else {
+          // 아직 위치를 선택하지 않은 경우, 위치 선택 다이얼로그 표시
+          debugPrint('선택된 위치가 없음. 위치 선택 안내 표시');
+          // 채팅방 생성 모드 활성화
+          _ref.read(mapProvider.notifier).setCreatingChatRoom(true);
+          // 위치 선택 안내 표시
+          _showLocationSelectionDialog(context);
+        }
+      });
+    } catch (e) {
+      debugPrint('채팅방 생성 모드 시작 오류: $e');
+      if (context.mounted) {
+        _showSnackBar(context, '채팅방 생성 모드 시작 실패: $e', isError: true);
+      }
     }
   }
 
   void _navigateToChatCreatePage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const ChatCreatePage()),
-    );
+    // 채팅방 생성 페이지로 이동하기 전 로그 출력
+    debugPrint('=== 채팅방 생성 페이지로 이동 ===');
+    debugPrint('생성 모드: ${_ref.read(mapProvider).isCreatingChatRoom}');
+    debugPrint('선택된 위치: ${_ref.read(mapProvider).selectedPosition}');
+    
+    // Navigate는 위젯 생명주기가 끝난 후에 실행하는 것이 안전
+    Future.microtask(() {
+      if (context.mounted) {
+        // 생성 모드 활성화 확인
+        _ref.read(mapProvider.notifier).setCreatingChatRoom(true);
+        
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ChatCreatePage()),
+        ).then((_) {
+          // 페이지에서 돌아온 후 디버그 정보 출력
+          debugPrint('채팅방 생성 페이지에서 돌아옴');
+          _ref.read(mapProvider.notifier).printDebugInfo();
+        });
+      }
+    });
   }
 
   void _showLocationSelectionDialog(BuildContext context) {
@@ -206,22 +240,32 @@ class MapViewModel extends StateNotifier<bool> {
     );
   }
 
-  // 채팅 목록 오버레이 표시
   void showChatListOverlay(BuildContext context) {
     _closeOverlays();
     
-    // ChatListOverlay 위젯을 사용하여 오버레이 표시
-    _chatListOverlay = OverlayEntry(
-      builder: (context) => ChatListOverlay(
-        onDismiss: () {
-          _chatListOverlay?.remove();
-          _chatListOverlay = null;
-        },
-      ),
-    );
-    
-    // 오버레이 삽입
-    Overlay.of(context).insert(_chatListOverlay!);
+    // 오버레이 표시는 위젯 생명주기 후에 지연 처리
+    Future.microtask(() {
+      if (context.mounted) {
+        _chatListOverlay = OverlayEntry(
+          builder: (context) => ChatListOverlay(
+            onDismiss: () {
+              _chatListOverlay?.remove();
+              _chatListOverlay = null;
+            },
+          ),
+        );
+        
+        final overlay = Overlay.of(context);
+        overlay.insert(_chatListOverlay!);
+        
+        // 추가 지연으로 안정성 확보
+        Future.microtask(() {
+          if (_chatListOverlay != null) {
+            _chatListOverlay!.markNeedsBuild();
+          }
+        });
+      }
+    });
   }
 
   @override

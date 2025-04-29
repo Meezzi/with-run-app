@@ -11,15 +11,91 @@ import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
 class ChatRoomViewModel extends Notifier<ChatRoomModel?>{
   final repository = ChatRoomFirebaseRepository();
   late final Ref _ref;
+  bool _isProcessing = false; // 중복 처리 방지 플래그
   
+  // 채팅방 입장 및 채팅방 정보 가져오기
   Future<ChatRoomModel?> enterChatRoom(String roomId) async {
+    if (_isProcessing) {
+      debugPrint('이미 처리 중입니다. 중복 요청 무시');
+      return null;
+    }
+    
+    _isProcessing = true;
+    
     try {
+      debugPrint('채팅방 입장 시작: $roomId');
+      
+      // 채팅방 정보 가져오기
       ChatRoomModel result = await repository.get(roomId);
+      
+      // 사용자가 아직 참가자가 아니면 참가자로 추가
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        bool isAlreadyParticipant = false;
+        
+        // 참가자 목록 확인
+        if (result.participants != null) {
+          isAlreadyParticipant = result.participants!.any((p) => p.uid == user.uid);
+        }
+        
+        // 아직 참가자가 아니면 추가
+        if (!isAlreadyParticipant) {
+          await _ensureUserIsParticipant(roomId, user.uid);
+        }
+      }
+      
+      // 최신 정보 다시 가져오기
+      result = await repository.get(roomId);
+      
+      // 상태 업데이트
       state = result;
+      
+      debugPrint('채팅방 입장 성공: $roomId');
+      _isProcessing = false;
       return result;
     } catch (e) {
       debugPrint('채팅방 입장 오류: $e');
+      _isProcessing = false;
       return null;
+    }
+  }
+  
+  // 사용자가 참가자인지 확인하고 아니면 참가자로 추가
+  Future<void> _ensureUserIsParticipant(String chatRoomId, String userId) async {
+    try {
+      // 먼저 사용자 정보 가져오기
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      
+      String nickname = '사용자';
+      String profileImageUrl = '';
+      
+      if (userDoc.exists && userDoc.data() != null) {
+        final userData = userDoc.data()!;
+        nickname = userData['nickname'] ?? '사용자';
+        profileImageUrl = userData['profileImageUrl'] ?? '';
+      } else {
+        // users 컬렉션에 없으면 Firebase Auth에서 가져오기
+        final authUser = FirebaseAuth.instance.currentUser;
+        if (authUser != null) {
+          nickname = authUser.displayName ?? '사용자';
+          profileImageUrl = authUser.photoURL ?? '';
+        }
+      }
+      
+      // 참가자로 추가
+      final appUser = app_user.User(
+        uid: userId,
+        nickname: nickname,
+        profileImageUrl: profileImageUrl,
+      );
+      
+      await repository.addParticipant(appUser, chatRoomId);
+      debugPrint('사용자 $nickname을(를) 채팅방 $chatRoomId의 참가자로 추가했습니다.');
+    } catch (e) {
+      debugPrint('참가자 추가 오류: $e');
     }
   }
   
@@ -34,6 +110,7 @@ class ChatRoomViewModel extends Notifier<ChatRoomModel?>{
     }
   }
 
+  // 참가자 추가
   Future<void> addParticipant(String chatRoomId) async {
     if (chatRoomId.isEmpty) return;
     
@@ -41,13 +118,29 @@ class ChatRoomViewModel extends Notifier<ChatRoomModel?>{
     if (user == null) return;
     
     try {
+      // 먼저 사용자 정보 가져오기
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      
+      String nickname = user.displayName ?? '사용자';
+      String profileImageUrl = user.photoURL ?? '';
+      
+      if (userDoc.exists && userDoc.data() != null) {
+        final userData = userDoc.data()!;
+        nickname = userData['nickname'] ?? nickname;
+        profileImageUrl = userData['profileImageUrl'] ?? profileImageUrl;
+      }
+      
       final appUser = app_user.User(
         uid: user.uid,
-        nickname: user.displayName ?? '사용자',
-        profileImageUrl: user.photoURL ?? '',
+        nickname: nickname,
+        profileImageUrl: profileImageUrl,
       );
       
       await repository.addParticipant(appUser, chatRoomId);
+      debugPrint('참가자 추가 완료: $nickname');
     } catch (e) {
       debugPrint('참가자 추가 오류: $e');
     }
@@ -110,13 +203,24 @@ class ChatRoomViewModel extends Notifier<ChatRoomModel?>{
   // 사용자가 채팅방에서 나가기
   Future<bool> leaveRoom() async {
     if (state == null) return false;
+    if (_isProcessing) {
+      debugPrint('이미 처리 중입니다. 중복 요청 무시');
+      return false;
+    }
+    
+    _isProcessing = true;
     
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return false;
+    if (user == null) {
+      _isProcessing = false;
+      return false;
+    }
+    
+    final roomId = state!.id;
+    final isCreator = state!.creator?.uid == user.uid;
     
     try {
-      // 사용자가 방장인지 확인
-      final isCreator = state!.creator?.uid == user.uid;
+      debugPrint('채팅방 나가기 시작: $roomId, 방장여부: $isCreator');
       
       if (isCreator) {
         // 방장이면 채팅방 삭제 (서브컬렉션까지 모두 삭제)
@@ -131,15 +235,18 @@ class ChatRoomViewModel extends Notifier<ChatRoomModel?>{
             .delete();
       }
       
-      // 상태 초기화
+      // 상태 초기화 - 명시적으로 null로 설정
       state = null;
       
       // 맵 새로고침
       await refreshMap();
       
+      _isProcessing = false;
+      debugPrint('채팅방 나가기 성공: $roomId');
       return true;
     } catch (e) {
       debugPrint('채팅방 나가기 오류: $e');
+      _isProcessing = false;
       return false;
     }
   }
@@ -181,18 +288,22 @@ class ChatRoomViewModel extends Notifier<ChatRoomModel?>{
       debugPrint('채팅방 $chatRoomId 삭제 완료');
     } catch (e) {
       debugPrint('채팅방 삭제 오류: $e');
-      throw e; // 에러를 상위로 전파
+      rethrow; // throw e 대신 rethrow 사용
     }
   }
 
+  // 상태 리셋 (채팅방 나가기)
   void leaveChatRoom(){
+    debugPrint('채팅방 상태 리셋');
     state = null;
   }
   
   // 맵 새로고침 기능
   Future<void> refreshMap() async {
     try {
+      debugPrint('맵 새로고침 시도');
       await _ref.read(mapProvider.notifier).refreshMap();
+      debugPrint('맵 새로고침 성공');
     } catch (e) {
       debugPrint('맵 새로고침 오류: $e');
     }

@@ -28,7 +28,6 @@ class MessageNotifier extends StateNotifier<List<Message>> {
       debugPrint('Snapshot received: ${snapshot.docs.length} messages');
       final msgs = snapshot.docs.map((doc) {
         final data = doc.data();
-        debugPrint('Message data: $data');
         return Message.fromMap(data, doc.id);
       }).toList();
       state = msgs;
@@ -61,6 +60,35 @@ class MessageNotifier extends StateNotifier<List<Message>> {
         final userData = userDoc.data();
         nickname = userData?['nickname'] ?? '알 수 없음';
         profileImageUrl = userData?['profileImageUrl'] ?? '';
+        
+        // 사용자 정보가 없으면 Firebase Auth에서 가져오기 시도
+        if (nickname == '알 수 없음') {
+          final authUser = await _firestore.collection('users').doc(myUserId).get();
+          if (authUser.exists) {
+            final authData = authUser.data();
+            nickname = authData?['nickname'] ?? '알 수 없음';
+            profileImageUrl = authData?['profileImageUrl'] ?? '';
+          }
+        }
+      } else {
+        // 참가자 목록에 없는 경우 사용자 정보 가져와서 추가하기
+        final authUser = await _firestore.collection('users').doc(myUserId).get();
+        if (authUser.exists) {
+          final authData = authUser.data();
+          nickname = authData?['nickname'] ?? '알 수 없음';
+          profileImageUrl = authData?['profileImageUrl'] ?? '';
+          
+          // 참가자로 등록
+          await _firestore
+              .collection('chatRooms')
+              .doc(chatRoomId)
+              .collection('participants')
+              .doc(myUserId)
+              .set({
+                'nickname': nickname,
+                'profileImageUrl': profileImageUrl,
+              });
+        }
       }
       
       final newMessage = {
@@ -77,7 +105,7 @@ class MessageNotifier extends StateNotifier<List<Message>> {
           .doc(chatRoomId)
           .collection('messages')
           .add(newMessage);
-      debugPrint('Message sent: $text');
+      debugPrint('Message sent by $nickname: $text');
     } catch (e) {
       debugPrint('Error sending message: $e');
     }

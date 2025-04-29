@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,8 @@ import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
 import 'package:with_run_app/ui/pages/setting/setting_page.dart';
 import 'package:with_run_app/ui/pages/map/viewmodels/map_viewmodel.dart';
+import 'package:with_run_app/ui/pages/map/viewmodels/chat_list_viewmodel.dart';
+import 'package:with_run_app/ui/pages/chat_create/chat_create_page.dart';
 
 class MapPage extends ConsumerStatefulWidget {
   const MapPage({super.key});
@@ -21,62 +24,77 @@ class _MapPageState extends ConsumerState<MapPage> with WidgetsBindingObserver {
   double _currentZoomLevel = 15.0;
   bool _isInitialized = false;
   bool _initialLocationMoved = false;
+  Timer? _locationMoveTimer;
 
- @override
-void initState() {
-  super.initState();
-  // 앱 생명주기 관찰자 등록
-  WidgetsBinding.instance.addObserver(this);
-  
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (mounted) {
-      debugPrint('MapPage PostFrameCallback 실행');
-      
-      // MapViewModel 초기화 (비동기 작업 전에 미리 실행)
-      ref.read(mapViewModelProvider.notifier).initialize(context);
-      
-      // 저장된 상태 확인 및 복원
-      _checkAndRestoreState().then((_) {
-        if (mounted) { // 비동기 작업 후 mounted 체크 추가
-          // 위치 정보를 우선 새로고침
-          ref.read(locationProvider.notifier).refreshLocation();
-          
-          // 위치 이동 순차적 시도
-          _scheduleLocationMoves();
-        }
-      });
-    }
-  });
-}
+  @override
+  void initState() {
+    super.initState();
+    // 앱 생명주기 관찰자 등록
+    WidgetsBinding.instance.addObserver(this);
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        debugPrint('MapPage PostFrameCallback 실행');
+        
+        // MapViewModel 초기화 (비동기 작업 전에 미리 실행)
+        ref.read(mapViewModelProvider.notifier).initialize(context);
+        
+        // 저장된 상태 확인 및 복원
+        _checkAndRestoreState().then((_) {
+          if (mounted) { // 비동기 작업 후 mounted 체크 추가
+            // 위치 정보를 우선 새로고침
+            ref.read(locationProvider.notifier).refreshLocation();
+            
+            // 위치 이동 순차적 시도
+            _scheduleLocationMoves();
+          }
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
     // 앱 생명주기 관찰자 해제
     WidgetsBinding.instance.removeObserver(this);
     ref.read(mapViewModelProvider.notifier).dispose();
+    _locationMoveTimer?.cancel();
     super.dispose();
   }
 
   // 순차적으로 위치 이동 시도
   void _scheduleLocationMoves() {
-    // 0.5초 후 첫 시도
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted && !_initialLocationMoved) {
-        _tryMoveToCurrentLocation();
-      }
-    });
+    // 기존 타이머가 있으면 취소
+    _locationMoveTimer?.cancel();
     
-    // 2초 후 두번째 시도
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted && !_initialLocationMoved) {
-        _tryMoveToCurrentLocation();
+    // 맵 컨트롤러와 위치 정보 모두 준비될 때까지 대기하는 방식으로 변경
+    _locationMoveTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
       }
-    });
-    
-    // 5초 후 세번째 시도
-    Future.delayed(const Duration(seconds: 5), () {
-      if (mounted && !_initialLocationMoved) {
+      
+      final locationState = ref.read(locationProvider);
+      final mapState = ref.read(mapProvider);
+      
+      debugPrint('위치 이동 시도 - 타이머 틱: ${timer.tick}, 위치 정보: ${locationState.currentPosition}, 맵 컨트롤러: ${mapState.mapController.isCompleted}');
+      
+      if (locationState.currentPosition != null && 
+          mapState.mapController.isCompleted && 
+          !_initialLocationMoved) {
+        
         _tryMoveToCurrentLocation();
+        
+        if (_initialLocationMoved) {
+          debugPrint('위치 이동 성공, 타이머 취소');
+          timer.cancel(); // 이동 성공 시 타이머 취소
+        }
+      }
+      
+      // 20초 후에도 이동 안되면 타이머 취소 (무한 대기 방지)
+      if (timer.tick > 20) {
+        debugPrint('20초 제한 도달, 타이머 취소');
+        timer.cancel();
       }
     });
     
@@ -109,7 +127,9 @@ void initState() {
             ),
           ).then((_) {
             debugPrint('카메라 이동 완료');
-            _initialLocationMoved = true;
+            setState(() {
+              _initialLocationMoved = true;
+            });
           }).catchError((e) {
             debugPrint('카메라 이동 실패: $e');
           });
@@ -148,6 +168,12 @@ void initState() {
         if (mounted) {
           await _restoreAppState();
         }
+      }
+      
+      // 채팅방 생성 모드와 임시 마커 상태 명시적으로 초기화
+      if (mounted) {
+        ref.read(mapProvider.notifier).setCreatingChatRoom(false);
+        ref.read(mapProvider.notifier).removeTemporaryMarker();
       }
       
       _isInitialized = true;
@@ -208,7 +234,9 @@ void initState() {
       
       // 선택된 위치 복원 (채팅방 생성 중이라면)
       final hasSelectedPosition = prefs.getBool('has_selected_position') ?? false;
-      if (hasSelectedPosition && 
+      final isCreatingChatRoom = prefs.getBool('is_creating_chat_room') ?? false;
+      
+      if (hasSelectedPosition && isCreatingChatRoom && 
           prefs.containsKey('selected_latitude') && 
           prefs.containsKey('selected_longitude')) {
         final lat = prefs.getDouble('selected_latitude');
@@ -218,6 +246,9 @@ void initState() {
           final position = LatLng(lat, lng);
           ref.read(mapProvider.notifier).addTemporaryMarker(position);
         }
+      } else {
+        // 채팅방 생성 모드가 아니면 임시 마커 제거
+        ref.read(mapProvider.notifier).removeTemporaryMarker();
       }
       
       // 마지막 위치로 카메라 이동
@@ -289,6 +320,51 @@ void initState() {
     _currentZoomLevel = position.zoom;
   }
 
+  // 앱바 아이콘 버튼 통일 함수
+  Widget _buildAppBarIconButton({
+    required IconData icon, 
+    required Color color, 
+    required String tooltip, 
+    required void Function() onPressed,
+    bool isLoading = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      width: 48, // 고정 너비
+      height: 48, // 고정 높이
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.1),
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IconButton(
+        icon: isLoading 
+            ? const SizedBox(
+                width: 24, 
+                height: 24, 
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2196F3)),
+                ),
+              )
+            : Icon(
+                icon,
+                color: color,
+                size: 24, // 아이콘 크기 통일
+              ),
+        tooltip: tooltip,
+        padding: EdgeInsets.zero,
+        onPressed: onPressed,
+      ),
+    );
+  }
+
   Widget _buildAppTitle(AppThemeState themeState) {
     return GestureDetector(
       onTap: () => ref.read(appThemeProvider.notifier).toggleTheme(),
@@ -334,34 +410,6 @@ void initState() {
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color iconColor,
-    required VoidCallback onPressed,
-    required String tooltip,
-  }) {
-    final themeState = ref.watch(appThemeProvider);
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      decoration: BoxDecoration(
-        color: themeState.isDarkMode ? Colors.white : Colors.grey[300],
-        shape: BoxShape.circle,
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: iconColor),
-        tooltip: tooltip,
-        onPressed: onPressed,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final themeState = ref.watch(appThemeProvider);
@@ -392,63 +440,72 @@ void initState() {
           backgroundColor: Colors.transparent,
           elevation: 0,
           automaticallyImplyLeading: false,
-          leading: Container(
-            margin: const EdgeInsets.only(left: 8),
-            decoration: BoxDecoration(
-              color: themeState.isDarkMode ? Colors.white : Colors.grey[300],
-              shape: BoxShape.circle,
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x1A000000),
-                  blurRadius: 6,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: IconButton(
-              icon: Icon(
-                Icons.menu,
-                color:
-                    themeState.isDarkMode
-                        ? Colors.blue[600]!
-                        : const Color(0xFF2196F3),
+          titleSpacing: 0, // 제목 간격 줄임
+          leading: _buildAppBarIconButton(
+            icon: Icons.menu,
+            color: themeState.isDarkMode ? Colors.blue[600]! : const Color(0xFF2196F3),
+            tooltip: '설정',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingPage()),
+              );
+            },
+          ),
+          
+          // 새로고침 버튼을 리딩 바로 오른쪽에 배치 (메뉴 바로 오른쪽)
+          leadingWidth: 48, // 리딩 영역 폭
+          title: Row(
+            children: [
+              // 새로고침 버튼을 메뉴 버튼 바로 오른쪽에 배치
+              _buildAppBarIconButton(
+                icon: Icons.refresh,
+                color: themeState.isDarkMode ? Colors.blue[600]! : const Color(0xFF2196F3),
+                tooltip: '새로고침',
+                isLoading: mapState.isRefreshing,
+                onPressed: () async {
+                  await ref.read(mapProvider.notifier).refreshMap();
+                  // 채팅방 목록도 함께 새로고침
+                  ref.read(chatListViewModelProvider.notifier).refreshChatRooms();
+                  
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('새로고침 완료'),
+                      duration: Duration(seconds: 1),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
               ),
-              tooltip: '설정',
+              
+              // 중앙 타이틀
+              Expanded(
+                child: Center(
+                  child: _buildAppTitle(themeState),
+                ),
+              ),
+            ],
+          ),
+          
+          actions: [
+            // 내 위치 버튼
+            _buildAppBarIconButton(
+              icon: Icons.my_location,
+              color: themeState.isDarkMode ? Colors.blue[600]! : const Color(0xFF2196F3),
+              tooltip: '내 위치로 이동',
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SettingPage()),
-                );
+                ref.read(mapViewModelProvider.notifier).moveToCurrentLocation(context);
               },
             ),
-          ),
-          title: _buildAppTitle(themeState),
-          centerTitle: true,
-          actions: [
-            _buildActionButton(
-              icon: Icons.my_location,
-              iconColor:
-                  themeState.isDarkMode
-                      ? Colors.blue[600]!
-                      : const Color(0xFF2196F3),
-              onPressed:
-                  () => ref
-                      .read(mapViewModelProvider.notifier)
-                      .moveToCurrentLocation(context),
-              tooltip: '내 위치로 이동',
-            ),
-           
-              _buildActionButton(
+            // 채팅 목록 버튼
+            _buildAppBarIconButton(
               icon: Icons.forum_outlined,
-              iconColor:
-                  themeState.isDarkMode
-                      ? Colors.blue[600]!
-                      : const Color(0xFF2196F3),
-              onPressed:
-                  () => ref
-                      .read(mapViewModelProvider.notifier)
-                      .showChatListOverlay(context),
+              color: themeState.isDarkMode ? Colors.blue[600]! : const Color(0xFF2196F3),
               tooltip: '채팅 목록',
+              onPressed: () {
+                ref.read(mapViewModelProvider.notifier).showChatListOverlay(context);
+              },
             ),
           ],
         ),
@@ -480,7 +537,9 @@ void initState() {
                         ),
                       ).then((_) {
                         debugPrint('onMapCreated 내 카메라 이동 완료');
-                        _initialLocationMoved = true;
+                        setState(() {
+                          _initialLocationMoved = true;
+                        });
                       }).catchError((e) {
                         debugPrint('onMapCreated 내 카메라 이동 실패: $e');
                       });
@@ -501,6 +560,43 @@ void initState() {
                       ? themeState.darkMapStyle
                       : themeState.lightMapStyle,
             ),
+            // 채팅방 생성 모드 안내 메시지 (임시 마커가 있을 때)
+            if (mapState.isCreatingChatRoom && mapState.selectedPosition != null)
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 70,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(25),
+                          blurRadius: 10,
+                          spreadRadius: 0,
+                        ),
+                      ]
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                        const SizedBox(width: 8),
+                        const Text(
+                          '초록색 마커를 탭하여 채팅방 생성',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w500
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             Positioned(
               bottom: 80,
               left: 0,
@@ -535,10 +631,18 @@ void initState() {
                     color: Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(30),
-                      onTap:
-                          () => ref
-                              .read(mapViewModelProvider.notifier)
-                              .startChatRoomCreationMode(context),
+                      onTap: () {
+                        // 이미 생성 모드이고 위치가 선택된 경우 - 바로 채팅방 생성 페이지로 이동
+                        if (mapState.isCreatingChatRoom && mapState.selectedPosition != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ChatCreatePage()),
+                          );
+                        } else {
+                          // 아직 생성 모드가 아니면 생성 모드 시작
+                          ref.read(mapViewModelProvider.notifier).startChatRoomCreationMode(context);
+                        }
+                      },
                       splashColor: const Color(0x33FFFFFF),
                       highlightColor: const Color(0x22FFFFFF),
                       child: Row(
@@ -557,9 +661,11 @@ void initState() {
                             ),
                           ),
                           const SizedBox(width: 12),
-                          const Text(
-                            '새 채팅방 만들기',
-                            style: TextStyle(
+                          Text(
+                            mapState.isCreatingChatRoom && mapState.selectedPosition != null
+                                ? '채팅방 만들기'
+                                : '새 채팅방 만들기',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 16,

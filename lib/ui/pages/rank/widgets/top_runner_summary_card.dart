@@ -45,7 +45,7 @@ class TopRunnerSummaryCard extends StatelessWidget {
                   imageUrl:
                       data['profileImageUrl'] ?? 'https://picsum.photos/200',
                 );
-              }).toList(),
+              }),
             ],
           ],
         ),

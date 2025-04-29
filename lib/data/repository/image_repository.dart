@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageRepository {
@@ -27,7 +28,7 @@ class ImageRepository {
         'imageName': imageName,
       };
     } catch (e) {
-      print('ImageRepository.uploadImage catch문 - $e');
+      debugPrint('ImageRepository.uploadImage catch문 - $e');
       return null;
     }
   }
@@ -39,11 +40,11 @@ class ImageRepository {
       final fileRef = storageRef.child(imageName);
 
       await fileRef.delete();
-      print('파일 삭제 완료');
+      debugPrint('파일 삭제 완료');
       return true;
     } catch (e) {
-      print('파일 삭제 실패');
-      print('ImageRepository.deleteImage catch문 - $e');
+      debugPrint('파일 삭제 실패');
+      debugPrint('ImageRepository.deleteImage catch문 - $e');
       return null;
     }
   }

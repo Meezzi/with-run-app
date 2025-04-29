@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class NicknameField extends StatelessWidget {
-  TextEditingController nicknameController;
+  final TextEditingController nicknameController;
 
-  NicknameField(this.nicknameController, {super.key});
+  const NicknameField(this.nicknameController, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +12,7 @@ class NicknameField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: '닉네임을 입력해 주세요',
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
+          borderSide: const BorderSide(color: Colors.grey),
           borderRadius: BorderRadius.circular(10),
         ),
         focusedBorder: OutlineInputBorder(

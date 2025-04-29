@@ -3,10 +3,10 @@ import 'package:time_range_picker/time_range_picker.dart';
 
 class TimeRangePickerInput extends StatefulWidget {
   const TimeRangePickerInput({
-    Key? key,
+    super.key,
     required this.onRangeChanged,
     required this.validator,
-  }) : super(key: key);
+  });
 
   final void Function(TimeRange timeRange) onRangeChanged;
   final String? Function(TimeRange?) validator;
@@ -75,7 +75,7 @@ class _TimeRangePickerInputState extends State<TimeRangePickerInput> {
                     startTime != null && endTime != null
                         ? '${startTime.format(context)} ~ ${endTime.format(context)}'
                         : '시간을 설정해주세요',
-                    style: TextStyle(fontSize: 18),
+                    style: const TextStyle(fontSize: 18),
                   ),
                 ),
                 const SizedBox(width: 10),

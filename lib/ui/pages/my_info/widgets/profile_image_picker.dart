@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileImagePicker extends StatelessWidget {
-  XFile? xFile;
-  bool? isImageValid;
+  final XFile? xFile;
+  final bool? isImageValid;
 
-  ProfileImagePicker(this.xFile, this.isImageValid, {super.key});
+  const ProfileImagePicker(this.xFile, this.isImageValid, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class ProfileImagePicker extends StatelessWidget {
                 child:
                     xFile != null
                         ? Image.file(File(xFile!.path), fit: BoxFit.cover)
-                        : Icon(Icons.person, size: 36),
+                        : const Icon(Icons.person, size: 36),
               ),
             ),
             Positioned(
@@ -35,18 +35,18 @@ class ProfileImagePicker extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                   color: Colors.white,
                 ),
-                child: Icon(Icons.add_circle),
+                child: const Icon(Icons.add_circle),
               ),
             ),
           ],
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
           '프로필 사진을 업로드 해주세요',
           style: TextStyle(
             fontSize: 13,
             color:
-                isImageValid == true ? Color(0xffB3261E) : Colors.transparent,
+                isImageValid == true ? const Color(0xffB3261E) : Colors.transparent,
           ),
         ),
       ],

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 class DatePickerInput extends StatefulWidget {
   const DatePickerInput({
-    Key? key,
+    super.key,
     required this.onDateChanged,
     required this.validator,
-  }) : super(key: key);
+  });
 
   final void Function(DateTime? date) onDateChanged;
   final String? Function(DateTime?) validator;
@@ -23,7 +23,7 @@ class _DatePickerInputState extends State<DatePickerInput> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
     );
 
     if (pickedDate != null) {

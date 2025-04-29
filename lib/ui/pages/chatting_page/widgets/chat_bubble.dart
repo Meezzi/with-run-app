@@ -21,6 +21,28 @@ class ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMyMessage = senderId == myUserId;
+    
+    // 시스템 메시지인 경우 (입장, 퇴장 메시지)
+    if (senderId == 'system') {
+      return Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+      );
+    }
+    
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -43,11 +65,11 @@ class ChatBubble extends StatelessWidget {
                   ? CrossAxisAlignment.end
                   : CrossAxisAlignment.start,
               children: [
-                // 모든 메시지에 닉네임 표시
+                // 닉네임 표시
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Text(
-                    nickname,
+                    nickname.isNotEmpty ? nickname : '알 수 없음',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
@@ -58,7 +80,9 @@ class ChatBubble extends StatelessWidget {
                   padding: const EdgeInsets.all(10),
                   margin: const EdgeInsets.symmetric(vertical: 4),
                   decoration: BoxDecoration(
-                    color: isMyMessage ? Colors.blue[100] : Colors.grey[300],
+                    color: isMyMessage 
+                        ? Colors.blue[100] 
+                        : Colors.grey[300],
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(text),

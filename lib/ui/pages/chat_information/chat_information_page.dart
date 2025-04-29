@@ -34,7 +34,7 @@ class _ChatInformationPageState extends ConsumerState<ChatInformationPage> {
       
       final chatRoom = ref.read(chatRoomViewModel);
       
-      if (chatRoom != null && chatRoom.location != null) {
+      if (chatRoom != null) {
         final location = chatRoom.location;
         List<Placemark> placemarks = await placemarkFromCoordinates(
           location.latitude, 

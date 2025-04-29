@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/ui/pages/rank/participantsProvider.dart';
+import 'package:with_run_app/ui/pages/rank/participants_provider.dart';
 import 'package:with_run_app/ui/pages/rank/widgets/my_result_summary_card.dart';
 import 'package:with_run_app/ui/pages/rank/widgets/top_runner_summary_card.dart';
 

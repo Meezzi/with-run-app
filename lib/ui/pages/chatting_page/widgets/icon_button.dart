@@ -9,7 +9,7 @@ Widget iconButton(String assetPath, Color color) {
       child: SvgPicture.asset(assetPath),
     ),
     onPressed: () {
-      print('$assetPath 클릭됨');
+      debugPrint('$assetPath 클릭됨');
     },
   );
 }

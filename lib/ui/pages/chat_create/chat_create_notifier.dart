@@ -4,6 +4,7 @@ import 'package:with_run_app/data/model/user.dart';
 import 'package:with_run_app/data/repository/chat_room_firebase_repository.dart';
 import 'package:with_run_app/data/repository/chat_room_repository.dart';
 import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
+import 'package:flutter/material.dart';
 
 enum ChatRoomCreateState {
   initialize,
@@ -23,9 +24,14 @@ class ChatCreateNotifier extends AutoDisposeNotifier<ChatRoomCreateState>{
       // 채팅방 생성 후 지도 새로고침
       await ref.read(mapProvider.notifier).refreshMap();
       
+      // 중요: 채팅방 생성 모드와 임시 마커 상태 초기화
+      ref.read(mapProvider.notifier).setCreatingChatRoom(false);
+      ref.read(mapProvider.notifier).removeTemporaryMarker();
+      
       state = ChatRoomCreateState.done;
       return result;
     } catch (e) {
+      debugPrint('채팅방 생성 오류: $e');
       state = ChatRoomCreateState.error;
       rethrow;
     }
