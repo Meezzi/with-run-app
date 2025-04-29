@@ -77,7 +77,13 @@ class _ChattingPageState extends ConsumerState<ChattingPage> {
               children: [
                 iconButton('assets/icons/run_time.svg', Colors.black),
                 iconButton('assets/icons/user_list.svg', Colors.black),
-                iconButton('assets/icons/leading_icon.svg', Colors.black),
+                const SizedBox(width: 10), 
+                IconButton(
+                  icon: const Icon(Icons.exit_to_app),
+                  color: Colors.black,
+                  onPressed: () {
+                  },
+                ),
               ],
             ),
           ],
@@ -112,24 +118,26 @@ class _ChattingPageState extends ConsumerState<ChattingPage> {
                         },
                       ),
               ),
-              ChatInputField(
-                controller: _controller,
-                onSend: () {
-                  final text = _controller.text.trim();
-                  if (text.isNotEmpty) {
-                    notifier.sendMessage(text);
-                    _controller.clear();
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (_scrollController.hasClients) {
-                        _scrollController.animateTo(
-                          _scrollController.position.minScrollExtent,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOut,
-                        );
-                      }
-                    });
-                  }
-                },
+              SafeArea(
+                child: ChatInputField(
+                  controller: _controller,
+                  onSend: () {
+                    final text = _controller.text.trim();
+                    if (text.isNotEmpty) {
+                      notifier.sendMessage(text);
+                      _controller.clear();
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (_scrollController.hasClients) {
+                          _scrollController.animateTo(
+                            _scrollController.position.minScrollExtent,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                          );
+                        }
+                      });
+                    }
+                  },
+                ),
               ),
             ],
           );
