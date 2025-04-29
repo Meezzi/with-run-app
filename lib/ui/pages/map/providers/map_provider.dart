@@ -50,15 +50,13 @@ class MapNotifier extends StateNotifier<MapState> {
   void setOnChatRoomMarkerTapCallback(OnChatRoomMarkerTapCallback callback) {
     _onChatRoomMarkerTap = callback;
     // 기존 마커들에 대한 콜백도 업데이트
-    _updateMarkers();
+    _updateMarkerCallbacks();
   }
 
   void setOnTemporaryMarkerTapCallback(OnTemporaryMarkerTapCallback callback) {
     _onTemporaryMarkerTap = callback;
     // 임시 마커가 있다면 업데이트
-    if (state.selectedPosition != null) {
-      _updateTemporaryMarker(state.selectedPosition!);
-    }
+    _updateMarkerCallbacks();
   }
 
   void _listenToLocationChanges() {
@@ -102,13 +100,45 @@ class MapNotifier extends StateNotifier<MapState> {
     state = state.copyWith(markers: currentMarkers);
   }
   
-  // 마커 업데이트 헬퍼 메소드
-  void _updateMarkers() {
-    refreshMap();
+  // 마커 콜백 업데이트
+  void _updateMarkerCallbacks() {
+    final currentMarkers = Set<Marker>.from(state.markers);
+    
+    // 채팅방 마커 업데이트
+    final updatedMarkers = currentMarkers.map((marker) {
+      // 채팅방 마커인 경우 콜백 업데이트
+      if (marker.markerId.value.startsWith('chatRoom_')) {
+        final chatRoomId = marker.markerId.value.substring('chatRoom_'.length);
+        return marker.copyWith(
+          onTapParam: () {
+            debugPrint('마커 클릭됨: ${marker.markerId.value}');
+            if (_onChatRoomMarkerTap != null) {
+              _onChatRoomMarkerTap!(chatRoomId);
+            }
+          }
+        );
+      }
+      // 임시 마커인 경우 콜백 업데이트
+      else if (marker.markerId == const MarkerId('temporaryMarker') && state.selectedPosition != null) {
+        return marker.copyWith(
+          onTapParam: () {
+            debugPrint('임시 마커 클릭됨: ${state.selectedPosition}');
+            if (_onTemporaryMarkerTap != null && state.selectedPosition != null) {
+              _onTemporaryMarkerTap!(state.selectedPosition!);
+            }
+          }
+        );
+      }
+      return marker;
+    }).toSet();
+    
+    state = state.copyWith(markers: updatedMarkers);
   }
   
   // 임시 마커 업데이트
-  void _updateTemporaryMarker(LatLng position) {
+  void _updateTemporaryMarker() {
+    if (state.selectedPosition == null) return;
+    
     final currentMarkers = Set<Marker>.from(state.markers);
     const markerId = MarkerId('temporaryMarker');
     
@@ -116,6 +146,7 @@ class MapNotifier extends StateNotifier<MapState> {
     currentMarkers.removeWhere((marker) => marker.markerId == markerId);
     
     // 새 임시 마커 추가
+    final position = state.selectedPosition!;
     currentMarkers.add(
       Marker(
         markerId: markerId,
@@ -123,6 +154,7 @@ class MapNotifier extends StateNotifier<MapState> {
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         infoWindow: const InfoWindow(title: '새 채팅방 위치'),
         onTap: () {
+          debugPrint('임시 마커 클릭됨: $position');
           if (_onTemporaryMarkerTap != null) {
             _onTemporaryMarkerTap!(position);
           }
@@ -130,16 +162,13 @@ class MapNotifier extends StateNotifier<MapState> {
       ),
     );
     
-    state = state.copyWith(
-      markers: currentMarkers,
-      selectedPosition: position,
-    );
+    state = state.copyWith(markers: currentMarkers);
   }
 
   // Firestore에서 채팅방 로드
   Future<void> refreshMap() async {
     try {
-      // 채팅방 생성 모드 상태 유지
+      // 채팅방 생성 모드 상태 저장
       final isCreatingChatRoom = state.isCreatingChatRoom;
       final selectedPosition = state.selectedPosition;
       
@@ -177,30 +206,15 @@ class MapNotifier extends StateNotifier<MapState> {
         }
       }
       
+      // 상태 업데이트
+      state = state.copyWith(markers: currentMarkers);
+      
       // 임시 마커 유지
       if (selectedPosition != null && isCreatingChatRoom) {
         addTemporaryMarker(selectedPosition);
       }
-      
-      state = state.copyWith(markers: currentMarkers);
     } catch (e) {
       debugPrint('채팅방 로드 오류: $e');
-    }
-  }
-
-  // 채팅방 마커 탭 처리
-  void onChatRoomMarkerTap(String chatRoomId) {
-    debugPrint('마커 클릭됨: chatRoom_$chatRoomId');
-    if (_onChatRoomMarkerTap != null) {
-      _onChatRoomMarkerTap!(chatRoomId);
-    }
-  }
-
-  // 임시 마커 탭 처리
-  void onTemporaryMarkerTap(LatLng position) {
-    debugPrint('임시 마커 클릭됨: $position');
-    if (_onTemporaryMarkerTap != null) {
-      _onTemporaryMarkerTap!(position);
     }
   }
 
@@ -251,7 +265,12 @@ class MapNotifier extends StateNotifier<MapState> {
         position: position,
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         infoWindow: const InfoWindow(title: '새 채팅방 위치'),
-        onTap: () => onTemporaryMarkerTap(position),
+        onTap: () {
+          debugPrint('임시 마커 클릭됨: $position');
+          if (_onTemporaryMarkerTap != null) {
+            _onTemporaryMarkerTap!(position);
+          }
+        },
       ),
     );
     
@@ -278,6 +297,7 @@ class MapNotifier extends StateNotifier<MapState> {
     state = state.copyWith(
       markers: currentMarkers,
       selectedPosition: null,
+      isCreatingChatRoom: false,  // 임시 마커 제거 시 생성 모드도 비활성화
     );
   }
 

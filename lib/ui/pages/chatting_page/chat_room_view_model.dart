@@ -60,19 +60,23 @@ class ChatRoomViewModel extends Notifier<ChatRoomModel?>{
       if (user == null) return false;
       
       final userId = user.uid;
-      final querySnapshot = await FirebaseFirestore.instance
+      
+      // 현재 입장하려는 채팅방에도 이미 참여 중인지 확인하기 위해
+      // participants 서브컬렉션을 직접 검색
+      final chatRooms = await FirebaseFirestore.instance
           .collection('chatRooms')
           .get();
       
-      for (var doc in querySnapshot.docs) {
-        final participantsQuery = await FirebaseFirestore.instance
+      for (var doc in chatRooms.docs) {
+        final participantDoc = await FirebaseFirestore.instance
             .collection('chatRooms')
             .doc(doc.id)
             .collection('participants')
             .doc(userId)
             .get();
         
-        if (participantsQuery.exists) {
+        if (participantDoc.exists) {
+          debugPrint('사용자가 이미 채팅방 ${doc.id}에 참여 중입니다.');
           return true;
         }
       }

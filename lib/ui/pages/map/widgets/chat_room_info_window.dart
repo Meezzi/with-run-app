@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:with_run_app/data/model/chat_room_model.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:with_run_app/ui/pages/chat_information/chat_information_page.dart';
 import 'package:with_run_app/ui/pages/chatting_page/chat_room_view_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:with_run_app/ui/pages/chatting_page/chatting_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatRoomInfoWindow extends ConsumerStatefulWidget {
   final String chatRoomId;
@@ -26,6 +26,8 @@ class _ChatRoomInfoWindowState extends ConsumerState<ChatRoomInfoWindow> {
   String address = '주소 불러오는 중...';
   bool isLoading = true;
   ChatRoomModel? chatRoom;
+  bool isInRoom = false;
+  bool isCreator = false;
 
   @override
   void initState() {
@@ -42,6 +44,20 @@ class _ChatRoomInfoWindowState extends ConsumerState<ChatRoomInfoWindow> {
         setState(() {
           chatRoom = result;
         });
+        
+        // 현재 사용자가 방장인지 확인
+        final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+        if (currentUserId != null && result.creator?.uid == currentUserId) {
+          setState(() {
+            isCreator = true;
+            // 방장은 자동으로 참가자이기도 함
+            isInRoom = true;
+          });
+        } else {
+          // 사용자가 이미 이 채팅방에 참여 중인지 확인
+          await _checkIfUserInThisRoom();
+        }
+        
         _loadAddress(result);
       }
     } catch (e) {
@@ -52,6 +68,29 @@ class _ChatRoomInfoWindowState extends ConsumerState<ChatRoomInfoWindow> {
           address = '채팅방 정보를 불러올 수 없습니다';
         });
       }
+    }
+  }
+  
+  // 현재 사용자가 이 특정 채팅방에 참여 중인지 확인
+  Future<void> _checkIfUserInThisRoom() async {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserId == null) return;
+    
+    try {
+      final participantDoc = await FirebaseFirestore.instance
+          .collection('chatRooms')
+          .doc(widget.chatRoomId)
+          .collection('participants')
+          .doc(currentUserId)
+          .get();
+      
+      if (mounted) {
+        setState(() {
+          isInRoom = participantDoc.exists;
+        });
+      }
+    } catch (e) {
+      debugPrint('참여 확인 오류: $e');
     }
   }
 
@@ -107,22 +146,45 @@ class _ChatRoomInfoWindowState extends ConsumerState<ChatRoomInfoWindow> {
         return;
       }
       
-      // 사용자가 이미 다른 채팅방에 참여 중인지 확인
-      final chatRoomVm = ref.read(chatRoomViewModel.notifier);
-      final isInAnyRoom = await chatRoomVm.isUserInAnyRoom();
-      
-      if (!mounted) return;
-      
-      if (isInAnyRoom) {
-        _showSnackBar('이미 참여 중인 채팅방이 있습니다. 한 번에 하나의 채팅방에만 참여할 수 있습니다.', isError: true);
-        return;
+      // 사용자가 아직 참여하지 않은 경우 참가자로 추가
+      if (!isInRoom) {
+        // 참가자 정보가 있는지 확인하고 추가
+        try {
+          // 사용자 정보 가져오기
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
+          
+          final userData = userDoc.exists 
+              ? userDoc.data() as Map<String, dynamic> 
+              : {
+                  'nickname': user.displayName ?? '사용자',
+                  'profileImageUrl': user.photoURL ?? '',
+                };
+          
+          // 참가자로 추가
+          await FirebaseFirestore.instance
+              .collection('chatRooms')
+              .doc(widget.chatRoomId)
+              .collection('participants')
+              .doc(user.uid)
+              .set({
+                'nickname': userData['nickname'] ?? '사용자',
+                'profileImageUrl': userData['profileImageUrl'] ?? '',
+              });
+              
+          debugPrint('참가자로 추가됨: ${user.uid}');
+          
+          // 채팅방 모델에도 참가자 업데이트
+          final chatRoomVm = ref.read(chatRoomViewModel.notifier);
+          await chatRoomVm.enterChatRoom(widget.chatRoomId);
+        } catch (e) {
+          debugPrint('참가자 추가 오류: $e');
+          _showSnackBar('참가자 추가 실패: $e', isError: true);
+          return;
+        }
       }
-      
-      // 채팅방에 입장하기 위한 처리
-      await chatRoomVm.enterChatRoom(widget.chatRoomId);
-      
-      // 참가자로 추가
-      await chatRoomVm.addParticipant(widget.chatRoomId);
       
       widget.onDismiss(); // 인포 윈도우 닫기
       
@@ -148,6 +210,30 @@ class _ChatRoomInfoWindowState extends ConsumerState<ChatRoomInfoWindow> {
     }
   }
   
+  // 채팅방 삭제 처리 (방장인 경우만)
+  Future<void> _deleteChatRoom() async {
+    if (!isCreator) return;
+    
+    try {
+      final success = await ref.read(chatRoomViewModel.notifier).leaveRoom();
+      
+      if (success) {
+        widget.onDismiss(); // 인포 윈도우 닫기
+        
+        if (mounted) {
+          _showSnackBar('채팅방이 삭제되었습니다.', isError: false);
+        }
+      } else {
+        _showSnackBar('채팅방 삭제에 실패했습니다.', isError: true);
+      }
+    } catch (e) {
+      debugPrint('채팅방 삭제 오류: $e');
+      if (mounted) {
+        _showSnackBar('채팅방 삭제에 실패했습니다: $e', isError: true);
+      }
+    }
+  }
+  
   void _showSnackBar(String message, {bool isError = false}) {
     if (!mounted) return;
     
@@ -159,6 +245,31 @@ class _ChatRoomInfoWindowState extends ConsumerState<ChatRoomInfoWindow> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.fromLTRB(16, 16, 16, 130),
         elevation: 4,
+      ),
+    );
+  }
+  
+  // 확인 다이얼로그 표시
+  void _showDeleteConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('채팅방 삭제'),
+        content: const Text('정말로 이 채팅방을 삭제하시겠습니까?\n모든 참가자가 나가게 되며, 이 작업은 되돌릴 수 없습니다.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _deleteChatRoom();
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('삭제'),
+          ),
+        ],
       ),
     );
   }
@@ -348,10 +459,16 @@ class _ChatRoomInfoWindowState extends ConsumerState<ChatRoomInfoWindow> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton(
-                    onPressed: widget.onDismiss,
-                    child: const Text('닫기'),
-                  ),
+                  isCreator 
+                      ? TextButton(
+                          onPressed: _showDeleteConfirmDialog,
+                          style: TextButton.styleFrom(foregroundColor: Colors.red),
+                          child: const Text('채팅방 삭제'),
+                        )
+                      : TextButton(
+                          onPressed: widget.onDismiss,
+                          child: const Text('닫기'),
+                        ),
                   ElevatedButton(
                     onPressed: _enterChatRoom,
                     style: ElevatedButton.styleFrom(
@@ -365,9 +482,9 @@ class _ChatRoomInfoWindowState extends ConsumerState<ChatRoomInfoWindow> {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    child: const Text(
-                      '채팅방 입장하기',
-                      style: TextStyle(
+                    child: Text(
+                      isInRoom ? '채팅방 입장하기' : '채팅방 참여하기',
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
