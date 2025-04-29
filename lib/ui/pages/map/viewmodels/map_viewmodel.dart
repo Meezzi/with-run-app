@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:with_run_app/ui/pages/chat_create/chat_create_page.dart';
-import 'package:with_run_app/ui/pages/chat_information/chat_information_page.dart';
 import 'package:with_run_app/ui/pages/chatting_page/chat_room_view_model.dart';
+import 'package:with_run_app/ui/pages/chatting_page/chatting_page.dart';
 import 'package:with_run_app/ui/pages/map/providers/location_provider.dart';
 import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
+import 'package:with_run_app/ui/pages/map/widgets/chat_list_overlay.dart';
 import 'package:with_run_app/ui/pages/map/widgets/create_chat_room_dialog.dart';
 
 class MapViewModel extends StateNotifier<bool> {
   final Ref _ref;
   OverlayEntry? _infoWindowOverlay;
+  OverlayEntry? _chatListOverlay;
   bool _isInitialized = false;
 
   MapViewModel(this._ref) : super(false);
@@ -32,18 +34,47 @@ class MapViewModel extends StateNotifier<bool> {
     _closeOverlays();
     
     try {
-      // 채팅방 정보 로드
-      final result = await _ref.read(chatRoomViewModel.notifier).enterChatRoom(chatRoomId);
+      // 사용자가 이미 다른 채팅방에 참여 중인지 확인
+      final chatRoomVm = _ref.read(chatRoomViewModel.notifier);
+      final isInAnyRoom = await chatRoomVm.isUserInAnyRoom();
       
-      // 채팅방 정보 페이지로 이동
-      if (context.mounted && result != null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatInformationPage(),
+      if (!context.mounted) return;
+      
+      if (isInAnyRoom) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('이미 참여 중인 채팅방이 있습니다. 한 번에 하나의 채팅방에만 참여할 수 있습니다.'),
+            backgroundColor: Colors.red,
           ),
         );
-      } else if (context.mounted) {
+        return;
+      }
+      
+      // 채팅방 정보 로드
+      final result = await chatRoomVm.enterChatRoom(chatRoomId);
+      
+      // 참가자 추가
+      await chatRoomVm.addParticipant(chatRoomId);
+      
+      // 채팅 페이지로 직접 이동
+      if (!context.mounted) return;
+      
+      if (result != null) {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChattingPage(
+                chatRoomId: chatRoomId,
+                myUserId: user.uid,
+                roomName: result.title,
+                location: '${result.location.latitude}, ${result.location.longitude}',
+              ),
+            ),
+          );
+        }
+      } else {
         _showSnackBar(context, '채팅방 정보를 불러올 수 없습니다.', isError: true);
       }
     } catch (e) {
@@ -74,6 +105,8 @@ class MapViewModel extends StateNotifier<bool> {
   void _closeOverlays() {
     _infoWindowOverlay?.remove();
     _infoWindowOverlay = null;
+    _chatListOverlay?.remove();
+    _chatListOverlay = null;
   }
 
   void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
@@ -117,14 +150,12 @@ class MapViewModel extends StateNotifier<bool> {
     try {
       await _ref.read(mapProvider.notifier).moveToCurrentLocation();
       
-      if (context.mounted) {
-        _showSnackBar(context, "현재 위치로 이동했습니다");
-      }
+      if (!context.mounted) return;
+      _showSnackBar(context, "현재 위치로 이동했습니다");
     } catch (e) {
       debugPrint("카메라 이동 실패: $e");
-      if (context.mounted) {
-        _showSnackBar(context, "위치로 이동하는데 실패했습니다", isError: true);
-      }
+      if (!context.mounted) return;
+      _showSnackBar(context, "위치로 이동하는데 실패했습니다", isError: true);
     }
   }
 
@@ -133,6 +164,36 @@ class MapViewModel extends StateNotifier<bool> {
       _showSnackBar(context, '로그인이 필요합니다.', isError: true);
       return;
     }
+    
+    // 사용자가 이미 채팅방을 생성했는지 확인
+    final chatRoomVm = _ref.read(chatRoomViewModel.notifier);
+    final hasCreatedRoom = await chatRoomVm.userHasCreatedRoom();
+    
+    if (!context.mounted) return;
+    
+    if (hasCreatedRoom) {
+      _showSnackBar(
+        context, 
+        '이미 생성한 채팅방이 있습니다. 한 번에 하나의 채팅방만 만들 수 있습니다.', 
+        isError: true
+      );
+      return;
+    }
+    
+    // 사용자가 이미 다른 채팅방에 참여 중인지 확인
+    final isInAnyRoom = await chatRoomVm.isUserInAnyRoom();
+    
+    if (!context.mounted) return;
+    
+    if (isInAnyRoom) {
+      _showSnackBar(
+        context, 
+        '이미 참여 중인 채팅방이 있습니다. 채팅방에서 나간 후 새로운 채팅방을 만들어주세요.', 
+        isError: true
+      );
+      return;
+    }
+    
     final mapState = _ref.read(mapProvider);
     if (mapState.selectedPosition != null) {
       _navigateToChatCreatePage(context);
@@ -179,9 +240,22 @@ class MapViewModel extends StateNotifier<bool> {
     );
   }
 
-  Future<void> showChatListOverlay(BuildContext context) async {
-    // 채팅 목록 오버레이 표시 기능은 나중에 구현
-    _showSnackBar(context, "채팅 목록 기능은 준비 중입니다.");
+  // 채팅 목록 오버레이 표시
+  void showChatListOverlay(BuildContext context) {
+    _closeOverlays();
+    
+    // ChatListOverlay 위젯을 사용하여 오버레이 표시
+    _chatListOverlay = OverlayEntry(
+      builder: (context) => ChatListOverlay(
+        onDismiss: () {
+          _chatListOverlay?.remove();
+          _chatListOverlay = null;
+        },
+      ),
+    );
+    
+    // 오버레이 삽입
+    Overlay.of(context).insert(_chatListOverlay!);
   }
 
   @override

@@ -49,10 +49,16 @@ class MapNotifier extends StateNotifier<MapState> {
 
   void setOnChatRoomMarkerTapCallback(OnChatRoomMarkerTapCallback callback) {
     _onChatRoomMarkerTap = callback;
+    // 기존 마커들에 대한 콜백도 업데이트
+    _updateMarkers();
   }
 
   void setOnTemporaryMarkerTapCallback(OnTemporaryMarkerTapCallback callback) {
     _onTemporaryMarkerTap = callback;
+    // 임시 마커가 있다면 업데이트
+    if (state.selectedPosition != null) {
+      _updateTemporaryMarker(state.selectedPosition!);
+    }
   }
 
   void _listenToLocationChanges() {
@@ -95,6 +101,40 @@ class MapNotifier extends StateNotifier<MapState> {
     
     state = state.copyWith(markers: currentMarkers);
   }
+  
+  // 마커 업데이트 헬퍼 메소드
+  void _updateMarkers() {
+    refreshMap();
+  }
+  
+  // 임시 마커 업데이트
+  void _updateTemporaryMarker(LatLng position) {
+    final currentMarkers = Set<Marker>.from(state.markers);
+    const markerId = MarkerId('temporaryMarker');
+    
+    // 기존 임시 마커 제거
+    currentMarkers.removeWhere((marker) => marker.markerId == markerId);
+    
+    // 새 임시 마커 추가
+    currentMarkers.add(
+      Marker(
+        markerId: markerId,
+        position: position,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        infoWindow: const InfoWindow(title: '새 채팅방 위치'),
+        onTap: () {
+          if (_onTemporaryMarkerTap != null) {
+            _onTemporaryMarkerTap!(position);
+          }
+        },
+      ),
+    );
+    
+    state = state.copyWith(
+      markers: currentMarkers,
+      selectedPosition: position,
+    );
+  }
 
   // Firestore에서 채팅방 로드
   Future<void> refreshMap() async {
@@ -113,13 +153,20 @@ class MapNotifier extends StateNotifier<MapState> {
         if (data.containsKey('location')) {
           final location = data['location'] as GeoPoint;
           
+          // 마커 ID를 채팅방 ID로 설정
+          final markerId = MarkerId('chatRoom_${doc.id}');
+          
+          // 기존 마커 업데이트 또는 새 마커 추가
           currentMarkers.add(
             Marker(
-              markerId: MarkerId('chatRoom_${doc.id}'),
+              markerId: markerId,
               position: LatLng(location.latitude, location.longitude),
               icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
               onTap: () {
-                onChatRoomMarkerTap(doc.id);
+                debugPrint('마커 클릭됨: chatRoom_${doc.id}');
+                if (_onChatRoomMarkerTap != null) {
+                  _onChatRoomMarkerTap!(doc.id);
+                }
               },
             ),
           );

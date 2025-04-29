@@ -13,6 +13,7 @@ class ChatRoomModel {
   final DateTime? lastMessageTimestamp;
   final DateTime startTime;
   final DateTime endTime;
+  final bool isStart; // 러닝 시작 상태
 
   ChatRoomModel({
     this.id,
@@ -26,6 +27,7 @@ class ChatRoomModel {
     this.participants,
     this.lastMessage,
     this.lastMessageTimestamp,
+    this.isStart = false,
   });
 
   factory ChatRoomModel.fromFirestore(
@@ -53,6 +55,7 @@ class ChatRoomModel {
               : null,
       startTime: (data['startTime'] as Timestamp).toDate(),
       endTime: (data['endTime'] as Timestamp).toDate(),
+      isStart: data['isStart'] ?? false,
     );
   }
 
@@ -70,6 +73,7 @@ class ChatRoomModel {
               : null,
       'startTime': Timestamp.fromDate(startTime),
       'endTime': Timestamp.fromDate(endTime),
+      'isStart': isStart,
     };
   }
 }

@@ -32,7 +32,7 @@ class Participant {
     );
   }
 
-    Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap() {
     return {
       'nickname': nickname,
       'profileImageUrl': profileImageUrl,

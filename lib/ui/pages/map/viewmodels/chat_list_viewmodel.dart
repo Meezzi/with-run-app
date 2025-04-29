@@ -16,7 +16,7 @@ class ChatListViewModel extends StateNotifier<AsyncValue<List<ChatRoomModel>>> {
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId == null) {
-        state = AsyncValue.data([]);
+        state = const AsyncValue.data([]);
         return;
       }
       
@@ -37,10 +37,6 @@ class ChatListViewModel extends StateNotifier<AsyncValue<List<ChatRoomModel>>> {
               .collection('participants')
               .get();
               
-          final participants = participantsSnapshot.docs.map((e) {
-            return e.data();
-          }).toList();
-          
           // 채팅방 데이터를 ChatRoomModel로 변환
           // 이 부분은 필요에 따라 실제 데이터 구조에 맞게 수정해야 함
           final room = await _firestore
@@ -63,6 +59,8 @@ class ChatListViewModel extends StateNotifier<AsyncValue<List<ChatRoomModel>>> {
   }
 
   Future<void> joinChatRoom(BuildContext context, ChatRoomModel chatRoom) async {
+    if (!context.mounted) return;
+    
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
       _showSnackBar(context, '로그인이 필요합니다.', isError: true);
@@ -72,6 +70,8 @@ class ChatListViewModel extends StateNotifier<AsyncValue<List<ChatRoomModel>>> {
     try {
       // 사용자 정보 가져오기
       final userDoc = await _firestore.collection('users').doc(userId).get();
+      
+      if (!context.mounted) return;
       
       if (!userDoc.exists) {
         _showSnackBar(context, '사용자 정보를 찾을 수 없습니다.', isError: true);
@@ -91,10 +91,14 @@ class ChatListViewModel extends StateNotifier<AsyncValue<List<ChatRoomModel>>> {
             'profileImageUrl': userData['profileImageUrl'] ?? '',
           });
       
+      if (!context.mounted) return;
+      
       _showSnackBar(context, '채팅방에 참여했습니다.');
     } catch (e) {
       debugPrint('채팅방 참여 오류: $e');
-      _showSnackBar(context, '오류 발생: $e', isError: true);
+      if (context.mounted) {
+        _showSnackBar(context, '오류 발생: $e', isError: true);
+      }
     }
   }
 

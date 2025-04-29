@@ -9,10 +9,10 @@ class MyResultSummaryCard extends ConsumerStatefulWidget {
   const MyResultSummaryCard({super.key, required this.chatRoomId});
 
   @override
-  _MyResultSummaryCardState createState() => _MyResultSummaryCardState();
+  ConsumerState<MyResultSummaryCard> createState() => MyResultSummaryCardState();
 }
 
-class _MyResultSummaryCardState extends ConsumerState<MyResultSummaryCard> {
+class MyResultSummaryCardState extends ConsumerState<MyResultSummaryCard> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(userViewModelProvider);
@@ -37,22 +37,22 @@ class _MyResultSummaryCardState extends ConsumerState<MyResultSummaryCard> {
                   radius: 48,
                   backgroundColor: Colors.blue[100],
                 ),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       user.nickname!,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       '${((double.tryParse(runningState.distance) ?? 0) / 1000.0).toStringAsFixed(2)} km',
 
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -61,7 +61,7 @@ class _MyResultSummaryCardState extends ConsumerState<MyResultSummaryCard> {
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -100,7 +100,7 @@ class DetailResult extends StatelessWidget {
         Text(title),
         Text(
           content,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ],
     );

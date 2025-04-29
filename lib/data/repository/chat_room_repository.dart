@@ -1,5 +1,3 @@
-
-
 import 'package:with_run_app/data/model/chat_room_model.dart';
 import 'package:with_run_app/data/model/user.dart';
 
@@ -9,4 +7,10 @@ abstract interface class ChatRoomRepository {
   Future<ChatRoomModel> get(String id);
 
   Future<void> addParticipant(User user, String chatRoomId);
+  
+  Future<void> removeParticipant(String userId, String chatRoomId);
+  
+  Future<void> deleteRoom(String chatRoomId);
+  
+  Future<List<ChatRoomModel>> getAllRooms();
 }

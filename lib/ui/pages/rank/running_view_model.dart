@@ -51,6 +51,7 @@ class RunningViewModel extends StateNotifier<RunningState> {
   final RunningRepository runningRepository;
   final Stopwatch _stopwatch = Stopwatch(); // 시간 측정을 위한 Stopwatch
   StreamSubscription<StepCount>? _stepSubscription; // 걸음 수 스트림
+  Timer? _timer; // 러닝 타이머
   int _initialSteps = 0; // 초기 걸음 수
   int _currentSteps = 0; // 현재 걸음 수
 
@@ -66,7 +67,40 @@ class RunningViewModel extends StateNotifier<RunningState> {
           runningTime: '0',
           errorMessage: '',
         ),
-      );
+      ) {
+    // 초기 상태 로드
+    _loadRunningStatus();
+  }
+
+  // 현재 러닝 상태 불러오기
+  Future<void> _loadRunningStatus() async {
+    try {
+      final statusStream = runningRepository.runningStatusStream();
+      await for (final result in statusStream) {
+        if (result is Ok<bool>) {
+          final isRunning = result.value;
+          
+          if (isRunning && !_stopwatch.isRunning) {
+            // 러닝 중이면 스톱워치 시작
+            _stopwatch.start();
+            _startTimer();
+            await _startPedometer();
+          } else if (!isRunning && _stopwatch.isRunning) {
+            // 러닝 중이 아니면 스톱워치 정지
+            _stopwatch.stop();
+            _timer?.cancel();
+            await _stepSubscription?.cancel();
+          }
+          
+          state = state.copyWith(isStart: isRunning);
+        }
+        // 최초 상태 로드 후 스트림 종료
+        break;
+      }
+    } catch (e) {
+      _handleError(Exception('러닝 상태 로드 실패: $e'));
+    }
+  }
 
   // 현재 걸음 수
   int get currentSteps => _currentSteps;
@@ -84,8 +118,17 @@ class RunningViewModel extends StateNotifier<RunningState> {
   // 현재 소모된 칼로리
   int get currentCalories => (_currentSteps * 0.04).round();
 
-  // 러닝 시작 메서드
-  Future<bool> startRunning() async {
+  // 러닝 타이머 시작
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      state = state.copyWith(
+        runningTime: _stopwatch.elapsed.inSeconds.toString(),
+      );
+    });
+  }
+
+  // 만보계 시작
+  Future<bool> _startPedometer() async {
     final status = await Permission.activityRecognition.request();
     if (!status.isGranted) {
       _handleError(Exception('걸음 수 측정 권한이 필요합니다.'));
@@ -93,7 +136,6 @@ class RunningViewModel extends StateNotifier<RunningState> {
     }
 
     try {
-      _stopwatch.start();
       _stepSubscription = Pedometer.stepCountStream.listen(
         (event) {
           _initialSteps = _initialSteps == 0 ? event.steps : _initialSteps;
@@ -101,12 +143,10 @@ class RunningViewModel extends StateNotifier<RunningState> {
 
           // 상태 갱신
           state = state.copyWith(
-            isStart: true,
             steps: _currentSteps.toString(),
             distance: currentDistance.toString(),
             speed: currentSpeed.toString(),
             colories: currentCalories.toString(),
-            runningTime: _stopwatch.elapsed.inSeconds.toString(),
           );
         },
         onError: (error) {
@@ -114,6 +154,28 @@ class RunningViewModel extends StateNotifier<RunningState> {
         },
       );
       return true;
+    } catch (e) {
+      _handleError(Exception('Pedometer 시작 실패: $e'));
+      return false;
+    }
+  }
+
+  // 러닝 시작 메서드
+  Future<bool> startRunning() async {
+    try {
+      _stopwatch.start();
+      _startTimer();
+      final success = await _startPedometer();
+      
+      if (success) {
+        state = state.copyWith(isStart: true);
+        return true;
+      }
+      
+      // 실패 시 리소스 정리
+      _stopwatch.stop();
+      _timer?.cancel();
+      return false;
     } catch (e) {
       _handleError(Exception('러닝 시작 실패: $e'));
       return false;
@@ -126,6 +188,7 @@ class RunningViewModel extends StateNotifier<RunningState> {
 
     try {
       _stopwatch.stop();
+      _timer?.cancel();
       await _stepSubscription?.cancel();
 
       final data = RunningData(
@@ -137,6 +200,7 @@ class RunningViewModel extends StateNotifier<RunningState> {
       );
 
       final result = await runningRepository.saveRunningData(data);
+      state = state.copyWith(isStart: false);
       return result is Ok;
     } catch (e) {
       _handleError(Exception('러닝 종료 실패: $e'));
@@ -171,9 +235,16 @@ class RunningViewModel extends StateNotifier<RunningState> {
     );
   }
 
-  // 권한 에러 처리
+  // 에러 처리
   void _handleError(Exception e) {
     state = state.copyWith(errorMessage: e.toString());
+  }
+  
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _stepSubscription?.cancel();
+    super.dispose();
   }
 }
 

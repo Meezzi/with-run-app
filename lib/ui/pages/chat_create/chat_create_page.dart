@@ -13,8 +13,8 @@ import 'package:with_run_app/ui/pages/chat_create/date_picker_input.dart';
 import 'package:with_run_app/ui/pages/chat_create/time_range_picker_input.dart';
 import 'package:with_run_app/ui/pages/chat_create/util/chat_creat_input_validator.dart';
 import 'package:with_run_app/ui/pages/chat_create/util/chat_create_util.dart';
-import 'package:with_run_app/ui/pages/chat_information/chat_information_page.dart';
 import 'package:with_run_app/ui/pages/chatting_page/chat_room_view_model.dart';
+import 'package:with_run_app/ui/pages/chatting_page/chatting_page.dart';
 import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
 import 'package:with_run_app/ui/pages/user_view_model.dart';
 
@@ -41,7 +41,32 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
     // 화면이 렌더링 된 후에 위치 정보 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadLocationData();
+      _checkExistingRoom();
     });
+  }
+  
+  // 이미 채팅방을 만들었는지 확인
+  Future<void> _checkExistingRoom() async {
+    try {
+      final chatRoomVm = ref.read(chatRoomViewModel.notifier);
+      final hasCreatedRoom = await chatRoomVm.userHasCreatedRoom();
+      
+      if (hasCreatedRoom) {
+        if (!mounted) return;
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('이미 생성한 채팅방이 있습니다. 한 번에 하나의 채팅방만 만들 수 있습니다.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        
+        // 맵 페이지로 돌아가기
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      debugPrint('채팅방 확인 오류: $e');
+    }
   }
 
   Future<void> _loadLocationData() async {
@@ -87,9 +112,11 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
       debugPrint('위치 초기화 오류: $e');
       locationController.text = '위치 정보를 가져올 수 없습니다';
     } finally {
-      setState(() {
-        isLoadingLocation = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoadingLocation = false;
+        });
+      }
     }
   }
 
@@ -108,7 +135,7 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
     
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(centerTitle: true, title: Text('채팅방 만들기')),
+        appBar: AppBar(centerTitle: true, title: const Text('채팅방 만들기')),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 0),
           child: Column(
@@ -116,7 +143,7 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
             children: [
               Expanded(
                 child: Container(
-                  constraints: BoxConstraints(minHeight: 350),
+                  constraints: const BoxConstraints(minHeight: 350),
                   child: Form(
                     key: formKey,
                     child: SingleChildScrollView(
@@ -216,34 +243,52 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                       final chatRoom = getChatRoom(user);
                       final result = await notifier.create(chatRoom, user);
                       
+                      // 이 시점에서 컨텍스트가 유효한지 확인
+                      if (!mounted) {
+                        return;
+                      }
+                      
                       // 채팅방 입장
                       await ref
                           .read(chatRoomViewModel.notifier)
                           .enterChatRoom(result);
                       
-                      loadingBar.hide();
-                      
-                      // 채팅방 정보 페이지로 이동
-                      if (mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => ChatInformationPage()),
-                        );
+                      // 마운트 상태 재확인
+                      if (!mounted) {
+                        return;
                       }
-                    } catch (e) {
+                      
                       loadingBar.hide();
                       
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('채팅방 생성 실패: ${e.toString()}'),
-                            backgroundColor: Colors.red,
+                      // 채팅방으로 바로 이동
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChattingPage(
+                            chatRoomId: result,
+                            myUserId: user.uid ?? '',
+                            roomName: chatRoom.title,
+                            location: locationController.text,
                           ),
-                        );
+                        ),
+                      );
+                    } catch (e) {
+                      // 이 시점에서 컨텍스트가 유효한지 확인
+                      if (!mounted) {
+                        return;
                       }
+                      
+                      loadingBar.hide();
+                      
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('채팅방 생성 실패: ${e.toString()}'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
                     }
                   },
-                  child: Text('채팅방 만들기'),
+                  child: const Text('채팅방 만들기'),
                 ),
               )
             ],
@@ -270,7 +315,7 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(requiredInput(name, isRequired)),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           isLoading 
             ? const Center(child: CircularProgressIndicator())
             : customInput ?? GestureDetector(
@@ -304,6 +349,7 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
         : GeoPoint(37.355149, 126.922238), // 기본값, 실제로는 유효성 검사에서 걸러짐
       creator: user,
       createdAt: DateTime.now(),
+      participants: [user], // 생성자를 participants에 추가
       startTime: makeDateTimeWithTime(date!, timeRange!.startTime),
       endTime: makeDateTimeWithTime(date!, timeRange!.endTime),
     );

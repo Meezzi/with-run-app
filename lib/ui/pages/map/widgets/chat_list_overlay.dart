@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:with_run_app/data/model/chat_room_model.dart';
+import 'package:with_run_app/ui/pages/chatting_page/chat_room_view_model.dart';
+import 'package:with_run_app/ui/pages/chatting_page/chatting_page.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
 import 'package:with_run_app/ui/pages/map/viewmodels/chat_list_viewmodel.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatListOverlay extends ConsumerWidget {
   final VoidCallback onDismiss;
@@ -233,9 +236,39 @@ class ChatListOverlay extends ConsumerWidget {
                   ? Colors.grey[400]
                   : const Color(0xFF9E9E9E),
             ),
-            onTap: () {
+            onTap: () async {
               onDismiss();
-              ref.read(chatListViewModelProvider.notifier).joinChatRoom(context, room);
+              
+              // 채팅방 입장
+              final user = FirebaseAuth.instance.currentUser;
+              if (user != null) {
+                try {
+                  // 채팅방 정보 가져오기
+                  final chatRoomVm = ref.read(chatRoomViewModel.notifier);
+                  final result = await chatRoomVm.enterChatRoom(room.id ?? '');
+                  
+                  if (result != null && context.mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChattingPage(
+                          chatRoomId: room.id ?? '',
+                          myUserId: user.uid,
+                          roomName: room.title,
+                          location: '${room.location.latitude}, ${room.location.longitude}',
+                        ),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  debugPrint('채팅방 입장 오류: $e');
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('채팅방 입장 실패: $e')),
+                    );
+                  }
+                }
+              }
             },
             dense: true,
           );

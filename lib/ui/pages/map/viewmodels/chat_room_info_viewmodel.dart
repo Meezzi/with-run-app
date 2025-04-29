@@ -64,6 +64,8 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
       // 사용자 정보 가져오기
       final userDoc = await _firestore.collection('users').doc(userId).get();
       
+      if (!context.mounted) return;
+      
       if (!userDoc.exists) {
         _showSnackBar(context, '사용자 정보를 찾을 수 없습니다.', isError: true);
         return;

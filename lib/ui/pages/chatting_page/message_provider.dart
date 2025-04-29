@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'dart:async';
 
 class MessageNotifier extends StateNotifier<List<Message>> {
@@ -16,7 +17,7 @@ class MessageNotifier extends StateNotifier<List<Message>> {
   }
 
   void _loadMessages() {
-    print('Loading messages for chatRoomId: $chatRoomId');
+    debugPrint('Loading messages for chatRoomId: $chatRoomId');
     _subscription = _firestore
         .collection('chatRooms')
         .doc(chatRoomId)
@@ -24,16 +25,16 @@ class MessageNotifier extends StateNotifier<List<Message>> {
         .orderBy('timestamp', descending: true)
         .snapshots()
         .listen((snapshot) {
-      print('Snapshot received: ${snapshot.docs.length} messages');
+      debugPrint('Snapshot received: ${snapshot.docs.length} messages');
       final msgs = snapshot.docs.map((doc) {
         final data = doc.data();
-        print('Message data: $data');
+        debugPrint('Message data: $data');
         return Message.fromMap(data, doc.id);
       }).toList();
       state = msgs;
-      print('State updated with ${msgs.length} messages');
+      debugPrint('State updated with ${msgs.length} messages');
     }, onError: (error) {
-      print('Error loading messages: $error');
+      debugPrint('Error loading messages: $error');
     });
   }
 
@@ -45,11 +46,30 @@ class MessageNotifier extends StateNotifier<List<Message>> {
 
   Future<void> sendMessage(String text) async {
     try {
+      // 참가자 정보 확인하여 닉네임 추가
+      final userDoc = await _firestore
+          .collection('chatRooms')
+          .doc(chatRoomId)
+          .collection('participants')
+          .doc(myUserId)
+          .get();
+      
+      String nickname = '알 수 없음';
+      String profileImageUrl = '';
+      
+      if (userDoc.exists) {
+        final userData = userDoc.data();
+        nickname = userData?['nickname'] ?? '알 수 없음';
+        profileImageUrl = userData?['profileImageUrl'] ?? '';
+      }
+      
       final newMessage = {
         'chatRoomId': chatRoomId,
         'senderId': myUserId,
         'text': text,
         'timestamp': FieldValue.serverTimestamp(),
+        'senderNickname': nickname, // 닉네임 추가
+        'senderProfileImageUrl': profileImageUrl, // 프로필 이미지 추가
       };
 
       await _firestore
@@ -57,9 +77,9 @@ class MessageNotifier extends StateNotifier<List<Message>> {
           .doc(chatRoomId)
           .collection('messages')
           .add(newMessage);
-      print('Message sent: $text');
+      debugPrint('Message sent: $text');
     } catch (e) {
-      print('Error sending message: $e');
+      debugPrint('Error sending message: $e');
     }
   }
 }
@@ -88,6 +108,8 @@ class Message {
   final String senderId;
   final String text;
   final DateTime timestamp;
+  final String senderNickname;
+  final String senderProfileImageUrl;
 
   Message({
     required this.messageId,
@@ -95,6 +117,8 @@ class Message {
     required this.senderId,
     required this.text,
     required this.timestamp,
+    this.senderNickname = '',
+    this.senderProfileImageUrl = '',
   });
 
   factory Message.fromMap(Map<String, dynamic> map, String id) {
@@ -105,6 +129,8 @@ class Message {
       senderId: map['senderId'] ?? '',
       text: map['text'] ?? '',
       timestamp: timestamp is Timestamp ? timestamp.toDate() : DateTime.now(),
+      senderNickname: map['senderNickname'] ?? '',
+      senderProfileImageUrl: map['senderProfileImageUrl'] ?? '',
     );
   }
 
@@ -114,6 +140,8 @@ class Message {
       'senderId': senderId,
       'text': text,
       'timestamp': timestamp,
+      'senderNickname': senderNickname,
+      'senderProfileImageUrl': senderProfileImageUrl,
     };
   }
 }

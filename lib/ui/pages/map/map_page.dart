@@ -437,7 +437,8 @@ void initState() {
                       .moveToCurrentLocation(context),
               tooltip: '내 위치로 이동',
             ),
-            _buildActionButton(
+           
+              _buildActionButton(
               icon: Icons.forum_outlined,
               iconColor:
                   themeState.isDarkMode

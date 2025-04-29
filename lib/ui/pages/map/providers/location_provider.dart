@@ -88,9 +88,14 @@ class LocationNotifier extends StateNotifier<LocationState> {
       
       // 위치 정보 가져오기
       try {
-        Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
+        // 장치에 적합한 설정 사용
+        final LocationSettings locationSettings = LocationSettings(
+          accuracy: LocationAccuracy.high,
           timeLimit: const Duration(seconds: 10),
+        );
+        
+        Position position = await Geolocator.getCurrentPosition(
+          locationSettings: locationSettings,
         );
 
         debugPrint('위치 정보 가져오기 성공: $position');

@@ -99,9 +99,9 @@ class _ChatInformationPageState extends ConsumerState<ChatInformationPage> {
     if (chatRoom == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('채팅방 정보'),
+          title: const Text('채팅방 정보'),
         ),
-        body: Center(
+        body: const Center(
           child: Text('채팅방 정보를 불러올 수 없습니다'),
         ),
       );
@@ -110,7 +110,7 @@ class _ChatInformationPageState extends ConsumerState<ChatInformationPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('${chatRoom.title}'),
+        title: Text(chatRoom.title),
       ),
       body: Column(
         children: [
@@ -128,9 +128,9 @@ class _ChatInformationPageState extends ConsumerState<ChatInformationPage> {
               child: ElevatedButton(
                 onPressed: _enterChatRoom,
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                child: Text('채팅방 입장하기'),
+                child: const Text('채팅방 입장하기'),
               ),
             ),
           ),
@@ -141,57 +141,57 @@ class _ChatInformationPageState extends ConsumerState<ChatInformationPage> {
   
   Widget _buildChatInfo(ChatRoomModel chatRoom) {
     return Card(
-      margin: EdgeInsets.all(16),
+      margin: const EdgeInsets.all(16),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (chatRoom.description != null && chatRoom.description!.isNotEmpty) ...[
-              Text(
+              const Text(
                 '설명',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(chatRoom.description!),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
             ],
             
-            Text(
+            const Text(
               '위치',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             isLoading
-                ? CircularProgressIndicator()
+                ? const CircularProgressIndicator()
                 : Text(address),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             
-            Text(
+            const Text(
               '일정',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Row(
               children: [
-                Icon(Icons.calendar_today, size: 16),
-                SizedBox(width: 4),
+                const Icon(Icons.calendar_today, size: 16),
+                const SizedBox(width: 4),
                 Text(
                   '${chatRoom.startTime.year}/${chatRoom.startTime.month}/${chatRoom.startTime.day}'
                 ),
               ],
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Row(
               children: [
-                Icon(Icons.access_time, size: 16),
-                SizedBox(width: 4),
+                const Icon(Icons.access_time, size: 16),
+                const SizedBox(width: 4),
                 Text(
                   '${chatRoom.startTime.hour.toString().padLeft(2, '0')}:${chatRoom.startTime.minute.toString().padLeft(2, '0')} ~ ${chatRoom.endTime.hour.toString().padLeft(2, '0')}:${chatRoom.endTime.minute.toString().padLeft(2, '0')}'
                 ),
