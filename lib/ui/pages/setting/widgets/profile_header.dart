@@ -8,8 +8,10 @@ class ProfileHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.read(userViewModelProvider);
+    final user = ref.watch(userViewModelProvider);
     final firebaseUser = ref.watch(firebaseUserProvider);
+
+    final profileImageUrl = user?.profileImageUrl ?? firebaseUser?.photoURL;
 
     return Container(
       width: double.infinity,
@@ -18,16 +20,17 @@ class ProfileHeader extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: 100),
+          const SizedBox(height: 100),
           CircleAvatar(
-            backgroundImage: NetworkImage('https://picsum.photos/200'),
             radius: 48,
             backgroundColor: Colors.blue[100],
+            backgroundImage:
+                profileImageUrl != null ? NetworkImage(profileImageUrl) : null,
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             user?.nickname ?? "닉네임 없음",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           Text(
             firebaseUser?.displayName ?? "이름 없음",
