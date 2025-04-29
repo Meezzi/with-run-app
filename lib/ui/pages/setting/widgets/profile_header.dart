@@ -15,7 +15,6 @@ class ProfileHeader extends ConsumerWidget {
       width: double.infinity,
       height: double.infinity,
       alignment: Alignment.topCenter,
-      decoration: BoxDecoration(color: Colors.pink[100]),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
