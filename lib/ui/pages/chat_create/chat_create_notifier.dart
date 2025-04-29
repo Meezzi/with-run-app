@@ -19,7 +19,6 @@ class ChatCreateNotifier extends AutoDisposeNotifier<ChatRoomCreateState>{
     final repository = ref.read(repositoryProvider);
     final result = await repository.create(chatRoom, creator);
     state = ChatRoomCreateState.done;
-    print(result);
     return result;
   }
   @override
