@@ -1,10 +1,8 @@
 ### ✨ withRun: 함께 뛰는 즐거움
 
-<p align="left">
-  <img src="https://github.com/user-attachments/assets/b6d379b4-214c-4bf9-bb66-8e2eb693238c" alt="withRun Main Banner" width="600"/>
-</p>
+![1](https://github.com/user-attachments/assets/1f0056dd-e6d9-41a8-9974-f599527f3fed)
 
----
+
 
 ## 🏃‍♂️ 개요
 
