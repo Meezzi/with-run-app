@@ -50,45 +50,47 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
               Expanded(
                 child: Container(
                   constraints: BoxConstraints(minHeight: 350),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        inputElement(
-                          name: '장소',
-                          readOnly: true,
-                          controller: locationController,
-                        ),
-                        inputElement(
-                          name: '채팅방 이름',
-                          isRequired: true,
-                          controller: titleController,
-                        ),
-                        inputElement(
-                          name: '날짜',
-                          isRequired: true,
-                          customInput: DatePickerInput(
-                            onDateChanged: (date) {
-                              this.date = date;
-                            },
+                  child: Form(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          inputElement(
+                            name: '장소',
+                            readOnly: true,
+                            controller: locationController,
                           ),
-                        ),
-                        inputElement(
-                          name: '시간',
-                          isRequired: true,
-                          customInput: TimeRangePickerInput(
-                            onRangeChanged: (timeRange) {
-                              this.timeRange = timeRange;
-                            },
+                          inputElement(
+                            name: '채팅방 이름',
+                            isRequired: true,
+                            controller: titleController,
                           ),
-                        ),
-                        inputElement(
-                          name: '설명',
-                          maxLines: 5,
-                          controller: descriptionController,
-                        ),
-                      ],
+                          inputElement(
+                            name: '날짜',
+                            isRequired: true,
+                            customInput: DatePickerInput(
+                              onDateChanged: (date) {
+                                this.date = date;
+                              },
+                            ),
+                          ),
+                          inputElement(
+                            name: '시간',
+                            isRequired: true,
+                            customInput: TimeRangePickerInput(
+                              onRangeChanged: (timeRange) {
+                                this.timeRange = timeRange;
+                              },
+                            ),
+                          ),
+                          inputElement(
+                            name: '설명',
+                            maxLines: 5,
+                            controller: descriptionController,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -107,15 +109,13 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                       getChatRoom(user!),
                       user,
                     );
-                    print(result);
-                    // ref
-                    //     .read(chatViewModelProvider.notifier)
-                    //     .streamChatRoom(result);
-                    // ref.watch(chatRoomStreamProvider(result));
-                    await ref.read(chatRoomViewModel.notifier).enterChatRoom(result);
+                    final a = await ref.read(chatRoomViewModel.notifier).enterChatRoom(result);
+                    print(a!.participants);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ChatInformationPage()),
+                      MaterialPageRoute(
+                        builder: (context) => ChatInformationPage()  
+                      ),
                     );
                   },
                   child: Text('채팅방 만들기'),
@@ -135,6 +135,7 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
     bool readOnly = false,
     Widget? customInput,
     TextEditingController? controller,
+    Function? validator,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
