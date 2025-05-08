@@ -1,38 +1,25 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
-labels: ''
+title: "[Login] 로그인 버튼 클릭 후 응답 없음"
+labels: bug
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+### 🚨 버그 개요
+로그인 시도 시 정상적인 자격 증명을 입력해도 대시보드로 이동하지 않고, 페이지가 멈추거나 오류가 발생
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+### 🪄 기대 동작
+- 
+- Given 사용자가 로그인 페이지에 있고 (주어진 상황)
+- And 올바른 이메일과 비밀번호를 입력했을 때 
+- When 로그인 버튼을 클릭하면 (언제)
+- Then 대시보드 페이지로 이동해야 한다 (그러면 기대 결과 반응)
+- And 사용자 이름이 화면에 보여야 한다
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+### 🔧 현재 동작
+- 로그인 버튼 클릭 시 응답 지연 후 아무런 반응 없음
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
-
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
-
-**Additional context**
-Add any other context about the problem here.
+### 🔎 참고할만한 자료(선택)
