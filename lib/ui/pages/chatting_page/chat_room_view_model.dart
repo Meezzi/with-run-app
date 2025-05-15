@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/data/model/chat_room_model.dart';
-import 'package:with_run_app/data/repository/chat_room_firebase_repository.dart';
-import 'package:with_run_app/data/repository/chat_room_repository.dart';
+import 'package:with_run_app/feature/chat/data/chat_room_model.dart';
+import 'package:with_run_app/feature/chat/data/chat_room_firebase_repository.dart';
+import 'package:with_run_app/feature/chat/data/chat_room_repository.dart';
 
 class ChatRoomViewModel extends Notifier<ChatRoomModel?>{
   Future<ChatRoomModel?> enterChatRoom(String roomId) async{

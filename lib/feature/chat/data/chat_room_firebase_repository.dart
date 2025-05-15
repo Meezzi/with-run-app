@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:with_run_app/data/model/chat_room_model.dart';
-import 'package:with_run_app/data/model/user.dart';
-import 'package:with_run_app/data/repository/chat_room_repository.dart';
+import 'package:with_run_app/feature/chat/data/chat_room_model.dart';
+import 'package:with_run_app/feature/auth/data/user.dart';
+import 'package:with_run_app/feature/chat/data/chat_room_repository.dart';
 
 class ChatRoomFirebaseRepository implements ChatRoomRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

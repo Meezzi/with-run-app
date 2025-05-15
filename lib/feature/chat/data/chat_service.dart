@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:with_run_app/models/chat_room.dart';
-import 'package:with_run_app/models/message.dart';
+import 'package:with_run_app/feature/chat/data/chat_room.dart';
+import 'package:with_run_app/feature/chat/data/message.dart';
 import 'dart:math' as math;
 
 class ChatService {

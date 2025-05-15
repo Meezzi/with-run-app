@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/data/model/chat_room_model.dart';
-import 'package:with_run_app/ui/pages/chat_information/chat_participant_list.dart';
+import 'package:with_run_app/feature/chat/data/chat_room_model.dart';
+import 'package:with_run_app/feature/chat/presentation/chat_information/widgets/chat_participant_list.dart';
 import 'package:with_run_app/ui/pages/chatting_page/chat_room_view_model.dart';
 
 class ChatInformationPage extends ConsumerWidget {

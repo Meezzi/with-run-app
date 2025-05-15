@@ -1,10 +1,10 @@
 
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/data/model/chat_room_model.dart';
-import 'package:with_run_app/data/model/user.dart';
-import 'package:with_run_app/data/repository/chat_room_firebase_repository.dart';
-import 'package:with_run_app/data/repository/chat_room_repository.dart';
+import 'package:with_run_app/feature/chat/data/chat_room_model.dart';
+import 'package:with_run_app/feature/auth/data/user.dart';
+import 'package:with_run_app/feature/chat/data/chat_room_firebase_repository.dart';
+import 'package:with_run_app/feature/chat/data/chat_room_repository.dart';
 
 enum ChatRoomCreateState {
   intialize,
@@ -12,7 +12,7 @@ enum ChatRoomCreateState {
   done,
   error,
 }
-
+// 뷰모델이니깐 나중에 뷰모델로 이름 변경하기~
 class ChatCreateNotifier extends AutoDisposeNotifier<ChatRoomCreateState>{
   Future<String> create(ChatRoomModel chatRoom, User creator) async{
     state = ChatRoomCreateState.submitted;

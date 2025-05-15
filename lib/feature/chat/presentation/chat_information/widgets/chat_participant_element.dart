@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:with_run_app/data/model/user.dart';
+import 'package:with_run_app/feature/auth/data/user.dart';
 
 class ChatParticipantElement extends StatelessWidget {
   const ChatParticipantElement({
