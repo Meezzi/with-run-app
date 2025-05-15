@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/data/model/user.dart';
-import 'package:with_run_app/data/repository/user_repository.dart';
+import 'package:with_run_app/feature/auth/data/user.dart';
+import 'package:with_run_app/feature/auth/data/user_repository.dart';
 
 class UserViewModel extends Notifier<User?> {
   @override

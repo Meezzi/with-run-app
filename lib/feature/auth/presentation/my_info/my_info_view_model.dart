@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:with_run_app/data/repository/image_repository.dart';
+import 'package:with_run_app/feature/auth/data/image_repository.dart';
 
 class MyInfoState {
   // 이미지 피커에 의해 선택된 이미지
