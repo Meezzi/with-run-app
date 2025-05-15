@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:with_run_app/data/model/user.dart';
+import 'package:with_run_app/feature/auth/data/user.dart';
 
 class UserRepository {
   /// firebase database에 로그인한 User정보 추가
