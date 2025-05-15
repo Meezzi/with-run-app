@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/models/chat_room.dart';
+import 'package:with_run_app/feature/chat/data/chat_room.dart';
 import 'package:with_run_app/ui/pages/map/theme_provider.dart';
 import 'package:with_run_app/ui/pages/map/viewmodels/chat_list_viewmodel.dart';
 

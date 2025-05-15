@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:with_run_app/models/chat_room.dart';
-import 'package:with_run_app/services/chat_service.dart';
+import 'package:with_run_app/feature/chat/data/chat_room.dart';
+import 'package:with_run_app/feature/chat/data/chat_service.dart';
 import 'package:with_run_app/ui/pages/map/providers/location_provider.dart';
 
 // 맵에 표시될 채팅방 마커를 클릭했을 때의 콜백 함수 타입
