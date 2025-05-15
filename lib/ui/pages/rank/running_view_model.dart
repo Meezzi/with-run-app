@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:with_run_app/core/result/result.dart';
-import 'package:with_run_app/data/model/running_data.dart';
-import 'package:with_run_app/data/repository/running_repository.dart';
+import 'package:with_run_app/feature/running/data/running_data.dart';
+import 'package:with_run_app/feature/running/data/running_repository.dart';
 
 // RunningState 클래스: 러닝의 상태를 저장
 class RunningState {

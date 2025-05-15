@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:with_run_app/core/result/result.dart'; // Result import
-import 'package:with_run_app/data/model/running_data.dart';
+import 'package:with_run_app/feature/running/data/running_data.dart';
 
 class RunningRepository {
   final String chatRoomId;
