@@ -5,11 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:with_run_app/features/auth/presentation/login/login_page.dart';
+import 'package:with_run_app/features/auth/user_view_model.dart';
+import 'package:with_run_app/features/map/presentation/map_page.dart';
+import 'package:with_run_app/features/map/presentation/theme_provider.dart';
 import 'package:with_run_app/firebase_options.dart';
-import 'package:with_run_app/ui/pages/login/login_page.dart';
-import 'package:with_run_app/ui/pages/map/map_page.dart';
-import 'package:with_run_app/ui/pages/map/theme_provider.dart';
-import 'package:with_run_app/ui/pages/user_view_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
