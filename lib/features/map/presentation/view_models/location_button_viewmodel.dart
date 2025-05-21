@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/ui/pages/map/providers/location_provider.dart';
-import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
+import 'package:with_run_app/features/map/presentation/view_models/location_provider.dart';
+import 'package:with_run_app/features/map/presentation/view_models/map_provider.dart';
 
 class LocationButtonViewModel extends StateNotifier<bool> {
   final Ref _ref;

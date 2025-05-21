@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:with_run_app/models/chat_room.dart';
-import 'package:with_run_app/services/chat_service.dart';
+import 'package:with_run_app/features/chat/data/chat_room.dart';
+import 'package:with_run_app/features/chat/data/chat_service.dart';
 
 
 

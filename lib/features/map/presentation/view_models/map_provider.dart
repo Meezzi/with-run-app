@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:with_run_app/features/chat/data/chat_room.dart';
 import 'package:with_run_app/features/chat/data/chat_service.dart';
-import 'package:with_run_app/ui/pages/map/providers/location_provider.dart';
+import 'package:with_run_app/features/map/presentation/view_models/location_provider.dart';
 
 // 맵에 표시될 채팅방 마커를 클릭했을 때의 콜백 함수 타입
 typedef OnChatRoomMarkerTapCallback = void Function(ChatRoom chatRoom);
