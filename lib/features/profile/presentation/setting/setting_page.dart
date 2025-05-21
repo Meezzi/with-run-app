@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:with_run_app/ui/pages/setting/widgets/profile_header.dart';
-import 'package:with_run_app/ui/pages/setting/widgets/setting_body_container.dart';
+import 'package:with_run_app/features/profile/presentation/setting/widgets/profile_header.dart';
+import 'package:with_run_app/features/profile/presentation/setting/widgets/setting_body_container.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});

@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/ui/pages/rank/rank_page.dart';
-import 'package:with_run_app/ui/pages/rank/running_view_model.dart';
+import 'package:with_run_app/features/running/presentation/rank/rank_page.dart';
+import 'package:with_run_app/features/running/presentation/rank/running_view_model.dart';
 
 /// 러닝 세션을 관리하는 컨트롤러 (러닝 시작/종료, 시간 증가, 결과 저장 및 페이지 이동)
 class RunningController {

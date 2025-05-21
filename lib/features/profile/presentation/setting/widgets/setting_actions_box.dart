@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:with_run_app/core/google_sign_in_helper.dart';
-import 'package:with_run_app/ui/pages/login/login_page.dart';
+import 'package:with_run_app/features/auth/data/google_sign_in_helper.dart';
+import 'package:with_run_app/features/auth/presentation/login/login_page.dart';
 
 class SettingActionBox extends StatelessWidget {
   const SettingActionBox({super.key});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:with_run_app/core/utils/duration_formatter.dart';
-import 'package:with_run_app/ui/pages/rank/running_view_model.dart';
+import 'package:with_run_app/features/running/presentation/rank/running_view_model.dart';
 
 class RunningStatusCard extends ConsumerWidget {
   final String chatRoomId;
