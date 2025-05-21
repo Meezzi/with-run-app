@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/ui/pages/map/theme_provider.dart';
-import 'package:with_run_app/ui/pages/map/viewmodels/location_button_viewmodel.dart';
+import 'package:with_run_app/features/map/presentation/theme_provider.dart';
+import 'package:with_run_app/features/map/presentation/view_models/location_button_viewmodel.dart';
 
 class LocationButton extends ConsumerWidget {
   const LocationButton({super.key});

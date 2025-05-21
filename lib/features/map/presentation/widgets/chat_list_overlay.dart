@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:with_run_app/features/chat/data/chat_room.dart';
-import 'package:with_run_app/ui/pages/map/theme_provider.dart';
-import 'package:with_run_app/ui/pages/map/viewmodels/chat_list_viewmodel.dart';
+import 'package:with_run_app/features/map/presentation/theme_provider.dart';
+import 'package:with_run_app/features/map/presentation/view_models/chat_list_viewmodel.dart';
 
 class ChatListOverlay extends ConsumerWidget {
   final VoidCallback onDismiss;
