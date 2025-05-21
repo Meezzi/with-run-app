@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/ui/pages/rank/running_view_model.dart';
-import 'package:with_run_app/ui/pages/user_view_model.dart';
+import 'package:with_run_app/features/auth/user_view_model.dart';
+import 'package:with_run_app/features/running/presentation/rank/running_view_model.dart';
 
 class MyResultSummaryCard extends ConsumerStatefulWidget {
   final String chatRoomId;

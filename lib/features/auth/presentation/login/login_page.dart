@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:with_run_app/core/google_sign_in_helper.dart';
-import 'package:with_run_app/ui/pages/my_info/my_info_page.dart';
+import 'package:with_run_app/features/auth/data/google_sign_in_helper.dart';
+import 'package:with_run_app/features/auth/presentation/my_info/my_info_page.dart';
 
 class LoginPage extends StatelessWidget {
   @override
