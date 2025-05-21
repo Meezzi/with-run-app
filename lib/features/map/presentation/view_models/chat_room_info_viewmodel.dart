@@ -2,36 +2,43 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:with_run_app/models/chat_room.dart';
-import 'package:with_run_app/services/chat_service.dart';
-
-
+import 'package:with_run_app/features/chat/data/chat_room.dart';
+import 'package:with_run_app/features/chat/data/chat_service.dart';
 
 class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
-  
   final ChatService _chatService = ChatService();
   final ChatRoom chatRoom;
 
-  ChatRoomInfoViewModel( this.chatRoom) : super(const AsyncValue.loading()) {
+  ChatRoomInfoViewModel(this.chatRoom) : super(const AsyncValue.loading()) {
     _getAddress();
   }
 
   Future<void> _getAddress() async {
     state = const AsyncValue.loading();
     try {
-      final address = await _getAddressFromLatLng(chatRoom.latitude, chatRoom.longitude);
+      final address = await _getAddressFromLatLng(
+        chatRoom.latitude,
+        chatRoom.longitude,
+      );
       state = AsyncValue.data(address);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }
   }
 
-  Future<String> _getAddressFromLatLng(double latitude, double longitude) async {
+  Future<String> _getAddressFromLatLng(
+    double latitude,
+    double longitude,
+  ) async {
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        latitude,
+        longitude,
+      );
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
-        return '${place.street ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}'.trim();
+        return '${place.street ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}'
+            .trim();
       }
       return '주소를 가져올 수 없습니다';
     } catch (e) {
@@ -71,7 +78,11 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
     if (!context.mounted) return;
 
     if (hasJoinedRoom) {
-      _showSnackBar(context, '이미 참여 중인 채팅방이 있습니다. 한 번에 하나의 채팅방에만 참여할 수 있습니다.', isError: true);
+      _showSnackBar(
+        context,
+        '이미 참여 중인 채팅방이 있습니다. 한 번에 하나의 채팅방에만 참여할 수 있습니다.',
+        isError: true,
+      );
       return;
     }
 
@@ -107,7 +118,11 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
     }
   }
 
-  void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
+  void _showSnackBar(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -121,6 +136,8 @@ class ChatRoomInfoViewModel extends StateNotifier<AsyncValue<String>> {
   }
 }
 
-final chatRoomInfoViewModelProvider = StateNotifierProvider.family<ChatRoomInfoViewModel, AsyncValue<String>, ChatRoom>(
-  (ref, chatRoom) => ChatRoomInfoViewModel(chatRoom),
-);
+final chatRoomInfoViewModelProvider = StateNotifierProvider.family<
+  ChatRoomInfoViewModel,
+  AsyncValue<String>,
+  ChatRoom
+>((ref, chatRoom) => ChatRoomInfoViewModel(chatRoom));

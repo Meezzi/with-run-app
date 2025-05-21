@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/ui/pages/map/theme_provider.dart';
-import 'package:with_run_app/ui/pages/map/viewmodels/create_chat_room_button_viewmodel.dart';
+import 'package:with_run_app/features/map/presentation/theme_provider.dart';
+import 'package:with_run_app/features/map/presentation/view_models/create_chat_room_button_viewmodel.dart';
 
 class CreateChatRoomButton extends ConsumerStatefulWidget {
   final VoidCallback onCreateButtonTap;
 
-  const CreateChatRoomButton({
-    super.key,
-    required this.onCreateButtonTap,
-  });
+  const CreateChatRoomButton({super.key, required this.onCreateButtonTap});
 
   @override
-  ConsumerState<CreateChatRoomButton> createState() => _CreateChatRoomButtonState();
+  ConsumerState<CreateChatRoomButton> createState() =>
+      _CreateChatRoomButtonState();
 }
 
 class _CreateChatRoomButtonState extends ConsumerState<CreateChatRoomButton> {
@@ -42,9 +40,10 @@ class _CreateChatRoomButtonState extends ConsumerState<CreateChatRoomButton> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: themeState.isDarkMode
-                ? [Colors.blue[400]!, Colors.green[400]!]
-                : [const Color(0xFF2196F3), const Color(0xFF00E676)],
+            colors:
+                themeState.isDarkMode
+                    ? [Colors.blue[400]!, Colors.green[400]!]
+                    : [const Color(0xFF2196F3), const Color(0xFF00E676)],
           ),
           borderRadius: const BorderRadius.all(Radius.circular(28)),
           boxShadow: const [
@@ -60,24 +59,31 @@ class _CreateChatRoomButtonState extends ConsumerState<CreateChatRoomButton> {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(28),
-            onTap: () => ref
-                .read(createChatRoomButtonViewModelProvider(_showSnackBar).notifier)
-                .onNewChatRoomButtonTap(context, widget.onCreateButtonTap),
+            onTap:
+                () => ref
+                    .read(
+                      createChatRoomButtonViewModelProvider(
+                        _showSnackBar,
+                      ).notifier,
+                    )
+                    .onNewChatRoomButtonTap(context, widget.onCreateButtonTap),
             splashColor: const Color(0x33FFFFFF),
             highlightColor: const Color(0x22FFFFFF),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CircleAvatar(
-                  backgroundColor: themeState.isDarkMode
-                      ? const Color.fromARGB(255, 255, 255, 255)
-                      : Colors.white,
+                  backgroundColor:
+                      themeState.isDarkMode
+                          ? const Color.fromARGB(255, 255, 255, 255)
+                          : Colors.white,
                   radius: 14,
                   child: Icon(
                     Icons.add_comment_outlined,
-                    color: themeState.isDarkMode
-                        ? Colors.blue[600]
-                        : const Color(0xFF2196F3),
+                    color:
+                        themeState.isDarkMode
+                            ? Colors.blue[600]
+                            : const Color(0xFF2196F3),
                     size: 16,
                   ),
                 ),

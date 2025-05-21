@@ -8,8 +8,8 @@ import 'package:with_run_app/features/chat/presentation/chat_room_create/chat_cr
 import 'package:with_run_app/features/map/presentation/view_models/location_provider.dart';
 import 'package:with_run_app/features/map/presentation/view_models/map_provider.dart';
 import 'package:with_run_app/features/map/presentation/widgets/chat_list_overlay.dart';
+import 'package:with_run_app/features/map/presentation/widgets/chat_room_info_window.dart';
 import 'package:with_run_app/features/map/presentation/widgets/create_chat_room_dialog.dart';
-import 'package:with_run_app/ui/pages/map/widgets/chat_room_info_window.dart';
 
 class MapViewModel extends StateNotifier<bool> {
   final Ref _ref;
@@ -23,10 +23,14 @@ class MapViewModel extends StateNotifier<bool> {
   void initialize(BuildContext context) {
     if (!_isInitialized) {
       _isInitialized = true;
-      _ref.read(mapProvider.notifier).setOnChatRoomMarkerTapCallback((chatRoom) {
+      _ref.read(mapProvider.notifier).setOnChatRoomMarkerTapCallback((
+        chatRoom,
+      ) {
         showChatRoomInfoWindow(context, chatRoom);
       });
-      _ref.read(mapProvider.notifier).setOnTemporaryMarkerTapCallback((position) {
+      _ref.read(mapProvider.notifier).setOnTemporaryMarkerTapCallback((
+        position,
+      ) {
         _showCreateChatRoomConfirmDialog(context, position);
       });
     }
@@ -35,13 +39,14 @@ class MapViewModel extends StateNotifier<bool> {
   void showChatRoomInfoWindow(BuildContext context, ChatRoom chatRoom) {
     _closeOverlays();
     _infoWindowOverlay = OverlayEntry(
-      builder: (context) => ChatRoomInfoWindow(
-        chatRoom: chatRoom,
-        onDismiss: () {
-          _infoWindowOverlay?.remove();
-          _infoWindowOverlay = null;
-        },
-      ),
+      builder:
+          (context) => ChatRoomInfoWindow(
+            chatRoom: chatRoom,
+            onDismiss: () {
+              _infoWindowOverlay?.remove();
+              _infoWindowOverlay = null;
+            },
+          ),
     );
     Overlay.of(context).insert(_infoWindowOverlay!);
   }
@@ -50,28 +55,30 @@ class MapViewModel extends StateNotifier<bool> {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => Transform.translate(
-        offset: const Offset(0, -160),
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: CreateChatRoomDialog(
-            position: position,
-            onDismiss: () => Navigator.of(context).pop(),
+      builder:
+          (context) => Transform.translate(
+            offset: const Offset(0, -160),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: CreateChatRoomDialog(
+                position: position,
+                onDismiss: () => Navigator.of(context).pop(),
+              ),
+            ),
           ),
-        ),
-      ),
     );
   }
 
   void showChatListOverlay(BuildContext context) {
     _closeOverlays();
     _chatListOverlay = OverlayEntry(
-      builder: (context) => ChatListOverlay(
-        onDismiss: () {
-          _chatListOverlay?.remove();
-          _chatListOverlay = null;
-        },
-      ),
+      builder:
+          (context) => ChatListOverlay(
+            onDismiss: () {
+              _chatListOverlay?.remove();
+              _chatListOverlay = null;
+            },
+          ),
     );
     Overlay.of(context).insert(_chatListOverlay!);
   }
@@ -83,9 +90,13 @@ class MapViewModel extends StateNotifier<bool> {
     _infoWindowOverlay = null;
   }
 
-  void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
+  void _showSnackBar(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+  }) {
     if (!context.mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -100,16 +111,16 @@ class MapViewModel extends StateNotifier<bool> {
 
   Future<void> moveToCurrentLocation(BuildContext context) async {
     final locationState = _ref.read(locationProvider);
-    
+
     // 위치 정보가 없으면 새로고침
     if (locationState.currentPosition == null) {
       _showSnackBar(context, "위치 정보를 가져오는 중입니다...");
       await _ref.read(locationProvider.notifier).refreshLocation();
-      
+
       // 위치 정보를 다시 확인
       final updatedLocationState = _ref.read(locationProvider);
       if (!context.mounted) return;
-      
+
       if (updatedLocationState.currentPosition == null) {
         if (updatedLocationState.error != null) {
           _showSnackBar(context, updatedLocationState.error!, isError: true);
@@ -119,7 +130,7 @@ class MapViewModel extends StateNotifier<bool> {
         return;
       }
     }
-    
+
     // 실제 지도 이동 로직
     try {
       final mapState = _ref.read(mapProvider);
@@ -129,26 +140,25 @@ class MapViewModel extends StateNotifier<bool> {
         }
         return;
       }
-      
+
       final controller = await mapState.mapController.future;
       if (!context.mounted) return;
-      
+
       final position = locationState.currentPosition!;
-      
+
       await controller.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
-            target: LatLng(
-              position.latitude,
-              position.longitude,
-            ),
+            target: LatLng(position.latitude, position.longitude),
             zoom: 15.0,
           ),
         ),
       );
-      
-      debugPrint("카메라가 현재 위치(${position.latitude}, ${position.longitude})로 이동했습니다");
-      
+
+      debugPrint(
+        "카메라가 현재 위치(${position.latitude}, ${position.longitude})로 이동했습니다",
+      );
+
       if (context.mounted) {
         _showSnackBar(context, "현재 위치로 이동했습니다");
       }
@@ -205,30 +215,31 @@ class MapViewModel extends StateNotifier<bool> {
   void _showLocationSelectionDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        contentPadding: EdgeInsets.zero,
-        content: Container(
-          width: 320,
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.touch_app, size: 40, color: Colors.blue),
-              const SizedBox(height: 8),
-              const Text(
-                '지도에서 채팅방을 개설할 위치를 선택해주세요',
-                style: TextStyle(fontWeight: FontWeight.w600),
-                textAlign: TextAlign.center,
+      builder:
+          (context) => AlertDialog(
+            contentPadding: EdgeInsets.zero,
+            content: Container(
+              width: 320,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.touch_app, size: 40, color: Colors.blue),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '지도에서 채팅방을 개설할 위치를 선택해주세요',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('확인'),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('확인'),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 

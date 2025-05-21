@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:with_run_app/ui/pages/map/viewmodels/create_chat_room_dialog_viewmodel.dart';
+import 'package:with_run_app/features/map/presentation/view_models/create_chat_room_dialog_viewmodel.dart';
 
 class CreateChatRoomDialog extends ConsumerWidget {
   final LatLng position;
@@ -15,7 +15,9 @@ class CreateChatRoomDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final viewModel = ref.read(createChatRoomDialogViewModelProvider(position).notifier);
+    final viewModel = ref.read(
+      createChatRoomDialogViewModelProvider(position).notifier,
+    );
 
     return CupertinoAlertDialog(
       title: const Text('새 채팅방 위치'),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/ui/pages/map/providers/location_provider.dart';
-import 'package:with_run_app/ui/pages/map/providers/map_provider.dart';
+import 'package:with_run_app/features/map/presentation/view_models/location_provider.dart';
+import 'package:with_run_app/features/map/presentation/view_models/map_provider.dart';
 
 class LocationButtonViewModel extends StateNotifier<bool> {
   final Ref _ref;
@@ -20,7 +20,11 @@ class LocationButtonViewModel extends StateNotifier<bool> {
     }
   }
 
-  void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
+  void _showSnackBar(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -36,5 +40,5 @@ class LocationButtonViewModel extends StateNotifier<bool> {
 
 final locationButtonViewModelProvider =
     StateNotifierProvider<LocationButtonViewModel, bool>((ref) {
-  return LocationButtonViewModel(ref);
-});
+      return LocationButtonViewModel(ref);
+    });

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:with_run_app/features/chat/data/chat_room.dart';
 import 'package:with_run_app/features/chat/data/chat_service.dart';
-import 'package:with_run_app/ui/pages/map/providers/location_provider.dart';
+import 'package:with_run_app/features/map/presentation/view_models/location_provider.dart';
 
 // 맵에 표시될 채팅방 마커를 클릭했을 때의 콜백 함수 타입
 typedef OnChatRoomMarkerTapCallback = void Function(ChatRoom chatRoom);
@@ -16,17 +16,16 @@ class MapState {
   final List<ChatRoom> nearbyRooms;
   final LatLng? selectedPosition;
   final bool isCreatingChatRoom;
-  
+
   MapState({
     Completer<GoogleMapController>? mapController,
     Set<Marker>? markers,
     List<ChatRoom>? nearbyRooms,
     this.selectedPosition,
     this.isCreatingChatRoom = false,
-  }) : 
-    mapController = mapController ?? Completer<GoogleMapController>(),
-    markers = markers ?? {},
-    nearbyRooms = nearbyRooms ?? [];
+  }) : mapController = mapController ?? Completer<GoogleMapController>(),
+       markers = markers ?? {},
+       nearbyRooms = nearbyRooms ?? [];
 
   MapState copyWith({
     Set<Marker>? markers,
@@ -64,10 +63,12 @@ class MapNotifier extends StateNotifier<MapState> {
 
   void _listenToLocationChanges() {
     _ref.listen(locationProvider, (previous, next) {
-      if (next.currentPosition != null && 
-          (previous?.currentPosition == null || 
-           previous!.currentPosition!.latitude != next.currentPosition!.latitude ||
-           previous.currentPosition!.longitude != next.currentPosition!.longitude)) {
+      if (next.currentPosition != null &&
+          (previous?.currentPosition == null ||
+              previous!.currentPosition!.latitude !=
+                  next.currentPosition!.latitude ||
+              previous.currentPosition!.longitude !=
+                  next.currentPosition!.longitude)) {
         _updateCurrentLocationMarker();
         loadNearbyChatRooms();
       }
@@ -81,25 +82,22 @@ class MapNotifier extends StateNotifier<MapState> {
 
     final currentPosition = locationState.currentPosition!;
     final currentMarkers = Set<Marker>.from(state.markers);
-    
+
     // 기존 내 위치 마커 제거
     currentMarkers.removeWhere(
       (marker) => marker.markerId == const MarkerId('myLocation'),
     );
-    
+
     // 새 내 위치 마커 추가
     currentMarkers.add(
       Marker(
         markerId: const MarkerId('myLocation'),
-        position: LatLng(
-          currentPosition.latitude,
-          currentPosition.longitude,
-        ),
+        position: LatLng(currentPosition.latitude, currentPosition.longitude),
         infoWindow: const InfoWindow(title: '내 위치'),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
       ),
     );
-    
+
     state = state.copyWith(markers: currentMarkers);
   }
 
@@ -109,38 +107,40 @@ class MapNotifier extends StateNotifier<MapState> {
     if (locationState.currentPosition == null) return;
 
     final currentPosition = locationState.currentPosition!;
-    
+
     try {
-      final rooms = await _chatService.getNearbyRooms(
-        latitude: currentPosition.latitude,
-        longitude: currentPosition.longitude,
-      ).first;
-      
+      final rooms =
+          await _chatService
+              .getNearbyRooms(
+                latitude: currentPosition.latitude,
+                longitude: currentPosition.longitude,
+              )
+              .first;
+
       final currentMarkers = Set<Marker>.from(state.markers);
-      
+
       // 기존 채팅방 마커 제거
       currentMarkers.removeWhere(
         (marker) => marker.markerId.value.startsWith('chatRoom_'),
       );
-      
+
       // 새 채팅방 마커 추가
       for (var room in rooms) {
         currentMarkers.add(
           Marker(
             markerId: MarkerId('chatRoom_${room.id}'),
             position: LatLng(room.latitude, room.longitude),
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueOrange,
+            ),
             onTap: () {
               onChatRoomMarkerTap(room);
             },
           ),
         );
       }
-      
-      state = state.copyWith(
-        markers: currentMarkers,
-        nearbyRooms: rooms,
-      );
+
+      state = state.copyWith(markers: currentMarkers, nearbyRooms: rooms);
     } catch (e) {
       debugPrint('주변 채팅방 로드 오류: $e');
     }
@@ -172,19 +172,18 @@ class MapNotifier extends StateNotifier<MapState> {
   // 현재 위치로 카메라 이동
   Future<void> moveToCurrentLocation() async {
     final locationState = _ref.read(locationProvider);
-    if (locationState.currentPosition == null || !state.mapController.isCompleted) return;
-    
+    if (locationState.currentPosition == null ||
+        !state.mapController.isCompleted)
+      return;
+
     final controller = await state.mapController.future;
     final currentPosition = locationState.currentPosition!;
-    
+
     try {
       await controller.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
-            target: LatLng(
-              currentPosition.latitude,
-              currentPosition.longitude,
-            ),
+            target: LatLng(currentPosition.latitude, currentPosition.longitude),
             zoom: 15.0,
           ),
         ),
@@ -198,10 +197,10 @@ class MapNotifier extends StateNotifier<MapState> {
   void addTemporaryMarker(LatLng position) {
     final currentMarkers = Set<Marker>.from(state.markers);
     const markerId = MarkerId('temporaryMarker');
-    
+
     // 기존 임시 마커 제거
     currentMarkers.removeWhere((marker) => marker.markerId == markerId);
-    
+
     // 새 임시 마커 추가 - 탭 이벤트 추가
     currentMarkers.add(
       Marker(
@@ -212,12 +211,9 @@ class MapNotifier extends StateNotifier<MapState> {
         onTap: () => onTemporaryMarkerTap(position),
       ),
     );
-    
-    state = state.copyWith(
-      markers: currentMarkers,
-      selectedPosition: position,
-    );
-    
+
+    state = state.copyWith(markers: currentMarkers, selectedPosition: position);
+
     // 마커를 추가한 후 카메라 이동
     if (state.mapController.isCompleted) {
       state.mapController.future.then((controller) {
@@ -232,11 +228,8 @@ class MapNotifier extends StateNotifier<MapState> {
     currentMarkers.removeWhere(
       (marker) => marker.markerId == const MarkerId('temporaryMarker'),
     );
-    
-    state = state.copyWith(
-      markers: currentMarkers,
-      selectedPosition: null,
-    );
+
+    state = state.copyWith(markers: currentMarkers, selectedPosition: null);
   }
 
   // 채팅방 생성 모드 설정
@@ -254,20 +247,20 @@ class MapNotifier extends StateNotifier<MapState> {
   // 채팅방 삭제 후 맵 새로고침
   Future<void> refreshMapAfterRoomDeletion(String roomId) async {
     final currentMarkers = Set<Marker>.from(state.markers);
-    
+
     // 삭제된 채팅방 마커 제거
     currentMarkers.removeWhere(
       (marker) => marker.markerId == MarkerId('chatRoom_$roomId'),
     );
-    
+
     final nearbyRoomsUpdated = List<ChatRoom>.from(state.nearbyRooms)
       ..removeWhere((room) => room.id == roomId);
-    
+
     state = state.copyWith(
       markers: currentMarkers,
       nearbyRooms: nearbyRoomsUpdated,
     );
-    
+
     // 주변 채팅방 다시 로드
     await loadNearbyChatRooms();
   }
