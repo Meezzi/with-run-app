@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/ui/pages/setting/provider/firebase_user_provider.dart';
-import 'package:with_run_app/ui/pages/user_view_model.dart';
+import 'package:with_run_app/features/auth/user_view_model.dart';
+import 'package:with_run_app/features/profile/presentation/setting/provider/firebase_user_provider.dart';
 
 class ProfileHeader extends ConsumerWidget {
   const ProfileHeader({super.key});
