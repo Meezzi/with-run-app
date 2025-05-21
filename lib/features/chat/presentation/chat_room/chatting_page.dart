@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:with_run_app/ui/pages/chatting_page/message_provider.dart';
-import 'package:with_run_app/ui/pages/chatting_page/widgets/chat_bubble.dart';
-import 'package:with_run_app/ui/pages/chatting_page/widgets/chat_input_field.dart';
-import 'package:with_run_app/ui/pages/chatting_page/widgets/icon_button.dart';
-import 'package:with_run_app/ui/pages/chatting_page/participant_provider.dart';
+import 'package:with_run_app/features/chat/presentation/chat_room/viewmodels/message_provider.dart';
+import 'package:with_run_app/features/chat/presentation/chat_room/viewmodels/participant_provider.dart';
+import 'package:with_run_app/features/chat/presentation/chat_room/widgets/chat_bubble.dart';
+import 'package:with_run_app/features/chat/presentation/chat_room/widgets/chat_input_field.dart';
+import 'package:with_run_app/features/chat/presentation/chat_room/widgets/icon_button.dart';
 
 class ChattingPage extends ConsumerStatefulWidget {
   final String chatRoomId;
@@ -67,22 +67,18 @@ class _ChattingPageState extends ConsumerState<ChattingPage> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  widget.location,
-                  style: const TextStyle(fontSize: 12),
-                ),
+                Text(widget.location, style: const TextStyle(fontSize: 12)),
               ],
             ),
             Row(
               children: [
                 iconButton('assets/icons/run_time.svg', Colors.black),
                 iconButton('assets/icons/user_list.svg', Colors.black),
-                const SizedBox(width: 10), 
+                const SizedBox(width: 10),
                 IconButton(
                   icon: const Icon(Icons.exit_to_app),
                   color: Colors.black,
-                  onPressed: () {
-                  },
+                  onPressed: () {},
                 ),
               ],
             ),
@@ -96,27 +92,32 @@ class _ChattingPageState extends ConsumerState<ChattingPage> {
           return Column(
             children: [
               Expanded(
-                child: messages.isEmpty
-                    ? const Center(child: Text('대화를 시작해 보세요!'))
-                    : ListView.builder(
-                        controller: _scrollController,
-                        reverse: true,
-                        padding: const EdgeInsets.all(8),
-                        itemCount: messages.length,
-                        itemBuilder: (context, index) {
-                          final msg = messages[index];
-                          final participant = participants[msg.senderId];
+                child:
+                    messages.isEmpty
+                        ? const Center(child: Text('대화를 시작해 보세요!'))
+                        : ListView.builder(
+                          controller: _scrollController,
+                          reverse: true,
+                          padding: const EdgeInsets.all(8),
+                          itemCount: messages.length,
+                          itemBuilder: (context, index) {
+                            final msg = messages[index];
+                            final participant = participants[msg.senderId];
 
-                          return ChatBubble(
-                            senderId: msg.senderId,
-                            myUserId: widget.myUserId,
-                            text: msg.text,
-                            time: DateFormat('a h:mm', 'ko_KR').format(msg.timestamp),
-                            nickname: participant?.nickname ?? '알 수 없음',
-                            profileImageUrl: participant?.profileImageUrl ?? '',
-                          );
-                        },
-                      ),
+                            return ChatBubble(
+                              senderId: msg.senderId,
+                              myUserId: widget.myUserId,
+                              text: msg.text,
+                              time: DateFormat(
+                                'a h:mm',
+                                'ko_KR',
+                              ).format(msg.timestamp),
+                              nickname: participant?.nickname ?? '알 수 없음',
+                              profileImageUrl:
+                                  participant?.profileImageUrl ?? '',
+                            );
+                          },
+                        ),
               ),
               SafeArea(
                 child: ChatInputField(
