@@ -3,8 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:with_run_app/features/map/presentation/theme_provider.dart';
 import 'package:with_run_app/features/map/presentation/view_models/location_provider.dart';
+import 'package:with_run_app/features/map/presentation/view_models/map_provider.dart';
 import 'package:with_run_app/features/map/presentation/view_models/map_viewmodel.dart';
+import 'package:with_run_app/features/profile/presentation/setting/setting_page.dart';
 
 class MapPage extends ConsumerStatefulWidget {
   const MapPage({super.key});
