@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:with_run_app/ui/pages/setting/widgets/setting_actions_box.dart';
+import 'package:with_run_app/features/profile/presentation/setting/widgets/setting_actions_box.dart';
 
 class SettingBodyContainer extends StatelessWidget {
   const SettingBodyContainer({super.key});
