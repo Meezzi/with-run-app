@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:with_run_app/features/map/provider.dart';
 
-// test
+// TODO : 파이어베이스에서 가져오기
 class ChatRoom {
   final String id;
   final String title;
@@ -70,36 +70,6 @@ class MapViewModel extends Notifier<MapState> {
     ];
 
     state = state.copyWith(chatRooms: dummy);
-  }
-
-  Future<Position?> getPosition() async {
-    final getPositionUsecase = ref.read(getPositionUsecaseProvider);
-    state = state.copyWith(currentPosition: await getPositionUsecase.execute());
-    return state.currentPosition;
-  }
-
-  Future<bool> moveCameraToPosition(NaverMapController controller) async {
-    try {
-      final latLng = await getPosition();
-      if (latLng == null) return false;
-
-      // 카메라 이동이 완료되면 false.
-      // true는 카메라 이동이 실패 했을 경우.
-      final isMoved = await controller.updateCamera(
-        NCameraUpdate.scrollAndZoomTo(
-          target: NLatLng(latLng.latitude, latLng.longitude),
-          zoom: 15,
-        ),
-      );
-
-      if (!isMoved) {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (e) {
-      return false;
-    }
   }
 
   void addMarker(NaverMapController controller, NLatLng latLng) {
