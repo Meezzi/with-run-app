@@ -1,7 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:with_run_app/features/map/data/data_source/location_data_source.dart';
 
-class LocationDataSourceImpl implements LocationDataSource {
+class GeolocatorLocationDataSourceImpl implements LocationDataSource {
   @override
   Future<Position?> getPosition() async {
     final permission = await Geolocator.checkPermission();
