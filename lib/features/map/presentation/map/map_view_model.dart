@@ -16,13 +16,10 @@ class MapViewModel extends Notifier<Position?> {
     return state;
   }
 
-  void moveMyPosition(
-    NaverMapController controller,
-    BuildContext context,
-  ) async {
+  Future<bool> moveMyPosition(NaverMapController controller) async {
     try {
       final pos = await getPosition();
-      if (pos == null) return;
+      if (pos == null) return false;
 
       // 카메라 이동이 완료되면 false.
       // true는 카메라 이동이 실패 했을 경우.
@@ -33,50 +30,13 @@ class MapViewModel extends Notifier<Position?> {
         ),
       );
 
-      if (context.mounted) {
-        if (!isMoved) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '현재 위치로 이동했습니다',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '현재 위치를 찾지 못했습니다',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.redAccent,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          );
-        }
+      if (!isMoved) {
+        return true;
+      } else {
+        return false;
       }
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.fixed,
-            content: Text(
-              '현재 위치를 찾지 못했습니다',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.redAccent,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        );
-      }
+      return false;
     }
   }
 
@@ -103,7 +63,3 @@ class MapViewModel extends Notifier<Position?> {
     });
   }
 }
-
-final mapViewModelProvider = NotifierProvider<MapViewModel, Position?>(() {
-  return MapViewModel();
-});
