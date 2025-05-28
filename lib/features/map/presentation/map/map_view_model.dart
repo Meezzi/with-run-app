@@ -4,16 +4,78 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:with_run_app/features/map/provider.dart';
 
-class MapViewModel extends Notifier<Position?> {
+// test
+class ChatRoom {
+  final String id;
+  final String title;
+  final String description;
+  final double lat;
+  final double lng;
+
+  const ChatRoom({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.lat,
+    required this.lng,
+  });
+}
+
+final chatRoomProvider = Provider((ref) {
+  return ChatRoom;
+});
+
+class MapState {
+  List<ChatRoom> chatRooms;
+  Position? currentPosition;
+
+  MapState({required this.chatRooms, required this.currentPosition});
+
+  MapState copyWith({
+    String? id,
+    List<ChatRoom>? chatRooms,
+    Position? currentPosition,
+  }) {
+    return MapState(
+      chatRooms: chatRooms ?? this.chatRooms,
+      currentPosition: currentPosition ?? this.currentPosition,
+    );
+  }
+}
+
+class MapViewModel extends Notifier<MapState> {
   @override
   build() {
-    return null;
+    fetchChatRooms();
+    return MapState(chatRooms: [], currentPosition: null);
+  }
+
+  void fetchChatRooms() async {
+    await Future.delayed(Duration(seconds: 1));
+    final dummy = [
+      ChatRoom(
+        id: '1',
+        title: '우리랑 뛸 사람',
+        description: '친목 도모',
+        lat: 37.354689,
+        lng: 126.723354,
+      ),
+      ChatRoom(
+        id: '2',
+        title: '션보다 잘 뛴다',
+        description: '기부 도모',
+        lat: 37.355393,
+        lng: 126.722420,
+      ),
+    ];
+
+    state = state.copyWith(chatRooms: dummy);
   }
 
   Future<Position?> getPosition() async {
     final getPositionUsecase = ref.read(getPositionUsecaseProvider);
-    state = await getPositionUsecase.execute();
-    return state;
+    state = state.copyWith(currentPosition: await getPositionUsecase.execute());
+    return state.currentPosition;
   }
 
   Future<bool> moveMyPosition(NaverMapController controller) async {

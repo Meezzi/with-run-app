@@ -21,6 +21,6 @@ final getPositionUsecaseProvider = Provider((ref) {
   return GetPositionUseCase(repository);
 });
 
-final mapViewModelProvider = NotifierProvider<MapViewModel, Position?>(() {
+final mapViewModelProvider = NotifierProvider<MapViewModel, MapState>(() {
   return MapViewModel();
 });
