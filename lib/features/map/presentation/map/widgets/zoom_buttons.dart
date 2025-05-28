@@ -34,14 +34,16 @@ class ZoomButtons extends StatelessWidget {
   }
 
   Widget _zoomButton({required IconData icon, VoidCallback? onPressed}) {
-    return SizedBox.square(
-      dimension: 34,
-      child: FloatingActionButton(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-        foregroundColor: Color(0xff636363),
-        backgroundColor: Colors.white,
-        onPressed: onPressed,
-        child: Icon(icon),
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Icon(icon, color: Color(0xff636363)),
       ),
     );
   }
