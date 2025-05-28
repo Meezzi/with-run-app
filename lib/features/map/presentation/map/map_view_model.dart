@@ -78,16 +78,16 @@ class MapViewModel extends Notifier<MapState> {
     return state.currentPosition;
   }
 
-  Future<bool> moveMyPosition(NaverMapController controller) async {
+  Future<bool> moveCameraToPosition(NaverMapController controller) async {
     try {
-      final pos = await getPosition();
-      if (pos == null) return false;
+      final latLng = await getPosition();
+      if (latLng == null) return false;
 
       // 카메라 이동이 완료되면 false.
       // true는 카메라 이동이 실패 했을 경우.
       final isMoved = await controller.updateCamera(
         NCameraUpdate.scrollAndZoomTo(
-          target: NLatLng(pos.latitude, pos.longitude),
+          target: NLatLng(latLng.latitude, latLng.longitude),
           zoom: 15,
         ),
       );
@@ -102,7 +102,7 @@ class MapViewModel extends Notifier<MapState> {
     }
   }
 
-  void markCurrentPosition(NaverMapController controller, NLatLng latLng) {
+  void addMarker(NaverMapController controller, NLatLng latLng) {
     final seletedPos = NMarker(
       // TODO : uid로 변경하기
       id: "test",

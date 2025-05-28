@@ -59,7 +59,7 @@ class _MapPageState extends ConsumerState<MapPage> {
               mapController = controller;
             },
             onMapTapped: (NPoint point, NLatLng latLng) async {
-              mapVm.markCurrentPosition(mapController!, latLng);
+              mapVm.addMarker(mapController!, latLng);
             },
           ),
           ZoomButtons(mapController: mapController),
