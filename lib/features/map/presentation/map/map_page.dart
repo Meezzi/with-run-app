@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:with_run_app/features/map/presentation/map/map_view_model.dart';
+import 'package:with_run_app/features/map/presentation/map/widgets/zoom_buttons.dart';
 
 class MapPage extends ConsumerStatefulWidget {
   const MapPage({super.key});
@@ -19,20 +20,21 @@ class _MapPageState extends ConsumerState<MapPage> {
     final mapVm = ref.read(mapViewModelProvider.notifier);
 
     return Scaffold(
-      body: NaverMap(
-        options: NaverMapViewOptions(),
-        onMapReady: (controller) async {
-          mapController = controller;
+      body: Stack(
+        children: [
+          NaverMap(
+            options: NaverMapViewOptions(locationButtonEnable: true),
+            onMapReady: (controller) async {
+              mapController = controller;
 
-          mapVm.moveMyPosition(mapController!, context);
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          if (mapController == null) return;
-          mapVm.moveMyPosition(mapController!, context);
-        },
-        child: Icon(Icons.gps_fixed),
+              mapVm.moveMyPosition(mapController!, context);
+            },
+            onMapTapped: (NPoint point, NLatLng latLng) async {
+              mapVm.markCurrentPosition(mapController!, latLng);
+            },
+          ),
+          ZoomButtons(mapController: mapController),
+        ],
       ),
     );
   }

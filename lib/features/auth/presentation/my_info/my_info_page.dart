@@ -6,7 +6,7 @@ import 'package:with_run_app/features/auth/presentation/my_info/my_info_view_mod
 import 'package:with_run_app/features/auth/presentation/my_info/widgets/nickname_field.dart';
 import 'package:with_run_app/features/auth/presentation/my_info/widgets/profile_image_picker.dart';
 import 'package:with_run_app/features/auth/user_view_model.dart';
-import 'package:with_run_app/features/map/presentation/map_page.dart';
+import 'package:with_run_app/features/map/presentation/map/map_page.dart';
 import 'package:with_run_app/features/widgets/loading_bar.dart';
 
 class MyInfoPage extends ConsumerStatefulWidget {
