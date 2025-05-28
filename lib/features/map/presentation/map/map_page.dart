@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:with_run_app/features/map/presentation/map/widgets/map_bottom_sheet.dart';
 import 'package:with_run_app/features/map/presentation/map/widgets/zoom_buttons.dart';
 import 'package:with_run_app/features/map/provider.dart';
@@ -14,6 +15,12 @@ class MapPage extends ConsumerStatefulWidget {
 
 class _MapPageState extends ConsumerState<MapPage> {
   NaverMapController? mapController;
+
+  @override
+  void initState() {
+    super.initState();
+    _permission();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,5 +73,13 @@ class _MapPageState extends ConsumerState<MapPage> {
         ],
       ),
     );
+  }
+
+  void _permission() async {
+    var requestStatus = await Permission.location.request();
+    var status = await Permission.location.status;
+    if (requestStatus.isPermanentlyDenied || status.isPermanentlyDenied) {
+      openAppSettings();
+    }
   }
 }
