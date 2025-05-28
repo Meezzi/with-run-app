@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:with_run_app/features/map/data/data_source/location_data_source.dart';
 import 'package:with_run_app/features/map/data/data_source/location_data_source.impl.dart';
 import 'package:with_run_app/features/map/data/repository/location_repository_impl.dart';
 import 'package:with_run_app/features/map/domain/repository/location_repository.dart';
 import 'package:with_run_app/features/map/domain/usecase/get_position_usecase.dart';
+import 'package:with_run_app/features/map/presentation/map/map_view_model.dart';
 
 final _locationDataSourceProvider = Provider<LocationDataSource>((ref) {
   return LocationDataSourceImpl();
@@ -17,4 +19,8 @@ final _locationRepositoryProvider = Provider<LocationRepository>((ref) {
 final getPositionUsecaseProvider = Provider((ref) {
   final repository = ref.read(_locationRepositoryProvider);
   return GetPositionUsecase(repository);
+});
+
+final mapViewModelProvider = NotifierProvider<MapViewModel, Position?>(() {
+  return MapViewModel();
 });
