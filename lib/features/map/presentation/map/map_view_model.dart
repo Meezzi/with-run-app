@@ -91,7 +91,6 @@ class MapViewModel extends Notifier<MapState> {
     // 마커 클릭 이벤트
     seletedPos.setOnTapListener((NMarker marker) {
       // TODO : marker.id == uid 로 조건문 만들어 페이지 라우팅하기
-      print('✅ 네비게이터');
     });
   }
 }

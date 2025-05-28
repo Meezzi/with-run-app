@@ -25,12 +25,12 @@ void main() async {
     clientId: dotenv.env['NAVER_MAPS_CLIENT_ID'],
     onAuthFailed:
         (ex) => switch (ex) {
-          NQuotaExceededException(:final message) => print(
+          NQuotaExceededException(:final message) => debugPrint(
             "사용량 초과 (message: $message)",
           ),
           NUnauthorizedClientException() ||
           NClientUnspecifiedException() ||
-          NAnotherAuthFailedException() => print("인증 실패: $ex"),
+          NAnotherAuthFailedException() => debugPrint("인증 실패: $ex"),
         },
   );
 
@@ -57,8 +57,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       // theme: themeState.lightTheme,
       // darkTheme: themeState.darkTheme,
       // themeMode: themeState.themeMode,
-      // home: userState != null ? MapPage() : LoginPage(),
-      home: MapPage(),
+      home: userState != null ? MapPage() : LoginPage(),
     );
   }
 }

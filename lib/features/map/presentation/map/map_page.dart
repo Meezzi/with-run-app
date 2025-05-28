@@ -27,8 +27,6 @@ class _MapPageState extends ConsumerState<MapPage> {
     final mapState = ref.watch(mapViewModelProvider);
     final mapVm = ref.read(mapViewModelProvider.notifier);
 
-    print(mapState.chatRooms);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mapController != null) {
         final chatRooms = mapState.chatRooms;
