@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -50,14 +49,8 @@ class MyApp extends ConsumerStatefulWidget {
 class _MyAppState extends ConsumerState<MyApp> {
   @override
   Widget build(BuildContext context) {
-    // final themeState = ref.watch(appThemeProvider);
     final userState = ref.watch(userViewModelProvider);
 
-    return MaterialApp(
-      // theme: themeState.lightTheme,
-      // darkTheme: themeState.darkTheme,
-      // themeMode: themeState.themeMode,
-      home: userState != null ? MapPage() : LoginPage(),
-    );
+    return MaterialApp(home: userState != null ? MapPage() : LoginPage());
   }
 }
