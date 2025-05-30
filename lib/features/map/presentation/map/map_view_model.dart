@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:with_run_app/features/map/provider.dart';
 
 // TODO : 파이어베이스에서 가져오기
 class ChatRoom {
@@ -80,7 +78,7 @@ class MapViewModel extends Notifier<MapState> {
     );
     controller.addOverlay(seletedPos);
 
-    // ✅ 지도에 표시된 마커의 정보창 표시하기
+    // 지도에 표시된 마커의 정보창 표시하기
     final onMarkerInfoWindow = NInfoWindow.onMarker(
       id: seletedPos.info.id,
       text: "이 위치에서 채팅방을 만드시려면 마커를 터치해주세요",
