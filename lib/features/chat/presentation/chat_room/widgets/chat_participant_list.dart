@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:with_run_app/features/auth/data/user.dart';
-import 'package:with_run_app/features/chat/presentation/chat_information/widgets/chat_participant_element.dart';
+import 'package:with_run_app/features/chat/presentation/chat_room/widgets/chat_participant_element.dart';
 
 class ChatParticipantList extends StatelessWidget {
   const ChatParticipantList({required this.participants, required this.creator, super.key});
