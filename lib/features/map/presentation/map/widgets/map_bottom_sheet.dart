@@ -1,37 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:with_run_app/features/map/presentation/map/map_view_model.dart';
+import 'package:with_run_app/features/map/presentation/map/widgets/chat_room_description.dart';
+import 'package:with_run_app/features/map/presentation/map/widgets/chat_room_detail.dart';
+import 'package:with_run_app/features/map/presentation/map/widgets/chat_room_header.dart';
+import 'package:with_run_app/features/map/presentation/map/widgets/chat_room_join_button.dart';
+import 'package:with_run_app/features/map/presentation/map/widgets/map_bottom_sheet_header.dart';
 
 class MapBottomSheet extends StatelessWidget {
+  const MapBottomSheet(this.chatroom, {super.key});
+
   final ChatRoom chatroom;
 
-  const MapBottomSheet(this.chatroom, {super.key});
   @override
-  Widget build(Object context) {
-    return Container(
-      height: 300,
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 320,
       width: double.infinity,
-      padding: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 50),
-      child: Row(
+      child: Column(
         children: [
-          // Image.network(book.image, fit: BoxFit.fitHeight),
-          SizedBox(width: 20),
+          const MapBottomSheetHeader(),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  chatroom.title,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  chatroom.description!,
-                  style: TextStyle(fontSize: 14),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ChatRoomHeader(chatroom),
+                  const SizedBox(height: 20),
+                  ChatRoomDescription(chatroom.description),
+                  const Spacer(),
+                  ChatRoomDetail(chatroom),
+                  const SizedBox(height: 20),
+                  const ChatRoomJoinButton(),
+                ],
+              ),
             ),
           ),
         ],
