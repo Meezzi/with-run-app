@@ -5,15 +5,21 @@ import 'package:geolocator/geolocator.dart';
 // TODO : 파이어베이스에서 가져오기
 class ChatRoom {
   final String id;
+  final String? address;
   final String title;
   final String description;
+  final DateTime createdAt;
+  final int memberCount;
   final double lat;
   final double lng;
 
   const ChatRoom({
     required this.id,
+    required this.address,
     required this.title,
     required this.description,
+    required this.createdAt,
+    required this.memberCount,
     required this.lat,
     required this.lng,
   });
@@ -53,15 +59,21 @@ class MapViewModel extends Notifier<MapState> {
     final dummy = [
       ChatRoom(
         id: '1',
+        address: '',
         title: '우리랑 뛸 사람',
         description: '친목 도모',
+        createdAt: DateTime.now().subtract(Duration(days: 365)),
+        memberCount: 1,
         lat: 37.354689,
         lng: 126.723354,
       ),
       ChatRoom(
         id: '2',
+        address: '',
         title: '션보다 잘 뛴다',
         description: '기부 도모',
+        createdAt: DateTime.now().subtract(Duration(days: 1)),
+        memberCount: 1,
         lat: 37.355393,
         lng: 126.722420,
       ),
