@@ -67,24 +67,24 @@ class _MapPageState extends ConsumerState<MapPage> {
         final chatRooms = mapState.chatRooms;
         Set<NMarker> overlays = {};
 
-        for (final room in chatRooms) {
-          final marker = NMarker(
-            id: room.id,
-            position: NLatLng(room.lat, room.lng),
-          );
+        // for (final room in chatRooms) {
+        //   final marker = NMarker(
+        //     id: room.id,
+        //     position: NLatLng(room.lat, room.lng),
+        //   );
 
-          overlays.add(marker);
+        //   overlays.add(marker);
 
-          marker.setOnTapListener((overlay) {
-            showModalBottomSheet(
-              context: context,
-              isDismissible: true,
-              builder: (context) {
-                return MapBottomSheet(room);
-              },
-            );
-          });
-        }
+        //   marker.setOnTapListener((overlay) {
+        //     showModalBottomSheet(
+        //       context: context,
+        //       isDismissible: true,
+        //       builder: (context) {
+        //         return MapBottomSheet(room);
+        //       },
+        //     );
+        //   });
+        // }
 
         mapController?.addOverlayAll(overlays);
       }

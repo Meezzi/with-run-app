@@ -21,7 +21,7 @@ class ChatInformationPage extends ConsumerWidget {
           padding: const EdgeInsets.all(10.0),
           child: ChatParticipantList(
             participants: chatRoom?.participants ?? [],
-            creator: chatRoom!.creator!,
+            creator: chatRoom!.creator,
           ),
         ),
       ),

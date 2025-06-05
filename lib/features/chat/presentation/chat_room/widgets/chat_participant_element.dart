@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:with_run_app/features/auth/data/user.dart';
+import 'package:with_run_app/features/auth/domain/entity/user_entity.dart';
 
 class ChatParticipantElement extends StatelessWidget {
   const ChatParticipantElement({
@@ -8,7 +8,7 @@ class ChatParticipantElement extends StatelessWidget {
     super.key,
     this.isCreator = false,
   });
-  final User participant;
+  final UserEntity participant;
   final bool isCreator;
 
   @override
@@ -26,11 +26,11 @@ class ChatParticipantElement extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(100),
-              child: Image.network(participant.profileImageUrl!),
+              child: Image.network(participant.profileImageUrl),
             ),
           ),
           SizedBox(width: 20),
-          Text(participant.nickname ?? '', style: TextStyle(fontSize: 20)),
+          Text(participant.nickname, style: TextStyle(fontSize: 20)),
           Spacer(),
           isCreator
               ? SvgPicture.asset(

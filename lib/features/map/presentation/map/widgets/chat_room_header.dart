@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:with_run_app/features/map/presentation/map/map_view_model.dart';
+import 'package:with_run_app/features/chat/domain/entities/chat_room.dart';
 
 class ChatRoomHeader extends StatelessWidget {
   const ChatRoomHeader(this.chatroom, {super.key});

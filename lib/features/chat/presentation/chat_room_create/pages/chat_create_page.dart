@@ -3,9 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:time_range_picker/time_range_picker.dart';
+import 'package:with_run_app/features/auth/domain/entity/user_entity.dart';
+import 'package:with_run_app/features/auth/presentation/login/models/login_model.dart';
 import 'package:with_run_app/features/auth/user_view_model.dart';
 import 'package:with_run_app/features/chat/presentation/chat_room/models/chat_room_model.dart';
-import 'package:with_run_app/features/auth/data/user.dart';
 import 'package:with_run_app/features/chat/presentation/chat_room/pages/chat_information_page.dart';
 import 'package:with_run_app/features/chat/presentation/chat_room/viewmodels/chat_room_view_model.dart';
 import 'package:with_run_app/features/chat/presentation/chat_room_create/utils/chat_creat_input_validator.dart';
@@ -178,12 +179,14 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
     );
   }
 
-  ChatRoomModel getChatRoom(User user) {
+  ChatRoomModel getChatRoom(UserEntity user) {
     return ChatRoomModel(
       title: titleController.text,
       description: descriptionController.text,
       location: GeoPoint(37.355149, 126.922238),
-      creator: user,
+      creator: UserModel.fromEntity(user),
+      address: '',
+      memberCount: 0,
       createdAt: DateTime.now(),
       startTime: makeDateTimeWithTime(date!, timeRange!.startTime),
       endTime: makeDateTimeWithTime(date!, timeRange!.endTime),

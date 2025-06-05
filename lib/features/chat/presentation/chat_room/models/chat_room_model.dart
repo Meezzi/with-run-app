@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:with_run_app/features/auth/presentation/login/models/login_model.dart';
 import 'package:with_run_app/features/chat/domain/entities/chat_room.dart';
 
 class ChatRoomModel {
@@ -6,10 +7,12 @@ class ChatRoomModel {
   final String title;
   final String? description;
   final GeoPoint location;
-  // final User creator;
+  final UserModel creator;
   final DateTime createdAt;
-  // final List<User>? participants;
+  final List<UserModel>? participants;
   final String? lastMessage;
+  final String address;
+  final int memberCount;
   final DateTime? lastMessageTimestamp;
   final DateTime startTime;
   final DateTime endTime;
@@ -19,89 +22,44 @@ class ChatRoomModel {
     required this.title,
     this.description,
     required this.location,
-    // required this.creator,
+    required this.creator,
     required this.createdAt,
     required this.startTime,
     required this.endTime,
-    // this.participants,
+    required this.address,
+    required this.memberCount,
+    this.participants,
     this.lastMessage,
     this.lastMessageTimestamp,
   });
 
-  factory ChatRoomModel.fromFirestore(
-    DocumentSnapshot doc,
-    // List<User> participants,
-  ) {
-    final rawData = doc.data();
-    if (rawData == null) {
-      throw Exception('Document data is null');
-    }
-    final data = rawData as Map<String, dynamic>;
-
-    // participants.forEach((e){
-    //   print(e.nickname);
-    // });
-
-    return ChatRoomModel(
-      id: doc.id,
-      title: data['title'] ?? '',
-      description: data['description'],
-      location: data['location'],
-      // creator: User.fromJson(data['creator']),
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      // participants: participants,
-      lastMessage: data['lastMessage'],
-      lastMessageTimestamp:
-          data['lastMessageTimestamp'] != null
-              ? (data['lastMessageTimestamp'] as Timestamp).toDate()
-              : null,
-      startTime: (data['startTime'] as Timestamp).toDate(),
-      endTime: (data['endTime'] as Timestamp).toDate(),
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'title': title,
-      'description': description,
-      'location': GeoPoint(location.latitude, location.longitude),
-      // 'creator': creator!.toJson(),
-      'createdAt': Timestamp.fromDate(createdAt),
-      'lastMessage': lastMessage,
-      'lastMessageTimestamp':
-          lastMessageTimestamp != null
-              ? Timestamp.fromDate(lastMessageTimestamp!)
-              : null,
-      'startTime': startTime,
-      'endTime': endTime,
-    };
-  }
-
   ChatRoom toEntity() {
     return ChatRoom(
       id: id!,
-      // participants: participants.map((e) => e.toEntity()).toList(),
-      // creator: creator.toEntity(),
+      participants: participants!.map((e) => e.toEntity()).toList(),
+      creator: creator.toEntity(),
       title: title,
       description: description!,
       createdAt: createdAt,
       location: location,
+      address: address,
+      memberCount: memberCount,
     );
   }
-
 
   factory ChatRoomModel.fromEntity(ChatRoom room) {
     return ChatRoomModel(
       id: room.id,
-      // participants: room.participants.map(UserDto.fromEntity).toList(),
-      // creator: UserDto.fromEntity(room.creator),
+      participants: room.participants.map((e) => UserModel.fromEntity(e)).toList(),
+      creator: UserModel.fromEntity(room.creator),
       title: room.title,
       description: room.description,
       createdAt: room.createdAt,
+      address: room.address,
+      memberCount: room.memberCount,
       location: room.location,
       startTime: DateTime.now(),
       endTime: DateTime.now(),
     );
   }
-
 }

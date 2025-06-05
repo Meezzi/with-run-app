@@ -10,9 +10,9 @@ import 'package:with_run_app/features/map/presentation/map/map_page.dart';
 import 'package:with_run_app/features/widgets/loading_bar.dart';
 
 class MyInfoPage extends ConsumerStatefulWidget {
-  final String uid;
+  final String id;
 
-  const MyInfoPage({super.key, required this.uid});
+  const MyInfoPage({super.key, required this.id});
 
   @override
   ConsumerState<MyInfoPage> createState() => _MyInfoPageState();
@@ -42,7 +42,7 @@ class _MyInfoPageState extends ConsumerState<MyInfoPage> {
       MyInfoState? newState = await myInfoVm.uploadImage(myInfoState.xFile!);
 
       final isSignin = await userVm.insert(
-        uid: widget.uid,
+        id: widget.id,
         nickname: nicknameController.text,
         profileImageUrl: newState?.imageUrl,
       );
