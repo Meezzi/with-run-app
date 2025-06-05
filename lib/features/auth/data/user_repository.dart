@@ -1,19 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:with_run_app/features/auth/data/dtos/user_dto.dart';
+import 'package:with_run_app/features/auth/domain/entity/user_entity.dart';
 
 class UserRepository {
   /// firebase database에 로그인한 User정보 추가
   Future<bool> insert({
-    required String uid,
+    required String id,
     required String nickname,
     required String profileImageUrl,
   }) async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
       CollectionReference collectionRef = firestore.collection('users');
-      DocumentReference documentRef = collectionRef.doc(uid);
+      DocumentReference documentRef = collectionRef.doc(id);
 
       await documentRef.set({
-        'uid': uid,
+        'id': id,
         'nickname': nickname,
         'profileImageUrl': profileImageUrl,
       });
@@ -25,14 +27,14 @@ class UserRepository {
     }
   }
 
-  Future<User?> getById(String? uid) async {
+  Future<UserEntity?> getById(String? id) async {
     try {
       final firestore = FirebaseFirestore.instance;
       final collectionRef = firestore.collection('users');
-      final documentRef = collectionRef.doc(uid);
+      final documentRef = collectionRef.doc(id);
       final doc = await documentRef.get();
 
-      return User.fromJson({...doc.data()!});
+      return UserDto.fromJson({...doc.data()!}).toEntity();
     } catch (e) {
       print('UserRepository.getById catch문 - $e');
       return null;

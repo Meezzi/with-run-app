@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:with_run_app/features/chat/presentation/chat_room/viewmodels/message_provider.dart';
 import 'package:with_run_app/features/chat/presentation/chat_room/viewmodels/participant_provider.dart';
-import 'package:with_run_app/features/chat/presentation/chat_room/widgets/chat_bubble.dart';
-import 'package:with_run_app/features/chat/presentation/chat_room/widgets/chat_input_field.dart';
-import 'package:with_run_app/features/chat/presentation/chat_room/widgets/icon_button.dart';
+import 'package:with_run_app/features/chat/presentation/chat_room/widgets/chatting/chat_bubble.dart';
+import 'package:with_run_app/features/chat/presentation/chat_room/widgets/chatting/chat_input_field.dart';
+import 'package:with_run_app/features/chat/presentation/chat_room/widgets/chatting/icon_button.dart';
 
 class ChattingPage extends ConsumerStatefulWidget {
   final String chatRoomId;

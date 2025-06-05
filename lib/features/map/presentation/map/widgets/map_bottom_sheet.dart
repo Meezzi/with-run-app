@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:with_run_app/features/map/presentation/map/map_view_model.dart';
+import 'package:with_run_app/features/chat/domain/entities/chat_room.dart';
 import 'package:with_run_app/features/map/presentation/map/widgets/chat_room_description.dart';
 import 'package:with_run_app/features/map/presentation/map/widgets/chat_room_detail.dart';
 import 'package:with_run_app/features/map/presentation/map/widgets/chat_room_header.dart';

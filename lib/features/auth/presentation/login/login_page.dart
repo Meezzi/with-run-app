@@ -36,7 +36,7 @@ class LoginPage extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) {
-                              return MyInfoPage(uid: credential.user!.uid);
+                              return MyInfoPage(id: credential.user!.uid);
                             },
                           ),
                         );
