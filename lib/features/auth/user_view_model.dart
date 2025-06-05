@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/features/auth/data/user.dart';
+import 'package:with_run_app/features/auth/data/dtos/user_dto.dart';
 import 'package:with_run_app/features/auth/data/user_repository.dart';
 
-class UserViewModel extends Notifier<User?> {
+class UserViewModel extends Notifier<UserDto?> {
   @override
-  User? build() {
+  UserDto? build() {
     getById(FirebaseAuth.instance.currentUser?.uid);
     return null;
   }
@@ -23,7 +23,7 @@ class UserViewModel extends Notifier<User?> {
     );
 
     if (result) {
-      state = User(
+      state = UserDto(
         uid: uid,
         nickname: nickname,
         profileImageUrl: profileImageUrl,
@@ -36,14 +36,14 @@ class UserViewModel extends Notifier<User?> {
   }
 
   /// 해당 User의 정보를 가져옴
-  Future<User?> getById(String? uid) async {
-    User? user = await UserRepository().getById(uid);
+  Future<UserDto?> getById(String? uid) async {
+    UserDto? user = await UserRepository().getById(uid);
     state = user;
 
     return user;
   }
 }
 
-final userViewModelProvider = NotifierProvider<UserViewModel, User?>(() {
+final userViewModelProvider = NotifierProvider<UserViewModel, UserDto?>(() {
   return UserViewModel();
 });
