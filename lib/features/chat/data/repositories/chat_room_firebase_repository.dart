@@ -1,19 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:with_run_app/features/chat/data/chat_room_model.dart';
+import 'package:with_run_app/features/chat/data/dtos/chat_room_dto.dart';
+import 'package:with_run_app/features/chat/presentation/chat_room/models/chat_room_model.dart';
 import 'package:with_run_app/features/auth/data/user.dart';
+import 'package:with_run_app/features/chat/domain/entities/chat_room.dart';
 import 'package:with_run_app/features/chat/domain/repositories/chat_room_repository.dart';
 
 class ChatRoomFirebaseRepository implements ChatRoomRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
-  Future<String> create(ChatRoomModel chatRoom, User creator) async {
+  Future<String> create(ChatRoom chatRoom) async {
     final result = await _firestore
         .collection('chatRooms')
-        .add(chatRoom.toMap())
+        .add(ChatRoomDto.fromEntity(chatRoom).toMap())
         .then((documentSnapshot) {
           print("Added Data with ID: ${documentSnapshot.id}");
-          addParticipant(creator, documentSnapshot.id);
+          // addParticipant(chatRoom.creator, documentSnapshot.id);
           return documentSnapshot.id;
         });
     return result;

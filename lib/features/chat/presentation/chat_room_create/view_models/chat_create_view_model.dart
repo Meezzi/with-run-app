@@ -1,9 +1,9 @@
 
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:with_run_app/features/chat/data/chat_room_model.dart';
+import 'package:with_run_app/features/chat/presentation/chat_room/models/chat_room_model.dart';
 import 'package:with_run_app/features/auth/data/user.dart';
-import 'package:with_run_app/features/chat/data/chat_room_firebase_repository.dart';
+import 'package:with_run_app/features/chat/data/repositories/chat_room_firebase_repository.dart';
 import 'package:with_run_app/features/chat/domain/repositories/chat_room_repository.dart';
 
 enum ChatRoomCreateState {
@@ -13,11 +13,11 @@ enum ChatRoomCreateState {
   error,
 }
 // 뷰모델이니깐 나중에 뷰모델로 이름 변경하기~
-class ChatCreateNotifier extends AutoDisposeNotifier<ChatRoomCreateState>{
+class ChatCreateViewModel extends AutoDisposeNotifier<ChatRoomCreateState>{
   Future<String> create(ChatRoomModel chatRoom, User creator) async{
     state = ChatRoomCreateState.submitted;
     final repository = ref.read(repositoryProvider);
-    final result = await repository.create(chatRoom, creator);
+    final result = await repository.create(chatRoom);
     state = ChatRoomCreateState.done;
     return result;
   }
@@ -32,6 +32,6 @@ final repositoryProvider = Provider<ChatRoomRepository>((ref) {
 });
 
 
-final chatCreateNotifier = NotifierProvider.autoDispose<ChatCreateNotifier, ChatRoomCreateState>(() {
-  return ChatCreateNotifier();
+final chatCreateViewModel = NotifierProvider.autoDispose<ChatCreateViewModel, ChatRoomCreateState>(() {
+  return ChatCreateViewModel();
 });

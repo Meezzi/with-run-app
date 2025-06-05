@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:time_range_picker/time_range_picker.dart';
 import 'package:with_run_app/features/auth/user_view_model.dart';
-import 'package:with_run_app/features/chat/data/chat_room_model.dart';
+import 'package:with_run_app/features/chat/presentation/chat_room/models/chat_room_model.dart';
 import 'package:with_run_app/features/auth/data/user.dart';
 import 'package:with_run_app/features/chat/presentation/chat_room/pages/chat_information_page.dart';
 import 'package:with_run_app/features/chat/presentation/chat_room/viewmodels/chat_room_view_model.dart';
 import 'package:with_run_app/features/chat/presentation/chat_room_create/utils/chat_creat_input_validator.dart';
 import 'package:with_run_app/features/chat/presentation/chat_room_create/utils/chat_create_util.dart';
-import 'package:with_run_app/features/chat/presentation/chat_room_create/view_models/chat_create_notifier.dart';
+import 'package:with_run_app/features/chat/presentation/chat_room_create/view_models/chat_create_view_model.dart';
 import 'package:with_run_app/features/chat/presentation/chat_room_create/widgets/date_picker_input.dart';
 import 'package:with_run_app/features/chat/presentation/chat_room_create/widgets/time_range_picker_input.dart';
 
@@ -38,7 +38,7 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
 
   @override
   Widget build(BuildContext context) {
-    final notifier = ref.watch(chatCreateNotifier.notifier);
+    final notifier = ref.watch(chatCreateViewModel.notifier);
     final formKey = GlobalKey<FormState>();
     return SafeArea(
       child: Scaffold(
@@ -113,10 +113,8 @@ class _ChatCreatePage extends ConsumerState<ChatCreatePage> {
                     final isFormValid =
                         formKey.currentState?.validate() ?? false;
 
-                    // 커스텀 위젯 유효성 검사
 
                     if (!isFormValid) {
-                      // 유효하지 않으면 종료
                       return;
                     }
                     final chatRoom = getChatRoom(user!);

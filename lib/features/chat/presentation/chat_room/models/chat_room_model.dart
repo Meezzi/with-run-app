@@ -1,14 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:with_run_app/features/auth/data/user.dart';
+import 'package:with_run_app/features/chat/domain/entities/chat_room.dart';
 
 class ChatRoomModel {
   final String? id;
   final String title;
   final String? description;
   final GeoPoint location;
-  final User? creator;
+  // final User creator;
   final DateTime createdAt;
-  final List<User>? participants;
+  // final List<User>? participants;
   final String? lastMessage;
   final DateTime? lastMessageTimestamp;
   final DateTime startTime;
@@ -19,18 +19,18 @@ class ChatRoomModel {
     required this.title,
     this.description,
     required this.location,
-    this.creator,
+    // required this.creator,
     required this.createdAt,
     required this.startTime,
     required this.endTime,
-    this.participants,
+    // this.participants,
     this.lastMessage,
     this.lastMessageTimestamp,
   });
 
   factory ChatRoomModel.fromFirestore(
     DocumentSnapshot doc,
-    List<User> participants,
+    // List<User> participants,
   ) {
     final rawData = doc.data();
     if (rawData == null) {
@@ -38,18 +38,18 @@ class ChatRoomModel {
     }
     final data = rawData as Map<String, dynamic>;
 
-    participants.forEach((e){
-      print(e.nickname);
-    });
+    // participants.forEach((e){
+    //   print(e.nickname);
+    // });
 
     return ChatRoomModel(
       id: doc.id,
       title: data['title'] ?? '',
       description: data['description'],
       location: data['location'],
-      creator: User.fromJson(data['creator']),
+      // creator: User.fromJson(data['creator']),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
-      participants: participants,
+      // participants: participants,
       lastMessage: data['lastMessage'],
       lastMessageTimestamp:
           data['lastMessageTimestamp'] != null
@@ -65,7 +65,7 @@ class ChatRoomModel {
       'title': title,
       'description': description,
       'location': GeoPoint(location.latitude, location.longitude),
-      'creator': creator!.toJson(),
+      // 'creator': creator!.toJson(),
       'createdAt': Timestamp.fromDate(createdAt),
       'lastMessage': lastMessage,
       'lastMessageTimestamp':
@@ -76,4 +76,32 @@ class ChatRoomModel {
       'endTime': endTime,
     };
   }
+
+  ChatRoom toEntity() {
+    return ChatRoom(
+      id: id!,
+      // participants: participants.map((e) => e.toEntity()).toList(),
+      // creator: creator.toEntity(),
+      title: title,
+      description: description!,
+      createdAt: createdAt,
+      location: location,
+    );
+  }
+
+
+  factory ChatRoomModel.fromEntity(ChatRoom room) {
+    return ChatRoomModel(
+      id: room.id,
+      // participants: room.participants.map(UserDto.fromEntity).toList(),
+      // creator: UserDto.fromEntity(room.creator),
+      title: room.title,
+      description: room.description,
+      createdAt: room.createdAt,
+      location: room.location,
+      startTime: DateTime.now(),
+      endTime: DateTime.now(),
+    );
+  }
+
 }
